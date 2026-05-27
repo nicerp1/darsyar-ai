@@ -6,13 +6,10 @@
     <title>درسیار | دستیار تحصیلی هوشمند</title>
     <link rel="stylesheet" href="fonts/kalameh.css">
     <link rel="stylesheet" href="css/style.css">
-    <!-- Material Icons -->
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0&display=swap">
-    <!-- KaTeX -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
     <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
-    <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
@@ -22,372 +19,82 @@
 </head>
 <body>
 
-<!-- Login Overlay -->
 <div class="login-overlay" id="loginOverlay">
     <div class="login-card">
         <img src="images/logo.jpg" alt="درسیار" style="width:70px;height:70px;border-radius:50%;object-fit:cover;display:block;margin:0 auto 1.5rem;">
         <h2>درسیار</h2>
         <p class="login-subtitle">دستیار تحصیلی هوشمند</p>
         
-        <!-- ========== فرم لاگین ========== -->
         <div id="loginForm">
-            <div class="input-group">
-                <label>نام کاربری</label>
-                <input type="text" id="loginUsername" placeholder="admin">
-            </div>
-            <div class="input-group">
-                <label>رمز عبور</label>
-                <input type="password" id="loginPassword" placeholder="1234">
-            </div>
-            <button class="btn btn-primary btn-block" id="loginSubmitBtn" onclick="Auth.login(document.getElementById('loginUsername').value, document.getElementById('loginPassword').value)">
-                <span class="material-symbols-outlined">login</span> ورود
-            </button>
-            <p style="text-align:center;margin-top:1rem;font-size:0.85rem;">
-                حساب کاربری ندارید؟
-                <a href="#" onclick="event.preventDefault(); Auth.showRegisterForm();" style="color:var(--primary);font-weight:600;">ثبت‌نام کنید</a>
-            </p>
+            <div class="input-group"><label>نام کاربری</label><input type="text" id="loginUsername" placeholder="admin"></div>
+            <div class="input-group"><label>رمز عبور</label><input type="password" id="loginPassword" placeholder="1234"></div>
+            <button class="btn btn-primary btn-block" id="loginSubmitBtn" onclick="
+                console.log('Button clicked via onclick');
+                Auth.login(document.getElementById('loginUsername').value, document.getElementById('loginPassword').value);
+            "><span class="material-symbols-outlined">login</span> ورود</button>
+            <p style="text-align:center;margin-top:1rem;font-size:0.85rem;">حساب کاربری ندارید؟ <a href="#" onclick="event.preventDefault(); Auth.showRegisterForm();" style="color:var(--primary);font-weight:600;">ثبت‌نام کنید</a></p>
         </div>
         
-        <!-- ========== فرم ثبت‌نام ========== -->
         <div id="registerForm" style="display:none;">
-            <div class="input-group">
-                <label>👤 نام کاربری *</label>
-                <input type="text" id="regUsername" placeholder="حداقل ۳ کاراکتر">
-            </div>
-            <div class="input-group">
-                <label>📧 ایمیل *</label>
-                <input type="email" id="regEmail" placeholder="example@mail.com">
-            </div>
-            <div class="input-group">
-                <label>👤 نام نمایشی (اختیاری)</label>
-                <input type="text" id="regName" placeholder="اختیاری">
-            </div>
-            <div class="input-group">
-                <label>🔒 رمز عبور *</label>
-                <input type="password" id="regPassword" placeholder="حداقل ۴ کاراکتر">
-            </div>
-            <div class="input-group">
-                <label>🔒 تکرار رمز عبور *</label>
-                <input type="password" id="regPasswordConfirm" placeholder="تکرار رمز عبور">
-            </div>
-            <button class="btn btn-primary btn-block" id="registerSubmitBtn" onclick="Auth.register(document.getElementById('regUsername').value, document.getElementById('regEmail').value, document.getElementById('regPassword').value, document.getElementById('regPasswordConfirm').value, document.getElementById('regName').value)">
-                <span class="material-symbols-outlined">person_add</span> ثبت‌نام
-            </button>
-            <p style="text-align:center;margin-top:1rem;font-size:0.85rem;">
-                قبلاً ثبت‌نام کرده‌اید؟
-                <a href="#" onclick="event.preventDefault(); Auth.showLoginForm();" style="color:var(--primary);font-weight:600;">ورود</a>
-            </p>
+            <div class="input-group"><label>👤 نام کاربری *</label><input type="text" id="regUsername" placeholder="حداقل ۳ کاراکتر"></div>
+            <div class="input-group"><label>📧 ایمیل *</label><input type="email" id="regEmail" placeholder="example@mail.com"></div>
+            <div class="input-group"><label>👤 نام نمایشی</label><input type="text" id="regName" placeholder="اختیاری"></div>
+            <div class="input-group"><label>🔒 رمز عبور *</label><input type="password" id="regPassword" placeholder="حداقل ۴ کاراکتر"></div>
+            <div class="input-group"><label>🔒 تکرار رمز عبور *</label><input type="password" id="regPasswordConfirm" placeholder="تکرار رمز عبور"></div>
+            <button class="btn btn-primary btn-block" id="registerSubmitBtn" onclick="
+                console.log('Register button clicked via onclick');
+                Auth.register(document.getElementById('regUsername').value, document.getElementById('regEmail').value, document.getElementById('regPassword').value, document.getElementById('regPasswordConfirm').value, document.getElementById('regName').value);
+            "><span class="material-symbols-outlined">person_add</span> ثبت‌نام</button>
+            <p style="text-align:center;margin-top:1rem;font-size:0.85rem;">قبلاً ثبت‌نام کرده‌اید؟ <a href="#" onclick="event.preventDefault(); Auth.showLoginForm();" style="color:var(--primary);font-weight:600;">ورود</a></p>
         </div>
         
         <p class="login-hint" style="margin-top:1rem;">admin / 1234 (برای تست)</p>
     </div>
 </div>
 
-<!-- App Container -->
 <div class="app-container" id="appContainer">
-
     <div class="sidebar-overlay" id="sidebarOverlay" onclick="App.toggleSidebar()"></div>
-    
-    <!-- Sidebar -->
     <aside class="sidebar" id="sidebar">
-        <div class="sidebar-header">
-            <img src="images/logo.jpg" alt="درسیار" style="width:36px;height:36px;border-radius:8px;object-fit:cover;">
-            <span class="sidebar-title">درسیار</span>
-        </div>
+        <div class="sidebar-header"><img src="images/logo.jpg" alt="درسیار" style="width:36px;height:36px;border-radius:8px;object-fit:cover;"><span class="sidebar-title">درسیار</span></div>
         <nav class="sidebar-nav" id="sidebarNav">
-            <button class="sidebar-item active" data-section="home">
-                <span class="material-symbols-outlined sidebar-icon">dashboard</span> داشبورد
-            </button>
-            <button class="sidebar-item" data-section="pomodoro">
-                <span class="material-symbols-outlined sidebar-icon">timer</span> پومودورو
-            </button>
-            <button class="sidebar-item" data-section="flashcards">
-                <span class="material-symbols-outlined sidebar-icon">style</span> فلش‌کارت
-            </button>
-            <button class="sidebar-item" data-section="writing">
-                <span class="material-symbols-outlined sidebar-icon">edit_note</span> انشانویسی
-            </button>
-            <button class="sidebar-item" data-section="research">
-                <span class="material-symbols-outlined sidebar-icon">biotech</span> تحقیق
-            </button>
-            <button class="sidebar-item" data-section="ai-assistant">
-                <span class="material-symbols-outlined sidebar-icon">smart_toy</span> دستیار هوش مصنوعی
-            </button>
-            <button class="sidebar-item" data-section="stats">
-                <span class="material-symbols-outlined sidebar-icon">bar_chart</span> آمار
-            </button>
-            <button class="sidebar-item" data-section="gamification">
-                <span class="material-symbols-outlined sidebar-icon">trophy</span> دستاوردها
-            </button>
-            <button class="sidebar-item" data-section="schedule">
-                <span class="material-symbols-outlined sidebar-icon">calendar_month</span> برنامه هفتگی
-            </button>
-            <button class="sidebar-item" data-section="exams">
-                <span class="material-symbols-outlined sidebar-icon">assignment</span> آزمون‌ها
-            </button>
-            <button class="sidebar-item" data-section="calculator">
-                <span class="material-symbols-outlined sidebar-icon">calculate</span> محاسبه درصد
-            </button>
-            <button class="sidebar-item admin-only" data-section="admin" style="display:none;">
-                <span class="material-symbols-outlined sidebar-icon">settings</span> مدیریت
-            </button>
+            <button class="sidebar-item active" data-section="home"><span class="material-symbols-outlined sidebar-icon">dashboard</span> داشبورد</button>
+            <button class="sidebar-item" data-section="pomodoro"><span class="material-symbols-outlined sidebar-icon">timer</span> پومودورو</button>
+            <button class="sidebar-item" data-section="flashcards"><span class="material-symbols-outlined sidebar-icon">style</span> فلش‌کارت</button>
+            <button class="sidebar-item" data-section="writing"><span class="material-symbols-outlined sidebar-icon">edit_note</span> انشانویسی</button>
+            <button class="sidebar-item" data-section="research"><span class="material-symbols-outlined sidebar-icon">biotech</span> تحقیق</button>
+            <button class="sidebar-item" data-section="ai-assistant"><span class="material-symbols-outlined sidebar-icon">smart_toy</span> دستیار هوش مصنوعی</button>
+            <button class="sidebar-item" data-section="stats"><span class="material-symbols-outlined sidebar-icon">bar_chart</span> آمار</button>
+            <button class="sidebar-item" data-section="gamification"><span class="material-symbols-outlined sidebar-icon">trophy</span> دستاوردها</button>
+            <button class="sidebar-item" data-section="schedule"><span class="material-symbols-outlined sidebar-icon">calendar_month</span> برنامه هفتگی</button>
+            <button class="sidebar-item" data-section="exams"><span class="material-symbols-outlined sidebar-icon">assignment</span> آزمون‌ها</button>
+            <button class="sidebar-item" data-section="calculator"><span class="material-symbols-outlined sidebar-icon">calculate</span> محاسبه درصد</button>
+            <button class="sidebar-item admin-only" data-section="admin" style="display:none;"><span class="material-symbols-outlined sidebar-icon">settings</span> مدیریت</button>
         </nav>
-        <div class="sidebar-footer">
-            <button class="btn btn-sm btn-block" onclick="Auth.logout()">
-                <span class="material-symbols-outlined">logout</span> خروج
-            </button>
-        </div>
+        <div class="sidebar-footer"><button class="btn btn-sm btn-block" onclick="Auth.logout()"><span class="material-symbols-outlined">logout</span> خروج</button></div>
     </aside>
-    
     <div class="main-wrapper" id="mainWrapper">
-        
-        <!-- Header -->
         <header class="header">
-            <div class="header-left">
-                <button class="hamburger" onclick="App.toggleSidebar()">
-                    <span class="material-symbols-outlined">menu</span>
-                </button>
-                <div class="breadcrumb">
-                    <span id="breadcrumbTitle">داشبورد</span>
-                </div>
-            </div>
-            <div class="header-right">
-                <button class="theme-toggle" onclick="App.toggleTheme()" id="themeToggle">
-                    <span class="material-symbols-outlined">dark_mode</span>
-                </button>
-                <button class="btn btn-sm btn-accent" onclick="Subscription.show()">
-                    <span class="material-symbols-outlined">star</span> اشتراک
-                </button>
-                <div id="levelDisplay" class="level-badge">🏆 سطح ۱</div>
-                <span id="userDisplayName" style="cursor:pointer;font-weight:500;" onclick="Profile.show()"></span>
-                <span id="userRoleBadge" class="badge"></span>
-            </div>
+            <div class="header-left"><button class="hamburger" onclick="App.toggleSidebar()"><span class="material-symbols-outlined">menu</span></button><div class="breadcrumb"><span id="breadcrumbTitle">داشبورد</span></div></div>
+            <div class="header-right"><button class="theme-toggle" onclick="App.toggleTheme()" id="themeToggle"><span class="material-symbols-outlined">dark_mode</span></button><button class="btn btn-sm btn-accent" onclick="Subscription.show()"><span class="material-symbols-outlined">star</span> اشتراک</button><div id="levelDisplay" class="level-badge">🏆 سطح ۱</div><span id="userDisplayName" style="cursor:pointer;font-weight:500;" onclick="Profile.show()"></span><span id="userRoleBadge" class="badge"></span></div>
         </header>
-        
         <main class="main-content">
-            
-            <!-- ==================== HOME (DASHBOARD) ==================== -->
-            <div class="section active" id="section-home">
-                <div id="dashboardContainer"></div>
-            </div>
-            
-            <!-- ==================== POMODORO PRO ==================== -->
-            <div class="section" id="section-pomodoro">
-                <div class="card lofi-container" id="lofiContainer">
-                    <div class="lofi-video-wrapper" id="lofiVideoWrapper" style="display:none;">
-                        <div class="lofi-overlay"></div>
-                        <canvas id="lofiCanvas"></canvas>
-                    </div>
-
-                    <div class="lofi-content" id="lofiContent">
-                        <div class="card-header">
-                            <span class="card-title">
-                                <span class="material-symbols-outlined">timer</span> تایمر پومودورو
-                            </span>
-                            <div style="display:flex;gap:0.5rem;">
-                                <button class="btn btn-sm" id="lofiActivateBtn" onclick="Pomodoro.showLofiOptions()">
-                                    <span class="material-symbols-outlined">palette</span> فضای مطالعه
-                                </button>
-                                <button class="btn btn-sm" onclick="Pomodoro.toggleSound()" id="soundToggle">
-                                    <span class="material-symbols-outlined">volume_up</span>
-                                </button>
-                                <button class="btn btn-sm btn-primary" onclick="Pomodoro.toggleFocusMode()">
-                                    <span class="material-symbols-outlined">center_focus_strong</span> فوکوس
-                                </button>
-                            </div>
-                        </div>
-
-                        <div id="lofiPanel" style="display:none;" class="lofi-panel">
-                            <h4>🎨 انتخاب فضای مطالعه</h4>
-                            <div class="lofi-options">
-                                <div class="lofi-option" onclick="Pomodoro.loadLofiScene('fireplace')">
-                                    <span class="lofi-option-icon">🔥</span>
-                                    <strong>شومینه دنج</strong>
-                                    <small>صدای ترق‌ترق چوب + ویولن</small>
-                                    <span class="lofi-badge">پیش‌فرض</span>
-                                </div>
-                                <div class="lofi-option disabled">
-                                    <span class="lofi-option-icon">🌧️</span><strong>بارون آروم</strong><small>به زودی...</small>
-                                </div>
-                                <div class="lofi-option disabled">
-                                    <span class="lofi-option-icon">🌙</span><strong>شب پرستاره</strong><small>به زودی...</small>
-                                </div>
-                            </div>
-                            <button class="btn btn-sm" onclick="Pomodoro.closeLofi()">
-                                <span class="material-symbols-outlined">close</span> بدون پس‌زمینه
-                            </button>
-                        </div>
-
-                        <div class="quote-box" id="currentQuote">برای شروع، یه فعالیت انتخاب کن ✨</div>
-
-                        <div style="display:flex;gap:1rem;flex-wrap:wrap;">
-                            <div class="input-group" style="flex:1;min-width:120px;"><label>⏲️ کار (دقیقه)</label><input type="number" id="workDuration" value="25" min="1"></div>
-                            <div class="input-group" style="flex:1;min-width:120px;"><label>☕ استراحت (دقیقه)</label><input type="number" id="breakDuration" value="5" min="1"></div>
-                        </div>
-
-                        <div class="task-selector">
-                            <select id="taskSelect">
-                                <option value="">انتخاب فعالیت از برنامه...</option>
-                                <option value="free">✏️ ورود آزاد (تایپ نام درس)</option>
-                            </select>
-                            <input type="text" id="freeTaskInput" placeholder="نام درس..." style="display:none;">
-                        </div>
-
-                        <div class="current-task-display">🎯 <span id="currentTaskDisplay">آماده برای شروع</span></div>
-
-                        <div class="timer-display" id="timerDisplay">25:00</div>
-
-                        <div style="display:flex;gap:0.5rem;justify-content:center;flex-wrap:wrap;">
-                            <button class="btn btn-primary" onclick="Pomodoro.start()">
-                                <span class="material-symbols-outlined">play_arrow</span> شروع
-                            </button>
-                            <button class="btn btn-warning" onclick="Pomodoro.pause()">
-                                <span class="material-symbols-outlined">pause</span> مکث
-                            </button>
-                            <button class="btn btn-danger" onclick="Pomodoro.reset()">
-                                <span class="material-symbols-outlined">restart_alt</span> بازنشانی
-                            </button>
-                        </div>
-
-                        <p class="text-center text-secondary mt-1" id="sessionInfo">جلسات امروز: 0</p>
-                        <p class="text-center text-secondary" id="liveTimeSaved"></p>
-
-                        <div class="live-stats">
-                            <div class="live-stat-item"><div class="live-stat-value" id="todaySessionsStat">0</div><div class="live-stat-label">🍅 جلسات امروز</div></div>
-                            <div class="live-stat-item"><div class="live-stat-value" id="weekHoursStat">0</div><div class="live-stat-label">⏱️ ساعت این هفته</div></div>
-                            <div class="live-stat-item"><div class="live-stat-value" id="streakDaysStat">0</div><div class="live-stat-label">🔥 روز پیاپی</div></div>
-                        </div>
-
-                        <div id="lofiMusicControls" style="display:none;" class="lofi-music-controls">
-                            <span class="material-symbols-outlined">music_note</span>
-                            <input type="range" id="musicVolume" min="0" max="100" value="30" onchange="Pomodoro.setMusicVolume(this.value)">
-                            <button class="btn btn-sm" onclick="Pomodoro.toggleMusic()">
-                                <span class="material-symbols-outlined">volume_off</span>
-                            </button>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="card">
-                    <div class="card-header">
-                        <span class="card-title">
-                            <span class="material-symbols-outlined">checklist</span> کارهای امروز
-                        </span>
-                    </div>
-                    <p class="task-progress" id="taskProgress">0 از 0 انجام شده</p>
-                    <div class="task-list-container" id="taskListContainer"></div>
-                    <div class="add-task-row">
-                        <input type="text" id="newTaskInput" placeholder="کار جدید..." onkeypress="if(event.key==='Enter') Pomodoro.addManualTask()">
-                        <button class="btn btn-primary btn-sm" onclick="Pomodoro.addManualTask()">
-                            <span class="material-symbols-outlined">add</span>
-                        </button>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- ==================== FLASHCARDS ==================== -->
-            <div class="section" id="section-flashcards">
-                <div id="flashcardsContainer"></div>
-            </div>
-            
-            <!-- ==================== WRITING ==================== -->
-            <div class="section" id="section-writing">
-                <div id="writingContainer"></div>
-            </div>
-            
-            <!-- ==================== RESEARCH ==================== -->
-            <div class="section" id="section-research">
-                <div id="researchContainer"></div>
-            </div>
-            
-            <!-- ==================== STATS ==================== -->
-            <div class="section" id="section-stats">
-                <div class="card">
-                    <div class="card-header"><span class="card-title"><span class="material-symbols-outlined">bar_chart</span> روند مطالعه (۷ روز)</span></div>
-                    <canvas id="studyChart"></canvas>
-                    <p class="text-secondary" id="chartExplanation"></p>
-                </div>
-                <div class="card">
-                    <div class="card-header"><span class="card-title"><span class="material-symbols-outlined">history</span> تاریخچه آزمون‌ها</span></div>
-                    <div id="examHistory"></div>
-                </div>
-                <button class="btn btn-accent no-print" onclick="Stats.generatePDF()">
-                    <span class="material-symbols-outlined">download</span> دانلود گزارش PDF
-                </button>
-            </div>
-            
-            <!-- ==================== GAMIFICATION ==================== -->
-            <div class="section" id="section-gamification">
-                <div class="card overall-progress">
-                    <div style="display:flex;align-items:center;gap:1.5rem;flex-wrap:wrap;justify-content:center;">
-                        <div class="level-badge" id="levelBadgeLarge">🏆 سطح ۱</div>
-                        <div style="text-align:center;"><div style="font-size:2rem;font-weight:800;color:var(--primary);" id="progressPercent">0%</div><div style="font-size:0.8rem;color:var(--text-secondary);">پیشرفت کلی</div></div>
-                    </div>
-                    <div class="xp-bar"><div class="xp-fill" id="progressFill" style="width:0%;"></div></div>
-                    <div style="display:flex;justify-content:space-between;font-size:0.85rem;margin-top:0.5rem;"><span>✨ <strong id="xpDisplay">0</strong> XP</span><span>🎯 <strong id="todayXP">0</strong> امروز</span></div>
-                </div>
-                <div class="grid-2">
-                    <div class="card"><div class="card-header"><span class="card-title"><span class="material-symbols-outlined">emoji_events</span> نشان‌ها</span></div><div id="achievementsGrid"></div></div>
-                    <div class="card"><div class="card-header"><span class="card-title"><span class="material-symbols-outlined">stars</span> عناوین</span></div><div id="titlesContainer"></div></div>
-                </div>
-                <div class="card"><div class="card-header"><span class="card-title"><span class="material-symbols-outlined">military_tech</span> تالار افتخارات</span></div><div id="hallOfFame"></div></div>
-                <div class="card"><div id="weeklyChallenges"></div></div>
-                <div class="card"><div class="card-header"><span class="card-title"><span class="material-symbols-outlined">today</span> چالش‌های روزانه</span></div><div id="dailyChallenges"></div></div>
-                <div class="grid-4">
-                    <div class="card text-center"><div class="stat-icon">⏱️</div><div class="stat-value" id="totalHours">0</div><div class="stat-label">ساعت مطالعه</div></div>
-                    <div class="card text-center"><div class="stat-icon">🔥</div><div class="stat-value" id="streakDays">0</div><div class="stat-label">روز پیاپی</div></div>
-                    <div class="card text-center"><div class="stat-icon">📝</div><div class="stat-value" id="totalExams">0</div><div class="stat-label">آزمون</div></div>
-                    <div class="card text-center"><div class="stat-icon">🎯</div><div class="stat-value" id="avgScore">0%</div><div class="stat-label">میانگین</div></div>
-                </div>
-            </div>
-            
-            <!-- ==================== AI ASSISTANT ==================== -->
-            <div class="section" id="section-ai-assistant" style="margin: -1.5rem -1.5rem 0 -1.5rem; padding: 0; height: calc(100vh - 56px); overflow: hidden;">
-                <div id="aiAssistantContainer" style="height: 100%;"></div>
-            </div>
-            
-            <!-- ==================== CALCULATOR ==================== -->
-            <div class="section" id="section-calculator">
-                <div class="card">
-                    <div class="card-header"><span class="card-title"><span class="material-symbols-outlined">calculate</span> محاسبه درصد</span></div>
-                    <div class="grid-2">
-                        <div class="input-group"><label>تعداد کل</label><input type="number" id="totalQuestions"></div>
-                        <div class="input-group"><label>درست</label><input type="number" id="correctAnswers"></div>
-                        <div class="input-group"><label>غلط</label><input type="number" id="wrongAnswers"></div>
-                        <div class="input-group"><label>نزده</label><input type="number" id="unanswered" readonly></div>
-                    </div>
-                    <button class="btn btn-primary" onclick="Utils.calculatePercentage()">
-                        <span class="material-symbols-outlined">functions</span> محاسبه
-                    </button>
-                    <div class="percentage-result" id="percentageResult">-</div>
-                </div>
-            </div>
-            
-            <!-- ==================== SCHEDULE ==================== -->
-            <div class="section" id="section-schedule">
-                <div class="card">
-                    <div class="card-header"><span class="card-title"><span class="material-symbols-outlined">calendar_month</span> برنامه هفتگی</span></div>
-                    <div class="schedule-grid" id="scheduleGrid"></div>
-                </div>
-            </div>
-            
-            <!-- ==================== EXAMS ==================== -->
-            <div class="section" id="section-exams">
-                <div id="examsList" class="grid-2"></div>
-                <div id="examTakingArea" style="display:none;"></div>
-            </div>
-            
-            <!-- ==================== ADMIN ==================== -->
+            <div class="section active" id="section-home"><div id="dashboardContainer"></div></div>
+            <div class="section" id="section-pomodoro"><div class="card"><p>پومودورو</p></div></div>
+            <div class="section" id="section-flashcards"><div id="flashcardsContainer"></div></div>
+            <div class="section" id="section-writing"><div id="writingContainer"></div></div>
+            <div class="section" id="section-research"><div id="researchContainer"></div></div>
+            <div class="section" id="section-stats"></div>
+            <div class="section" id="section-gamification"></div>
+            <div class="section" id="section-ai-assistant" style="margin:-1.5rem;height:calc(100vh - 56px);overflow:hidden;"><div id="aiAssistantContainer" style="height:100%;"></div></div>
+            <div class="section" id="section-calculator"></div>
+            <div class="section" id="section-schedule"></div>
+            <div class="section" id="section-exams"><div id="examsList" class="grid-2"></div><div id="examTakingArea" style="display:none;"></div></div>
             <div class="section" id="section-admin"></div>
-            
         </main>
     </div>
 </div>
 
-<!-- PDF Report -->
-<div id="pdfReport" style="display:none;">
-    <div class="pdf-header"><h1>📊 گزارش درسیار</h1><p id="pdfDate"></p><div id="pdfContent"></div></div>
-</div>
+<div id="pdfReport" style="display:none;"><div class="pdf-header"><h1>📊 گزارش درسیار</h1><p id="pdfDate"></p><div id="pdfContent"></div></div></div>
 <div id="modalContainer"></div>
 
 <script src="js/default-content.js"></script>
