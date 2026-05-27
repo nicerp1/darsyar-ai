@@ -3,7 +3,7 @@
   "short_name": "درسیار",
   "description": "پومودورو، فلش‌کارت، آزمون، گیمیفیکیشن و دستیار هوش مصنوعی",
   "start_url": "/index.html",
-  "display": "standalone",
+  "display": "fullscreen",
   "background_color": "#f5f6f8",
   "theme_color": "#05319e",
   "orientation": "portrait-primary",
@@ -43,5 +43,7 @@
       "sizes": "512x512",
       "type": "image/png"
     }
-  ]
+  ],
+  "lang": "fa",
+  "prefer_related_applications": false
 }
