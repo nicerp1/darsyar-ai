@@ -1,9 +1,9 @@
-// ============ AUTH SYSTEM - FINAL DEBUG ============
+// ============ AUTH SYSTEM - FINAL FIXED ============
 const Auth = {
     apiURL: '/api',
     
     async register(username, email, password, passwordConfirm, name) {
-        console.log('REGISTER called:', { username, email });
+        console.log('REGISTER called:', username, email);
         
         if (!username || !email || !password || !passwordConfirm) {
             if (typeof Utils !== 'undefined') Utils.showToast('⚠️ همه فیلدهای اجباری را پر کنید');
@@ -54,7 +54,6 @@ const Auth = {
             if (typeof Utils !== 'undefined') Utils.showToast('✅ ثبت‌نام و ورود موفق!');
             return true;
         } catch(e) {
-            console.error('Register error:', e);
             // Fallback به localStorage
             const savedUsers = JSON.parse(localStorage.getItem('serverUsers') || '{}');
             if (savedUsers[username]) {
