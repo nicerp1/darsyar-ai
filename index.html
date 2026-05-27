@@ -39,12 +39,12 @@
                 <label>رمز عبور</label>
                 <input type="password" id="loginPassword" placeholder="1234">
             </div>
-            <button class="btn btn-primary btn-block" id="loginSubmitBtn">
+            <button class="btn btn-primary btn-block" id="loginSubmitBtn" onclick="Auth.login(document.getElementById('loginUsername').value, document.getElementById('loginPassword').value)">
                 <span class="material-symbols-outlined">login</span> ورود
             </button>
             <p style="text-align:center;margin-top:1rem;font-size:0.85rem;">
                 حساب کاربری ندارید؟
-                <a href="#" id="showRegisterLink" style="color:var(--primary);font-weight:600;">ثبت‌نام کنید</a>
+                <a href="#" onclick="event.preventDefault(); Auth.showRegisterForm();" style="color:var(--primary);font-weight:600;">ثبت‌نام کنید</a>
             </p>
         </div>
         
@@ -70,12 +70,12 @@
                 <label>🔒 تکرار رمز عبور *</label>
                 <input type="password" id="regPasswordConfirm" placeholder="تکرار رمز عبور">
             </div>
-            <button class="btn btn-primary btn-block" id="registerSubmitBtn">
+            <button class="btn btn-primary btn-block" id="registerSubmitBtn" onclick="Auth.register(document.getElementById('regUsername').value, document.getElementById('regEmail').value, document.getElementById('regPassword').value, document.getElementById('regPasswordConfirm').value, document.getElementById('regName').value)">
                 <span class="material-symbols-outlined">person_add</span> ثبت‌نام
             </button>
             <p style="text-align:center;margin-top:1rem;font-size:0.85rem;">
                 قبلاً ثبت‌نام کرده‌اید؟
-                <a href="#" id="showLoginLink" style="color:var(--primary);font-weight:600;">ورود</a>
+                <a href="#" onclick="event.preventDefault(); Auth.showLoginForm();" style="color:var(--primary);font-weight:600;">ورود</a>
             </p>
         </div>
         
@@ -408,67 +408,6 @@
 <script src="js/dashboard.js"></script>
 <script src="js/admin.js"></script>
 <script src="js/app.js"></script>
-
-<script>
-// ============ AUTH BUTTON BINDING ============
-document.addEventListener('DOMContentLoaded', function() {
-    // دکمه لاگین
-    var loginBtn = document.getElementById('loginSubmitBtn');
-    if (loginBtn) {
-        loginBtn.addEventListener('click', function() {
-            var username = document.getElementById('loginUsername').value;
-            var password = document.getElementById('loginPassword').value;
-            Auth.login(username, password);
-        });
-    }
-    
-    // دکمه ثبت‌نام
-    var registerBtn = document.getElementById('registerSubmitBtn');
-    if (registerBtn) {
-        registerBtn.addEventListener('click', function() {
-            var username = document.getElementById('regUsername').value;
-            var email = document.getElementById('regEmail').value;
-            var password = document.getElementById('regPassword').value;
-            var passwordConfirm = document.getElementById('regPasswordConfirm').value;
-            var name = document.getElementById('regName').value;
-            Auth.register(username, email, password, passwordConfirm, name);
-        });
-    }
-    
-    // لینک نمایش ثبت‌نام
-    var showRegisterLink = document.getElementById('showRegisterLink');
-    if (showRegisterLink) {
-        showRegisterLink.addEventListener('click', function(e) {
-            e.preventDefault();
-            Auth.showRegisterForm();
-        });
-    }
-    
-    // لینک نمایش لاگین
-    var showLoginLink = document.getElementById('showLoginLink');
-    if (showLoginLink) {
-        showLoginLink.addEventListener('click', function(e) {
-            e.preventDefault();
-            Auth.showLoginForm();
-        });
-    }
-    
-    // Enter برای لاگین
-    document.addEventListener('keydown', function(e) {
-        if (e.key === 'Enter') {
-            var overlay = document.getElementById('loginOverlay');
-            if (overlay && !overlay.classList.contains('hidden')) {
-                var registerForm = document.getElementById('registerForm');
-                if (registerForm && registerForm.style.display === 'block') {
-                    registerBtn.click();
-                } else {
-                    loginBtn.click();
-                }
-            }
-        }
-    });
-});
-</script>
 
 </body>
 </html>
