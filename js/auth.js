@@ -1,9 +1,8 @@
-// ============ AUTH SYSTEM WITH API ============
+// ============ AUTH SYSTEM - FIXED ============
 const Auth = {
-    apiURL: '/api', // Vercel Functions path
+    apiURL: '/api',
     
     async register(username, email, password, passwordConfirm, name) {
-        // اعتبارسنجی front-end
         if (!username || !email || !password || !passwordConfirm) {
             Utils.showToast('⚠️ همه فیلدهای اجباری را پر کنید');
             return false;
@@ -43,7 +42,6 @@ const Auth = {
                 return false;
             }
             
-            // ثبت‌نام موفق - مستقیم لاگین کن
             Storage.currentUser = data.user;
             this.onLoginSuccess();
             Utils.showToast('✅ ثبت‌نام و ورود موفق!');
@@ -60,6 +58,15 @@ const Auth = {
             return false;
         }
         
+        // اول localStorage رو چک کن (برای admin)
+        if (Storage.USERS[username] && Storage.USERS[username].password === password) {
+            Storage.currentUser = { username, ...Storage.USERS[username] };
+            this.onLoginSuccess();
+            Utils.showToast(`✅ خوش آمدید ${Storage.USERS[username].name}`);
+            return true;
+        }
+        
+        // بعد API رو امتحان کن
         try {
             const response = await fetch(`${this.apiURL}/login`, {
                 method: 'POST',
@@ -79,14 +86,8 @@ const Auth = {
             Utils.showToast(`✅ خوش آمدید ${data.user.name}`);
             return true;
         } catch(e) {
-            // Fallback: استفاده از localStorage برای admin
-            if (Storage.USERS[username] && Storage.USERS[username].password === password) {
-                Storage.currentUser = { username, ...Storage.USERS[username] };
-                this.onLoginSuccess();
-                Utils.showToast(`✅ خوش آمدید ${Storage.USERS[username].name}`);
-                return true;
-            }
-            Utils.showToast('❌ خطا در ارتباط با سرور');
+            // اگه API در دسترس نبود، فقط localStorage
+            Utils.showToast('❌ خطا در ارتباط با سرور. با admin وارد شوید.');
             return false;
         }
     },
