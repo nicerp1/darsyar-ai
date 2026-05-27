@@ -4,16 +4,21 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>درسیار | دستیار تحصیلی هوشمند</title>
-    <link rel="manifest" href="manifest.json">
     <link rel="stylesheet" href="fonts/kalameh.css">
     <link rel="stylesheet" href="css/style.css">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <!-- Material Icons -->
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0&display=swap">
+    <!-- KaTeX -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="apple-mobile-web-app-title" content="درسیار">
-    <link rel="apple-touch-icon" href="icons/icon-192.png">
+    <link rel="apple-touch-icon" href="icons/icon-512.png">
+    <link rel="manifest" href="manifest.json">
 </head>
 <body>
 
@@ -31,7 +36,9 @@
             <label>رمز عبور</label>
             <input type="password" id="passwordInput" placeholder="1234">
         </div>
-        <button class="btn btn-primary btn-block" id="loginBtn">ورود</button>
+        <button class="btn btn-primary btn-block" id="loginBtn">
+            <span class="material-symbols-outlined">login</span> ورود
+        </button>
         <p class="login-hint">admin / 1234 | user / 1234</p>
     </div>
 </div>
@@ -108,7 +115,9 @@
                 <button class="theme-toggle" onclick="App.toggleTheme()" id="themeToggle">
                     <span class="material-symbols-outlined">dark_mode</span>
                 </button>
-                <button class="btn btn-sm btn-accent" onclick="Subscription.show()">⭐ اشتراک</button>
+                <button class="btn btn-sm btn-accent" onclick="Subscription.show()">
+                    <span class="material-symbols-outlined">star</span> اشتراک
+                </button>
                 <div id="levelDisplay" class="level-badge">🏆 سطح ۱</div>
                 <span id="userDisplayName" style="cursor:pointer;font-weight:500;" onclick="Profile.show()"></span>
                 <span id="userRoleBadge" class="badge"></span>

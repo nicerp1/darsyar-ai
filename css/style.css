@@ -3904,3 +3904,139 @@ body {
     transition: width 1s ease;
     background: linear-gradient(90deg, var(--primary), #c9a03e);
 }
+/* ============ KATEX FIXES ============ */
+
+/* کادر دور فرمول‌های بلوکی */
+.katex-display {
+    background: var(--bg);
+    padding: 1rem;
+    border-radius: 8px;
+    margin: 0.8rem 0;
+    overflow-x: auto;
+    text-align: center !important;
+}
+
+/* رفع مشکل برعکس شدن - مجبور کردن به چپ به راست */
+.katex {
+    direction: ltr !important;
+    unicode-bidi: embed !important;
+    text-align: left !important;
+}
+
+.katex-display > .katex {
+    direction: ltr !important;
+    text-align: center !important;
+}
+
+/* فرمول‌های درون خطی */
+.katex-inline {
+    direction: ltr !important;
+    display: inline-block !important;
+}
+
+/* اسکرول افقی برای فرمول‌های طولانی */
+.katex-display {
+    overflow-x: auto;
+    overflow-y: hidden;
+}
+
+/* رنگ طلایی برای فرمول‌ها */
+.katex {
+    color: #f39c12 !important;
+}
+.katex { direction: ltr !important; text-align: left !important; }
+.katex-display { background: var(--bg); padding: 1rem; border-radius: 8px; margin: 0.8rem 0; overflow-x: auto; }
+.katex-display > .katex { text-align: center !important; }
+.katex-html { direction: ltr !important; }
+/* ============ MATERIAL ICONS ============ */
+.material-symbols-outlined {
+    font-size: 20px;
+    vertical-align: middle;
+    line-height: 1;
+}
+
+.sidebar-icon {
+    font-size: 22px !important;
+    width: 24px;
+    text-align: center;
+}
+
+.btn .material-symbols-outlined {
+    font-size: 18px;
+}
+
+.card-title .material-symbols-outlined {
+    font-size: 22px;
+    margin-left: 4px;
+}
+
+/* ============ KATEX FIXES ============ */
+.katex {
+    direction: ltr !important;
+    text-align: left !important;
+    unicode-bidi: embed !important;
+}
+
+.katex-display {
+    background: var(--bg);
+    padding: 1rem;
+    border-radius: 8px;
+    margin: 0.8rem 0;
+    overflow-x: auto;
+    overflow-y: hidden;
+}
+
+.katex-display > .katex {
+    text-align: center !important;
+    direction: ltr !important;
+}
+
+.katex-html {
+    direction: ltr !important;
+}
+
+.katex .mathbf {
+    color: #f39c12;
+}
+
+/* ============ CHART.JS ============ */
+canvas {
+    max-width: 100%;
+}
+
+/* ============ STAT CARDS ============ */
+.stat-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1.2rem 1rem;
+    text-align: center;
+    transition: var(--transition);
+}
+
+.stat-card:hover {
+    box-shadow: var(--shadow);
+    transform: translateY(-2px);
+}
+
+.stat-card-value {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--primary);
+}
+
+.stat-card-label {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    margin-top: 0.2rem;
+}
+
+/* ============ RESPONSIVE ============ */
+@media (max-width: 768px) {
+    .stat-card {
+        padding: 0.8rem 0.5rem;
+    }
+    .stat-card-value {
+        font-size: 1.2rem;
+    }
+}
