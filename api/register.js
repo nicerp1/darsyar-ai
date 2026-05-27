@@ -1,13 +1,11 @@
-// api/register.js - API ثبت‌نام کاربر جدید
+// api/register.js - API ثبت‌نام کاربر جدید (نسخه اصلاح شده)
 export default async function handler(req, res) {
-    // فقط POST قبول کن
     if (req.method !== 'POST') {
         return res.status(405).json({ error: 'Method not allowed' });
     }
 
     const { username, email, password, name } = req.body;
     
-    // اعتبارسنجی
     if (!username || !password || !email) {
         return res.status(400).json({ error: 'نام کاربری، ایمیل و رمز عبور الزامی است' });
     }
@@ -20,21 +18,29 @@ export default async function handler(req, res) {
         return res.status(400).json({ error: 'رمز عبور حداقل ۴ کاراکتر باشد' });
     }
 
+    // نمی‌ذاره admin ثبت‌نام کنه
+    if (username === 'admin') {
+        return res.status(400).json({ error: 'این نام کاربری مجاز نیست' });
+    }
+
     try {
-        // گرفتن لیست کاربران از Upstash
         const checkUrl = `${process.env.UPSTASH_REDIS_REST_URL}/get/users`;
         const checkResponse = await fetch(checkUrl, {
             headers: { 'Authorization': `Bearer ${process.env.UPSTASH_REDIS_REST_TOKEN}` }
         });
-        const checkData = await checkResponse.json();
-        let users = JSON.parse(checkData.result || '{}');
         
-        // چک کن کاربر قبلاً نباشه
+        if (!checkResponse.ok) {
+            return res.status(503).json({ error: 'سرور موقتاً در دسترس نیست' });
+        }
+        
+        const checkData = await checkResponse.json();
+        let users = {};
+        try { users = JSON.parse(checkData.result || '{}'); } catch(e) { users = {}; }
+        
         if (users[username]) {
             return res.status(400).json({ error: 'این نام کاربری قبلاً ثبت شده است' });
         }
 
-        // ساختن کاربر جدید
         users[username] = {
             password,
             email,
@@ -45,7 +51,6 @@ export default async function handler(req, res) {
             createdAt: new Date().toISOString()
         };
 
-        // ذخیره توی Upstash
         const saveUrl = `${process.env.UPSTASH_REDIS_REST_URL}/set/users`;
         await fetch(saveUrl, {
             method: 'POST',
@@ -56,7 +61,6 @@ export default async function handler(req, res) {
             body: JSON.stringify({ value: JSON.stringify(users) })
         });
 
-        // برگردوندن موفقیت + اطلاعات کاربر
         return res.status(200).json({
             success: true,
             message: 'ثبت‌نام با موفقیت انجام شد',
@@ -69,6 +73,6 @@ export default async function handler(req, res) {
             }
         });
     } catch (error) {
-        return res.status(500).json({ error: 'خطای سرور. دوباره تلاش کنید.' });
+        return res.status(500).json({ error: 'خطای سرور' });
     }
 }
