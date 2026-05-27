@@ -1,4 +1,4 @@
-// ============ AUTH SYSTEM - FIXED ============
+// ============ AUTH SYSTEM - FINAL FIXED ============
 const Auth = {
     apiURL: '/api',
     
@@ -29,26 +29,59 @@ const Auth = {
         }
         
         try {
+            // اول تلاش برای API
             const response = await fetch(`${this.apiURL}/register`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ username, email, password, name: name || username })
             });
             
-            const data = await response.json();
+            if (response.ok) {
+                const data = await response.json();
+                Storage.currentUser = data.user;
+                this.onLoginSuccess();
+                Utils.showToast('✅ ثبت‌نام و ورود موفق!');
+                return true;
+            }
             
-            if (!response.ok) {
-                Utils.showToast('❌ ' + (data.error || 'خطا در ثبت‌نام'));
+            // اگه API کار نکرد، توی localStorage ذخیره کن
+            const savedUsers = JSON.parse(localStorage.getItem('serverUsers') || '{}');
+            if (savedUsers[username]) {
+                Utils.showToast('⚠️ این نام کاربری قبلاً ثبت شده');
                 return false;
             }
             
-            Storage.currentUser = data.user;
+            savedUsers[username] = {
+                password, email, name: name || username,
+                role: 'user', subscription: 'free',
+                createdAt: new Date().toISOString()
+            };
+            localStorage.setItem('serverUsers', JSON.stringify(savedUsers));
+            
+            Storage.currentUser = { username, ...savedUsers[username] };
             this.onLoginSuccess();
-            Utils.showToast('✅ ثبت‌نام و ورود موفق!');
+            Utils.showToast('✅ ثبت‌نام و ورود موفق! (آفلاین)');
             return true;
+            
         } catch(e) {
-            Utils.showToast('❌ خطا در ارتباط با سرور');
-            return false;
+            // Fallback کامل به localStorage
+            const savedUsers = JSON.parse(localStorage.getItem('serverUsers') || '{}');
+            if (savedUsers[username]) {
+                Utils.showToast('⚠️ این نام کاربری قبلاً ثبت شده');
+                return false;
+            }
+            
+            savedUsers[username] = {
+                password, email, name: name || username,
+                role: 'user', subscription: 'free',
+                createdAt: new Date().toISOString()
+            };
+            localStorage.setItem('serverUsers', JSON.stringify(savedUsers));
+            
+            Storage.currentUser = { username, ...savedUsers[username] };
+            this.onLoginSuccess();
+            Utils.showToast('✅ ثبت‌نام و ورود موفق! (آفلاین)');
+            return true;
         }
     },
     
@@ -58,7 +91,7 @@ const Auth = {
             return false;
         }
         
-        // اول localStorage رو چک کن (برای admin)
+        // ۱. چک localStorage اصلی (admin)
         if (Storage.USERS[username] && Storage.USERS[username].password === password) {
             Storage.currentUser = { username, ...Storage.USERS[username] };
             this.onLoginSuccess();
@@ -66,7 +99,16 @@ const Auth = {
             return true;
         }
         
-        // بعد API رو امتحان کن
+        // ۲. چک کاربرای ثبت‌نامی توی localStorage
+        const savedUsers = JSON.parse(localStorage.getItem('serverUsers') || '{}');
+        if (savedUsers[username] && savedUsers[username].password === password) {
+            Storage.currentUser = { username, ...savedUsers[username] };
+            this.onLoginSuccess();
+            Utils.showToast(`✅ خوش آمدید ${savedUsers[username].name}`);
+            return true;
+        }
+        
+        // ۳. تلاش برای API
         try {
             const response = await fetch(`${this.apiURL}/login`, {
                 method: 'POST',
@@ -74,22 +116,19 @@ const Auth = {
                 body: JSON.stringify({ username, password })
             });
             
-            const data = await response.json();
-            
-            if (!response.ok) {
-                Utils.showToast('❌ ' + (data.error || 'خطا در ورود'));
-                return false;
+            if (response.ok) {
+                const data = await response.json();
+                Storage.currentUser = data.user;
+                this.onLoginSuccess();
+                Utils.showToast(`✅ خوش آمدید ${data.user.name}`);
+                return true;
             }
-            
-            Storage.currentUser = data.user;
-            this.onLoginSuccess();
-            Utils.showToast(`✅ خوش آمدید ${data.user.name}`);
-            return true;
         } catch(e) {
-            // اگه API در دسترس نبود، فقط localStorage
-            Utils.showToast('❌ خطا در ارتباط با سرور. با admin وارد شوید.');
-            return false;
+            // API در دسترس نیست - قبلاً چک شده
         }
+        
+        Utils.showToast('❌ نام کاربری یا رمز عبور اشتباه است');
+        return false;
     },
     
     onLoginSuccess() {
