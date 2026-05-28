@@ -2,48 +2,42 @@
 const Auth = {
     apiURL: '/api',
     
-    login: async function(username, password) {
-        console.log('LOGIN CALLED:', username, password);
-        
-        if (!username || !password || username.trim() === '' || password.trim() === '') {
+    async login(username, password) {
+        if (!username || !password) {
             alert('⚠️ نام کاربری و رمز عبور را وارد کنید');
             return false;
         }
         
         // اول admin رو چک کن (سریع و قطعی)
         if (username === 'admin' && password === '1234') {
-            console.log('Admin login success');
-            Storage.currentUser = { username: 'admin', name: 'مدیر', role: 'admin' };
-            this.goToApp();
+            this.setUser({ username: 'admin', name: 'مدیر', role: 'admin' });
             return true;
         }
         
         // بعد API رو امتحان کن
         try {
-            console.log('Trying API...');
             const res = await fetch(`${this.apiURL}/login`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ username: username, password: password })
+                body: JSON.stringify({ username, password })
             });
-            const data = await res.json();
-            console.log('API response:', data);
             
-            if (res.ok && data.success) {
-                Storage.currentUser = data.user;
-                this.goToApp();
-                return true;
+            if (res.ok) {
+                const data = await res.json();
+                if (data.success) {
+                    this.setUser(data.user);
+                    return true;
+                }
             }
         } catch(e) {
-            console.log('API failed:', e);
+            console.log('API failed, trying localStorage');
         }
         
-        // چک localStorage
+        // Fallback به localStorage
         try {
             const savedUsers = JSON.parse(localStorage.getItem('serverUsers') || '{}');
             if (savedUsers[username] && savedUsers[username].password === password) {
-                Storage.currentUser = savedUsers[username];
-                this.goToApp();
+                this.setUser(savedUsers[username]);
                 return true;
             }
         } catch(e) {}
@@ -52,7 +46,26 @@ const Auth = {
         return false;
     },
     
-    register: async function(username, email, password, passwordConfirm, name) {
+    setUser(user) {
+        Storage.currentUser = user;
+        document.getElementById('loginOverlay').classList.add('hidden');
+        document.getElementById('appContainer').classList.add('active');
+        document.getElementById('userDisplayName').textContent = user.name;
+        
+        const badge = document.getElementById('userRoleBadge');
+        if (badge) {
+            badge.textContent = user.role === 'admin' ? 'ادمین' : 'کاربر';
+            badge.className = 'badge ' + (user.role === 'admin' ? 'badge-admin' : 'badge-user');
+        }
+        
+        document.querySelectorAll('.admin-only').forEach(function(el) {
+            el.style.display = user.role === 'admin' ? 'block' : 'none';
+        });
+        
+        if (typeof App !== 'undefined') App.init();
+    },
+    
+    async register(username, email, password, passwordConfirm, name) {
         if (!username || !email || !password || !passwordConfirm) {
             alert('⚠️ همه فیلدهای اجباری را پر کنید');
             return false;
@@ -69,8 +82,7 @@ const Auth = {
             });
             const data = await res.json();
             if (res.ok && data.success) {
-                Storage.currentUser = data.user;
-                this.goToApp();
+                this.setUser(data.user);
                 return true;
             }
             alert('❌ ' + (data.error || 'خطا'));
@@ -81,29 +93,19 @@ const Auth = {
         }
     },
     
-    goToApp: function() {
-        document.getElementById('loginOverlay').classList.add('hidden');
-        document.getElementById('appContainer').classList.add('active');
-        document.getElementById('userDisplayName').textContent = Storage.currentUser.name;
-        const badge = document.getElementById('userRoleBadge');
-        badge.textContent = Storage.currentUser.role === 'admin' ? 'ادمین' : 'کاربر';
-        badge.className = 'badge ' + (Storage.currentUser.role === 'admin' ? 'badge-admin' : 'badge-user');
-        document.querySelectorAll('.admin-only').forEach(function(el) { el.style.display = Storage.currentUser.role === 'admin' ? 'block' : 'none'; });
-        if (typeof App !== 'undefined') App.init();
-    },
-    
-    logout: function() {
+    logout() {
         if (typeof Pomodoro !== 'undefined') Pomodoro.pause();
         Storage.currentUser = null;
         document.getElementById('loginOverlay').classList.remove('hidden');
         document.getElementById('appContainer').classList.remove('active');
     },
     
-    showRegisterForm: function() {
+    showRegisterForm() {
         document.getElementById('loginForm').style.display = 'none';
         document.getElementById('registerForm').style.display = 'block';
     },
-    showLoginForm: function() {
+    
+    showLoginForm() {
         document.getElementById('loginForm').style.display = 'block';
         document.getElementById('registerForm').style.display = 'none';
     }
