@@ -1619,6 +1619,38 @@ a {
     box-shadow: var(--shadow-sm);
 }
 
+.schedule-admin-tools { margin-bottom: 16px; overflow: hidden; background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-md); }
+.schedule-admin-toggle { width: 100%; min-height: 64px; display: flex; align-items: center; gap: 12px; padding: 12px 16px; color: var(--text-primary); background: transparent; border: 0; text-align: right; cursor: pointer; }
+.schedule-admin-toggle > span:nth-child(2) { flex: 1; display: grid; gap: 3px; }
+.schedule-admin-toggle small { color: var(--text-muted); font-weight: 400; }
+.schedule-admin-toggle > .material-symbols-outlined:first-child { color: var(--gold); }
+.schedule-admin-chevron { transition: transform var(--transition); }
+.schedule-admin-toggle[aria-expanded="true"] .schedule-admin-chevron { transform: rotate(180deg); }
+.schedule-admin-toggle:focus-visible { outline: 2px solid var(--gold); outline-offset: -3px; }
+.schedule-admin-drawer { padding: 16px; border-top: 1px solid var(--border-color); background: var(--bg-surface); }
+.schedule-admin-drawer .form-group { max-width: 460px; margin-bottom: 8px; }
+.schedule-admin-drawer p, .manual-report-help { color: var(--text-muted); font-size: 12px; line-height: 1.8; }
+.schedule-context-banner { display: flex; align-items: center; gap: 10px; margin-bottom: 16px; padding: 12px 16px; color: var(--gold-light); background: rgba(201,160,62,.1); border: 1px solid var(--border-color); border-radius: var(--radius-md); }
+.schedule-time-cell { font-weight: 700; color: var(--gold-light); background: var(--bg-surface); text-align: center; white-space: nowrap; font-size: 13px; }
+.schedule-status { display: inline-flex; align-items: center; width: fit-content; margin-top: 8px; padding: 3px 7px; border: 1px solid currentColor; border-radius: 999px; font-size: 10px; font-weight: 700; }
+.schedule-status-pending { color: var(--text-muted); }
+.schedule-status-completed { color: #22c55e; }
+.schedule-status-partial { color: #f59e0b; }
+.schedule-status-missed { color: #ef4444; }
+.manual-report-card { margin-top: 20px; }
+.manual-report-form { display: grid; grid-template-columns: 1.2fr 2fr 1fr 1fr 1.4fr; gap: 12px; align-items: end; margin-top: 16px; }
+.manual-report-form .form-group { margin-bottom: 0; }
+.manual-report-notes { grid-column: 1 / -2; }
+.manual-report-form > button { min-height: 44px; justify-content: center; }
+.manual-report-list { display: grid; gap: 10px; margin-top: 20px; }
+.manual-report-item { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 14px; background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: var(--radius-md); }
+.manual-report-item > div:first-child { min-width: 0; display: grid; gap: 4px; }
+.manual-report-item > div:first-child span, .manual-report-item small { color: var(--text-muted); font-size: 12px; overflow-wrap: anywhere; }
+.manual-report-actions { display: flex; align-items: center; gap: 8px; flex: 0 0 auto; }
+.manual-report-actions .schedule-status { margin-top: 0; }
+.admin-report-note { display: block; margin-top: 4px; color: var(--text-muted); }
+.admin-report-subtitle { margin-top: 20px; }
+
 .schedule-table {
     width: 100%;
     border-collapse: separate;
@@ -2193,6 +2225,19 @@ a {
     .admin-form-grid { grid-template-columns: 1fr; }
     .admin-form-span { grid-column: auto; }
     .admin-student-header { align-items: flex-start; }
+    .manual-report-form { grid-template-columns: 1fr 1fr; }
+    .manual-report-notes { grid-column: 1 / -1; }
+    .manual-report-form > button { grid-column: 1 / -1; }
+    .manual-report-item { align-items: flex-start; flex-direction: column; }
+}
+
+@media (max-width: 480px) {
+    .manual-report-form { grid-template-columns: 1fr; }
+    .manual-report-notes, .manual-report-form > button { grid-column: auto; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .schedule-admin-chevron { transition: none; }
 }
 
 /* Responsive Overrides */

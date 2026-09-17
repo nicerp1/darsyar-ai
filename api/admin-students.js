@@ -52,10 +52,12 @@ module.exports = async (req, res) => {
         if (req.method === 'POST') {
             const subject = String(req.body?.subject || '').trim().slice(0, 100);
             if (!subject) return res.status(400).json({ error: 'عنوان درس الزامی است.' });
+            const previousStatus = schedule[dayIndex].slots[slotIndex]?.status;
             schedule[dayIndex].slots[slotIndex] = {
                 time: times[slotIndex], subject,
                 note: String(req.body?.note || '').trim().slice(0, 300),
                 color: /^#[0-9a-f]{6}$/i.test(req.body?.color) ? req.body.color : '#05319e',
+                status: ['pending', 'completed', 'partial', 'missed'].includes(previousStatus) ? previousStatus : 'pending',
                 assignedBy: 'kiankaki', assignedAt: new Date().toISOString()
             };
         } else if (req.method === 'DELETE') {

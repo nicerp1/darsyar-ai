@@ -88,8 +88,10 @@ const Admin = (function () {
         const history = Array.isArray(data.study_history) ? data.study_history : [];
         const results = Array.isArray(data.exam_results) ? data.exam_results : [];
         const cards = Array.isArray(data.flashcards) ? data.flashcards : [];
-        const hours = history.reduce((sum, item) => sum + Number(item.hours || 0), 0);
-        const sessions = history.reduce((sum, item) => sum + Number(item.sessions || 0), 0);
+        const manualReports = Array.isArray(data.manual_reports) ? data.manual_reports : [];
+        const manualHours = manualReports.reduce((sum, item) => sum + Number(item.minutes || 0), 0) / 60;
+        const hours = history.reduce((sum, item) => sum + Number(item.hours || 0), 0) + manualHours;
+        const sessions = history.reduce((sum, item) => sum + Number(item.sessions || 0), 0) + manualReports.filter(item => item.status !== 'missed').length;
         const average = results.length ? Math.round(results.reduce((sum, item) => sum + Number(item.scorePercentage || 0), 0) / results.length) : 0;
         const metrics = [
             ['schedule', 'ساعت مطالعه', `${pd(hours.toFixed(1))} ساعت`], ['timer', 'جلسات تمرکز', pd(sessions)],
@@ -98,7 +100,7 @@ const Admin = (function () {
         ];
         document.getElementById('admin-student-metrics').innerHTML = metrics.map(item => `<div class="admin-metric"><span class="material-symbols-outlined" aria-hidden="true">${item[0]}</span><small>${item[1]}</small><strong>${item[2]}</strong></div>`).join('');
         renderProgram(data.schedule || []);
-        renderReport(history, results);
+        renderReport(history, results, manualReports);
     }
 
     function renderProgram(schedule) {
@@ -113,26 +115,19 @@ const Admin = (function () {
         </div>`).join('') || '<div class="admin-list-empty">هنوز برنامه‌ای برای این دانش‌آموز ثبت نشده است.</div>';
     }
 
-    function renderReport(history, results) {
+    function renderReport(history, results, manualReports) {
         const container = document.getElementById('admin-study-report');
         const historyRows = history.slice(-10).reverse().map(item => `<tr><td>${esc(item.date || '—')}</td><td>${pd(item.hours || 0)} ساعت</td><td>${pd(item.sessions || 0)}</td><td>${esc(Object.keys(item.subjectBreakdown || {}).join('، ') || '—')}</td></tr>`).join('');
+        const statusLabels = { completed: 'انجام شد', partial: 'بخشی انجام شد', missed: 'انجام نشد', pending: 'در انتظار' };
+        const manualRows = manualReports.slice(-15).reverse().map(item => `<tr><td>${esc(item.date || '—')}</td><td>${esc(item.start || '—')} تا ${esc(item.end || '—')}</td><td>${pd(item.minutes || 0)} دقیقه</td><td><strong>${esc(item.subject || '—')}</strong><small class="admin-report-note">${esc(item.notes || '')}</small></td><td>${esc(statusLabels[item.status] || '—')}</td></tr>`).join('');
         const resultRows = results.slice(-5).reverse().map(item => `<li><span>${esc(item.examTitle || 'آزمون')}</span><strong>${pd(item.scorePercentage || 0)}٪</strong></li>`).join('');
-        container.innerHTML = `<div class="admin-report-table-wrap"><table class="admin-report-table"><thead><tr><th>تاریخ</th><th>زمان</th><th>جلسه</th><th>دروس</th></tr></thead><tbody>${historyRows || '<tr><td colspan="4">هنوز گزارش مطالعه‌ای ثبت نشده است.</td></tr>'}</tbody></table></div>
+        container.innerHTML = `<div class="admin-report-table-wrap"><h4>گزارش‌های دستی دانش‌آموز</h4><table class="admin-report-table"><thead><tr><th>تاریخ</th><th>بازه</th><th>مدت</th><th>درس و توضیح</th><th>وضعیت</th></tr></thead><tbody>${manualRows || '<tr><td colspan="5">هنوز گزارش دستی ثبت نشده است.</td></tr>'}</tbody></table><h4 class="admin-report-subtitle">گزارش پومودورو</h4><table class="admin-report-table"><thead><tr><th>تاریخ</th><th>زمان</th><th>جلسه</th><th>دروس</th></tr></thead><tbody>${historyRows || '<tr><td colspan="4">هنوز گزارش پومودورو ثبت نشده است.</td></tr>'}</tbody></table></div>
             <div class="admin-exam-summary"><h4>آخرین نتایج آزمون</h4><ul>${resultRows || '<li><span>هنوز آزمونی ثبت نشده است.</span></li>'}</ul></div>`;
     }
 
-    async function saveProgramSlot() {
+    function openStudentSchedule() {
         if (!selectedUsername) return Utils.showToast('ابتدا دانش‌آموز را انتخاب کنید.', 'warning');
-        const body = { username: selectedUsername, dayIndex: Number(document.getElementById('admin-program-day').value), slotIndex: Number(document.getElementById('admin-program-time').value), subject: document.getElementById('admin-program-subject').value, note: document.getElementById('admin-program-note').value, color: document.getElementById('admin-program-color').value };
-        setLoading(true);
-        try {
-            const response = await fetch('/api/admin-students', { method: 'POST', credentials: 'same-origin', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
-            const payload = await response.json(); if (!response.ok) throw new Error(payload.error);
-            selectedPayload.data.schedule = payload.schedule;
-            document.getElementById('admin-program-subject').value = ''; document.getElementById('admin-program-note').value = '';
-            renderProgram(payload.schedule); Utils.showToast('برنامه دانش‌آموز ذخیره شد.', 'success');
-        } catch (error) { Utils.showToast(error.message || 'ذخیره برنامه انجام نشد.', 'error'); }
-        finally { setLoading(false); }
+        Schedule.openForStudent(selectedUsername);
     }
 
     async function removeProgramSlot(dayIndex, slotIndex) {
@@ -155,6 +150,6 @@ const Admin = (function () {
     function exportBackupJSON() { Utils.showToast('برای امنیت، خروجی کامل داده کاربران از مرورگر غیرفعال است.', 'info'); }
     function resetDemoData() { Utils.showToast('داده آزمایشی در نسخه واقعی غیرفعال است.', 'info'); }
 
-    return { init, filterStudents, selectStudent, saveProgramSlot, removeProgramSlot, changeUserPlan, saveSystemSettings, exportBackupJSON, resetDemoData };
+    return { init, filterStudents, selectStudent, openStudentSchedule, removeProgramSlot, changeUserPlan, saveSystemSettings, exportBackupJSON, resetDemoData };
 })();
 window.Admin = Admin;

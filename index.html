@@ -784,6 +784,25 @@
                         </button>
                     </div>
 
+                    <div id="schedule-admin-tools" class="schedule-admin-tools hidden">
+                        <button id="schedule-admin-toggle" class="schedule-admin-toggle" type="button" aria-expanded="false" aria-controls="schedule-admin-drawer" onclick="Schedule.toggleAdminDrawer()">
+                            <span class="material-symbols-outlined" aria-hidden="true">manage_accounts</span>
+                            <span><strong>برنامه‌ریزی برای دانش‌آموز</strong><small id="schedule-admin-current">برای انتخاب دانش‌آموز، پنل را باز کنید</small></span>
+                            <span class="material-symbols-outlined schedule-admin-chevron" aria-hidden="true">expand_more</span>
+                        </button>
+                        <div id="schedule-admin-drawer" class="schedule-admin-drawer" hidden>
+                            <div class="form-group">
+                                <label class="form-label" for="schedule-admin-student">دانش‌آموز</label>
+                                <select id="schedule-admin-student" class="form-control" onchange="Schedule.selectAdminStudent(this.value)">
+                                    <option value="">برنامه خودم</option>
+                                </select>
+                            </div>
+                            <p>دانش‌آموز را انتخاب کنید و سپس روی هر خانه جدول بزنید؛ تغییرات مستقیم در دیتابیس همان دانش‌آموز ذخیره می‌شود.</p>
+                        </div>
+                    </div>
+
+                    <div id="schedule-context-banner" class="schedule-context-banner hidden" role="status" aria-live="polite"></div>
+
                     <div class="schedule-table-wrap" id="schedule-printable-table">
                         <table class="schedule-table">
                             <thead>
@@ -800,6 +819,24 @@
                             </thead>
                             <tbody id="schedule-grid-tbody"></tbody>
                         </table>
+                    </div>
+
+                    <div class="content-card manual-report-card">
+                        <div class="content-card-title">
+                            <span class="material-symbols-outlined" aria-hidden="true">fact_check</span>
+                            <span>گزارش کار دستی</span>
+                        </div>
+                        <p class="manual-report-help">مطالعه واقعی خود را با ساعت شروع و پایان ثبت کنید. این گزارش برای ادمین هم قابل مشاهده است.</p>
+                        <form id="manual-report-form" class="manual-report-form" onsubmit="event.preventDefault(); Schedule.saveManualReport();">
+                            <div class="form-group"><label class="form-label" for="report-date">تاریخ</label><input id="report-date" class="form-control" type="date" required></div>
+                            <div class="form-group"><label class="form-label" for="report-subject">درس یا فعالیت</label><input id="report-subject" class="form-control" maxlength="100" required placeholder="مثلاً زیست‌شناسی"></div>
+                            <div class="form-group"><label class="form-label" for="report-start">از ساعت</label><input id="report-start" class="form-control" type="time" required></div>
+                            <div class="form-group"><label class="form-label" for="report-end">تا ساعت</label><input id="report-end" class="form-control" type="time" required></div>
+                            <div class="form-group"><label class="form-label" for="report-status">وضعیت انجام</label><select id="report-status" class="form-control"><option value="completed">کامل انجام شد</option><option value="partial">بخشی انجام شد</option><option value="missed">انجام نشد</option></select></div>
+                            <div class="form-group manual-report-notes"><label class="form-label" for="report-notes">توضیحات</label><textarea id="report-notes" class="form-control" maxlength="500" rows="2" placeholder="مبحث، تعداد تست یا نکته‌ای که باید پیگیری شود"></textarea></div>
+                            <button id="manual-report-submit" class="btn-gold" type="submit"><span class="material-symbols-outlined" aria-hidden="true">add_task</span> ثبت گزارش در دیتابیس</button>
+                        </form>
+                        <div id="manual-report-list" class="manual-report-list" aria-live="polite"></div>
                     </div>
                 </section>
 
@@ -1216,43 +1253,16 @@
                                 <div id="admin-student-metrics" class="admin-metrics-grid"></div>
 
                                 <div class="admin-detail-grid">
-                                    <form class="content-card admin-program-form" onsubmit="event.preventDefault(); Admin.saveProgramSlot();">
+                                    <div class="content-card admin-program-form">
                                         <div class="content-card-title">
                                             <span class="material-symbols-outlined" aria-hidden="true">edit_calendar</span>
-                                            <span>ثبت برنامه اختصاصی</span>
+                                            <span>ویرایش برنامه اختصاصی</span>
                                         </div>
-                                        <div class="admin-form-grid">
-                                            <div class="form-group">
-                                                <label class="form-label" for="admin-program-day">روز</label>
-                                                <select id="admin-program-day" class="form-control" required>
-                                                    <option value="0">شنبه</option><option value="1">یک‌شنبه</option><option value="2">دوشنبه</option>
-                                                    <option value="3">سه‌شنبه</option><option value="4">چهارشنبه</option><option value="5">پنج‌شنبه</option><option value="6">جمعه</option>
-                                                </select>
-                                            </div>
-                                            <div class="form-group">
-                                                <label class="form-label" for="admin-program-time">بازه زمانی</label>
-                                                <select id="admin-program-time" class="form-control" required>
-                                                    <option value="0">۰۸:۰۰ - ۱۰:۰۰</option><option value="1">۱۰:۰۰ - ۱۲:۰۰</option><option value="2">۱۴:۰۰ - ۱۶:۰۰</option>
-                                                    <option value="3">۱۶:۰۰ - ۱۸:۰۰</option><option value="4">۱۸:۰۰ - ۲۰:۰۰</option><option value="5">۲۰:۰۰ - ۲۲:۰۰</option>
-                                                </select>
-                                            </div>
-                                            <div class="form-group admin-form-span">
-                                                <label class="form-label" for="admin-program-subject">درس یا فعالیت</label>
-                                                <input id="admin-program-subject" class="form-control" maxlength="100" required placeholder="مثلاً زیست‌شناسی؛ فصل ژنتیک">
-                                            </div>
-                                            <div class="form-group admin-form-span">
-                                                <label class="form-label" for="admin-program-note">توضیحات و هدف</label>
-                                                <textarea id="admin-program-note" class="form-control" maxlength="300" rows="3" placeholder="حجم مطالعه، تعداد تست یا نکته مشاور"></textarea>
-                                            </div>
-                                            <div class="form-group">
-                                                <label class="form-label" for="admin-program-color">رنگ برنامه</label>
-                                                <input id="admin-program-color" class="form-control admin-color-input" type="color" value="#0ea5e9">
-                                            </div>
-                                        </div>
-                                        <button id="admin-program-submit" class="btn-primary" type="submit">
-                                            <span class="material-symbols-outlined" aria-hidden="true">add_task</span> ثبت در برنامه دانش‌آموز
+                                        <p class="manual-report-help">ویرایش برنامه حالا داخل خود صفحه برنامه انجام می‌شود تا کل هفته را یک‌جا ببینید.</p>
+                                        <button class="btn-primary" type="button" onclick="Admin.openStudentSchedule()">
+                                            <span class="material-symbols-outlined" aria-hidden="true">calendar_month</span> باز کردن برنامه این دانش‌آموز
                                         </button>
-                                    </form>
+                                    </div>
 
                                     <div class="content-card">
                                         <div class="content-card-title">
@@ -1518,16 +1528,20 @@
             <div class="modal-body">
                 <div style="font-weight: 700; color: var(--gold-light); margin-bottom: 14px;" id="edit-slot-day-name">شنبه - بازه ۰۸:۰۰ - ۱۰:۰۰</div>
                 <div class="form-group">
-                    <label class="form-label">عنوان درس یا فعالیت</label>
+                    <label class="form-label" for="input-slot-subject">عنوان درس یا فعالیت</label>
                     <input type="text" id="input-slot-subject" class="form-control">
                 </div>
                 <div class="form-group">
-                    <label class="form-label">مبحث یا توضیحات تکمیلی</label>
+                    <label class="form-label" for="input-slot-note">مبحث یا توضیحات تکمیلی</label>
                     <input type="text" id="input-slot-note" class="form-control">
                 </div>
                 <div class="form-group">
-                    <label class="form-label">رنگ نشانگر</label>
+                    <label class="form-label" for="input-slot-color">رنگ نشانگر</label>
                     <input type="color" id="input-slot-color" class="form-control" style="height: 40px; padding: 2px;">
+                </div>
+                <div id="slot-status-group" class="form-group">
+                    <label class="form-label" for="input-slot-status">وضعیت انجام</label>
+                    <select id="input-slot-status" class="form-control"><option value="pending">در انتظار انجام</option><option value="completed">کامل انجام شد</option><option value="partial">بخشی انجام شد</option><option value="missed">انجام نشد</option></select>
                 </div>
             </div>
             <div class="modal-footer">
