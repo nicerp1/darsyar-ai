@@ -1,48 +1,99 @@
-// ============ DATA STORAGE ============
-const Storage = {
-    USERS: {
-        admin: { password: '1234', role: 'admin', name: 'مدیر' },
-        user: { password: '1234', role: 'user', name: 'کاربر' }
-    },
-    
-    currentUser: null,
-    studySessions: JSON.parse(localStorage.getItem('studySessions') || '[]'),
-    exams: JSON.parse(localStorage.getItem('exams') || '[]'),
-    weeklySchedule: JSON.parse(localStorage.getItem('weeklySchedule') || '{}'),
-    articles: JSON.parse(localStorage.getItem('articles') || '[]'),
-    examResults: JSON.parse(localStorage.getItem('examResults') || '[]'),
-    userProgress: JSON.parse(localStorage.getItem('userProgress') || '{"xp":0,"level":1,"achievements":[],"dailyChallenges":[],"lastChallengeDate":""}'),
-    
-    save(key, data) {
-        localStorage.setItem(key, JSON.stringify(data));
-        this[key] = data;
-    },
-    
-    get(key) {
-        return this[key];
-    },
-    
-    updateProgress() {
-        this.save('userProgress', this.userProgress);
-    },
-    
-    updateStudySessions() {
-        this.save('studySessions', this.studySessions);
-    },
-    
-    updateExamResults() {
-        this.save('examResults', this.examResults);
-    },
-    
-    updateExams() {
-        this.save('exams', this.exams);
-    },
-    
-    updateSchedule() {
-        this.save('weeklySchedule', this.weeklySchedule);
-    },
-    
-    updateArticles() {
-        this.save('articles', this.articles);
+/** StudyMate server-backed store. Nothing is persisted in browser storage. */
+const Storage = (function () {
+    const cache = Object.create(null);
+    let currentUser = null;
+    let saveChain = Promise.resolve();
+
+    async function request(url, options = {}) {
+        const response = await fetch(url, {
+            credentials: 'same-origin',
+            headers: { 'Content-Type': 'application/json', ...(options.headers || {}) },
+            ...options
+        });
+        const payload = await response.json().catch(() => ({}));
+        if (!response.ok) throw new Error(payload.error || 'خطا در ارتباط با سرور');
+        return payload;
     }
-};
+
+    async function init() {
+        const payload = await request('/api/bootstrap');
+        currentUser = payload.user || null;
+        Object.assign(cache, payload.data || {});
+        if (payload.users) cache.users = payload.users;
+    }
+
+    function get(key, defaultValue = null) {
+        return Object.prototype.hasOwnProperty.call(cache, key) ? cache[key] : defaultValue;
+    }
+
+    function persist(key, value, remove = false) {
+        if (!currentUser) return;
+        saveChain = saveChain.then(() => request('/api/data', {
+            method: remove ? 'DELETE' : 'POST', body: JSON.stringify({ key, value })
+        })).catch(error => {
+            console.error('Database sync failed:', error);
+            if (typeof Utils !== 'undefined') Utils.showToast('ذخیره در دیتابیس انجام نشد.', 'error');
+        });
+    }
+
+    function set(key, value) { cache[key] = value; persist(key, value); return true; }
+    function remove(key) { delete cache[key]; persist(key, null, true); return true; }
+    function getCurrentUser() { return currentUser; }
+    function setCurrentUser(user) { currentUser = user || null; }
+
+    async function login(username, password) {
+        const payload = await request('/api/auth', { method: 'POST', body: JSON.stringify({ action: 'login', username, password }) });
+        currentUser = payload.user;
+        Object.keys(cache).forEach(key => delete cache[key]);
+        Object.assign(cache, payload.data || {});
+        if (payload.users) cache.users = payload.users;
+        return currentUser;
+    }
+
+    async function register(user) {
+        const payload = await request('/api/auth', { method: 'POST', body: JSON.stringify({ action: 'register', ...user }) });
+        currentUser = payload.user;
+        Object.keys(cache).forEach(key => delete cache[key]);
+        return currentUser;
+    }
+
+    async function logout() {
+        await request('/api/auth', { method: 'DELETE' });
+        currentUser = null;
+        Object.keys(cache).forEach(key => delete cache[key]);
+    }
+
+    function getUsers() { return get('users', currentUser ? [currentUser] : []); }
+    function saveUsers(users) {
+        cache.users = users;
+        if (currentUser?.role === 'admin') saveChain = saveChain.then(() => request('/api/users', { method: 'POST', body: JSON.stringify({ users }) })).catch(console.error);
+        return true;
+    }
+
+    function updateUser(userData) {
+        currentUser = { ...currentUser, ...userData };
+        const users = getUsers();
+        const index = users.findIndex(user => user.username === currentUser.username);
+        if (index >= 0) users[index] = currentUser;
+        cache.users = users;
+        saveChain = saveChain.then(() => request('/api/users', { method: 'PUT', body: JSON.stringify({ user: currentUser }) })).catch(console.error);
+        return true;
+    }
+
+    function addXP(amount) {
+        if (!currentUser) return;
+        const xp = (currentUser.xp || 0) + amount;
+        const level = xp >= 2500 ? 5 : xp >= 1200 ? 4 : xp >= 600 ? 3 : xp >= 200 ? 2 : 1;
+        updateUser({ ...currentUser, xp, level });
+        return { xp, level, gained: amount };
+    }
+
+    function getSettings() {
+        return get('settings', { theme: 'dark', aiModel: 'gapgpt-qwen-3.5', soundEnabled: true, dailyGoalHours: 4, pomodoroWork: 25, pomodoroShortBreak: 5, pomodoroLongBreak: 15 });
+    }
+    function saveSettings(settings) { return set('settings', settings); }
+
+    return { init, get, set, remove, getCurrentUser, setCurrentUser, login, register, logout, getUsers, saveUsers, updateUser, addXP, getSettings, saveSettings };
+})();
+
+window.Storage = Storage;

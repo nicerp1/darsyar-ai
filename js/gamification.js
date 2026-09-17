@@ -1,137 +1,168 @@
-// ============ GAMIFICATION SYSTEM - FIXED ============
-const Gamification = {
-    ACHIEVEMENTS: [
-        { id: 'first_pomodoro', name: 'اولین قدم', desc: 'اولین پومودورو را کامل کن', icon: '👣', condition: () => Pomodoro.sessionsToday >= 1, xp: 10, hidden: false },
-        { id: '10_pomodoros', name: 'استقامت', desc: '۱۰ پومودورو در یک روز', icon: '💪', condition: () => Pomodoro.sessionsToday >= 10, xp: 30, hidden: false },
-        { id: '50_total', name: 'کارکشته', desc: '۵۰ پومودورو در کل', icon: '🎯', condition: () => Utils.getTotalSessions() >= 50, xp: 50, hidden: false },
-        { id: '100_total', name: 'استاد پومودورو', desc: '۱۰۰ پومودورو در کل', icon: '👑', condition: () => Utils.getTotalSessions() >= 100, xp: 100, hidden: false },
-        { id: 'first_exam', name: 'آزمون اول', desc: 'اولین آزمون را انجام بده', icon: '📝', condition: () => Storage.examResults.length >= 1, xp: 20, hidden: false },
-        { id: 'perfect_score', name: 'عالی', desc: 'در یک آزمون ۱۰۰٪ بگیر', icon: '🌟', condition: () => Storage.examResults.some(r => r.percentage >= 100), xp: 50, hidden: false },
-        { id: '7day_streak', name: 'متعهد', desc: '۷ روز پیاپی مطالعه کن', icon: '🔥', condition: () => Utils.getStreakDays() >= 7, xp: 40, hidden: false },
-        { id: '30day_streak', name: 'پایدار', desc: '۳۰ روز پیاپی مطالعه کن', icon: '⚡', condition: () => Utils.getStreakDays() >= 30, xp: 100, hidden: false },
-    ],
-    
-    TITLES: [
-        { id: 'student', name: 'دانش‌آموز نمونه', icon: '🎓', condition: () => Utils.getTotalSessions() >= 100 },
-        { id: 'focus_master', name: 'استاد تمرکز', icon: '🧘', condition: () => (Utils.getTotalSessions() * Pomodoro.workMin / 60) >= 50 },
-        { id: 'exam_pro', name: 'آزمون‌دهنده حرفه‌ای', icon: '📋', condition: () => Storage.examResults.length >= 20 },
-        { id: 'streak_king', name: 'پادشاه استمرار', icon: '👑', condition: () => Utils.getStreakDays() >= 14 },
-    ],
-    
-    weeklyProgress: JSON.parse(localStorage.getItem('weeklyProgress') || '{"weekStart":"","challenges":[]}'),
-    
-    addXP(amount) {
-        Storage.userProgress.xp += amount;
-        const xpNeeded = Storage.userProgress.level * 100;
-        while (Storage.userProgress.xp >= xpNeeded) {
-            Storage.userProgress.xp -= xpNeeded;
-            Storage.userProgress.level++;
-            Utils.showToast(`🎉 تبریک! به سطح ${Storage.userProgress.level} رسیدی!`);
-        }
-        Storage.updateProgress();
-        this.updateUI();
-    },
-    
-    checkAchievements() {
-        this.ACHIEVEMENTS.forEach(ach => {
-            if (!Storage.userProgress.achievements.includes(ach.id) && ach.condition()) {
-                Storage.userProgress.achievements.push(ach.id);
-                this.addXP(ach.xp);
-                Utils.showToast(`🏅 نشان "${ach.name}" رو گرفتی! +${ach.xp}XP`, 4000);
-            }
-        });
-        Storage.updateProgress();
-    },
-    
-    updateUI() {
-        const xpNeeded = Storage.userProgress.level * 100;
-        const elements = {
-            xpDisplay: document.getElementById('xpDisplay'),
-            xpToNext: document.getElementById('xpToNext'),
-            xpFill: document.getElementById('xpFill'),
-            levelBadgeLarge: document.getElementById('levelBadgeLarge'),
-            levelDisplay: document.getElementById('levelDisplay'),
-            totalHours: document.getElementById('totalHours'),
-            streakDays: document.getElementById('streakDays'),
-            totalExams: document.getElementById('totalExams'),
-            avgScore: document.getElementById('avgScore'),
-            progressPercent: document.getElementById('progressPercent'),
-            progressFill: document.getElementById('progressFill'),
-        };
-        
-        if (elements.xpDisplay) elements.xpDisplay.textContent = Storage.userProgress.xp;
-        if (elements.xpToNext) elements.xpToNext.textContent = xpNeeded;
-        if (elements.xpFill) elements.xpFill.style.width = (Storage.userProgress.xp / xpNeeded * 100) + '%';
-        if (elements.levelBadgeLarge) elements.levelBadgeLarge.textContent = `🏆 سطح ${Storage.userProgress.level}`;
-        if (elements.levelDisplay) elements.levelDisplay.textContent = `🏆 سطح ${Storage.userProgress.level}`;
-        if (elements.totalHours) elements.totalHours.textContent = (Utils.getTotalSessions() * Pomodoro.workMin / 60).toFixed(1);
-        if (elements.streakDays) elements.streakDays.textContent = Utils.getStreakDays();
-        if (elements.totalExams) elements.totalExams.textContent = Storage.examResults.length;
-        
-        if (elements.avgScore) {
-            const avg = Storage.examResults.length > 0 ? 
-                (Storage.examResults.reduce((s, r) => s + r.percentage, 0) / Storage.examResults.length).toFixed(1) : 0;
-            elements.avgScore.textContent = avg + '%';
-        }
-        
-        if (elements.progressPercent) {
-            const total = this.ACHIEVEMENTS.length;
-            const unlocked = Storage.userProgress.achievements.length;
-            elements.progressPercent.textContent = Math.round((unlocked / total) * 100) + '%';
-            if (elements.progressFill) elements.progressFill.style.width = Math.round((unlocked / total) * 100) + '%';
-        }
-    },
-    
-    renderAchievements() {
-        const grid = document.getElementById('achievementsGrid');
-        if (!grid) return;
-        
-        grid.innerHTML = this.ACHIEVEMENTS.map(ach => {
-            const unlocked = Storage.userProgress.achievements.includes(ach.id);
-            return `<div class="achievement ${unlocked ? 'unlocked' : 'locked'}">
-                <div class="achievement-icon">${ach.icon}</div>
-                <div><strong>${ach.name}</strong> ${unlocked ? '✅' : '🔒'}<br><small>${ach.desc} • +${ach.xp}XP</small></div>
-            </div>`;
-        }).join('');
-    },
-    
-    renderTitles() {
-        const container = document.getElementById('titlesContainer');
-        if (!container) return;
-        
-        const unlocked = this.TITLES.filter(t => t.condition());
-        container.innerHTML = unlocked.length === 0 ? '<p class="text-secondary">هنوز عنوانی کسب نکردی</p>' :
-            unlocked.map(t => `<span class="title-badge">${t.icon} ${t.name}</span>`).join('');
-    },
-    
-    renderHallOfFame() {
-        const container = document.getElementById('hallOfFame');
-        if (!container) return;
-        
-        const sessions = Storage.studySessions || [];
-        const exams = Storage.examResults || [];
-        
-        const byDay = {};
-        sessions.forEach(s => { byDay[s.date] = (byDay[s.date] || 0) + 1; });
-        const bestDay = Object.values(byDay).length > 0 ? Math.max(...Object.values(byDay)) : 0;
-        
-        const bestScore = exams.length > 0 ? Math.max(...exams.map(e => e.percentage || 0)) : 0;
-        const streak = Utils.getStreakDays();
-        const totalHours = (sessions.reduce((s, x) => s + (x.duration || 25), 0) / 60).toFixed(1);
-        
-        container.innerHTML = `
-            <div class="fame-item"><span class="fame-medal">🥇</span><span class="fame-value">${bestDay}</span><span class="fame-label">پومودورو در یک روز</span></div>
-            <div class="fame-item"><span class="fame-medal">🥈</span><span class="fame-value">${bestScore.toFixed(1)}%</span><span class="fame-label">بهترین نمره</span></div>
-            <div class="fame-item"><span class="fame-medal">🥉</span><span class="fame-value">${streak}</span><span class="fame-label">روز استریک</span></div>
-            <div class="fame-item"><span class="fame-medal">⏱️</span><span class="fame-value">${totalHours}</span><span class="fame-label">ساعت مطالعه</span></div>
-        `;
-    },
-    
-    render() {
-        this.updateUI();
-        this.renderAchievements();
-        this.renderTitles();
-        this.renderHallOfFame();
-        this.checkAchievements();
+/**
+ * StudyMate Pro - Gamification, XP, Badges & Hall of Fame
+ */
+
+const Gamification = (function () {
+    const levels = [
+        { level: 1, title: 'دانش‌آموز تازه‌کار 🌱', minXP: 0, maxXP: 200 },
+        { level: 2, title: 'پوینده کوشا 📚', minXP: 200, maxXP: 600 },
+        { level: 3, title: 'پژوهشگر پرتلاش 🔬', minXP: 600, maxXP: 1200 },
+        { level: 4, title: 'نخبه علمی 🎯', minXP: 1200, maxXP: 2500 },
+        { level: 5, title: 'استاد بزرگ درسیار 👑', minXP: 2500, maxXP: 5000 }
+    ];
+
+    function init() {
+        renderLevelProgress();
+        renderBadges();
+        renderChallenges();
+        renderLeaderboard();
     }
-};
+
+    function renderLevelProgress() {
+        const user = Storage.getCurrentUser() || { xp: 350, level: 2 };
+        const userXP = user.xp || 0;
+
+        let currentLvl = levels[0];
+        for (let l of levels) {
+            if (userXP >= l.minXP) {
+                currentLvl = l;
+            }
+        }
+
+        const nextLvl = levels.find(l => l.level === currentLvl.level + 1) || currentLvl;
+        const xpInCurrentLevel = userXP - currentLvl.minXP;
+        const levelRange = Math.max(1, nextLvl.maxXP - currentLvl.minXP);
+        const percent = Math.min(100, Math.round((xpInCurrentLevel / levelRange) * 100));
+
+        const titleEl = document.getElementById('game-level-title');
+        const xpTextEl = document.getElementById('game-level-xp-text');
+        const fillEl = document.getElementById('game-level-progress-fill');
+        const sideLevelBadge = document.getElementById('sidebar-user-level');
+        const sideXPBar = document.getElementById('sidebar-xp-bar');
+
+        const pd = typeof Utils !== 'undefined' ? Utils.toPersianDigits : (v => v);
+
+        if (titleEl) titleEl.textContent = `سطح ${pd(currentLvl.level)}: ${currentLvl.title}`;
+        if (xpTextEl) xpTextEl.textContent = `${pd(userXP)} / ${pd(nextLvl.maxXP)} XP (${pd(percent)}٪)`;
+        if (fillEl) fillEl.style.width = `${percent}%`;
+
+        if (sideLevelBadge) sideLevelBadge.textContent = `سطح ${pd(currentLvl.level)}`;
+        if (sideXPBar) sideXPBar.style.width = `${percent}%`;
+    }
+
+    function renderBadges() {
+        const grid = document.getElementById('game-badges-grid');
+        if (!grid) return;
+
+        const badges = Storage.get('badges', []);
+        const pd = typeof Utils !== 'undefined' ? Utils.toPersianDigits : (v => v);
+
+        grid.innerHTML = badges.map(b => `
+            <div class="badge-item-card ${b.unlocked ? 'unlocked' : 'locked'}">
+                <div class="badge-icon-wrap">
+                    ${b.icon}
+                </div>
+                <div>
+                    <div class="badge-card-title">${b.title} ${b.unlocked ? '✅' : '🔒'}</div>
+                    <div class="badge-card-desc">${b.description}</div>
+                    <div style="font-size: 11px; color: var(--gold-light); font-weight: 700; margin-top: 4px;">
+                        پاداش: +${pd(b.xpReward)} XP
+                    </div>
+                </div>
+            </div>
+        `).join('');
+    }
+
+    function renderChallenges() {
+        const container = document.getElementById('game-challenges-list');
+        if (!container) return;
+
+        const challenges = Storage.get('daily_challenges', [
+            { id: 'c1', title: 'تکمیل ۳ جلسه پومودورو امروز', xp: 50, progress: 2, total: 3, claimed: false },
+            { id: 'c2', title: 'مرور ۱۰ فلش‌کارت در جعبه لایتنر', xp: 40, progress: 10, total: 10, claimed: true },
+            { id: 'c3', title: 'شرکت در یک آزمون آنلاین و کسب درصد بالای ۷۰', xp: 80, progress: 1, total: 1, claimed: false }
+        ]);
+
+        const pd = typeof Utils !== 'undefined' ? Utils.toPersianDigits : (v => v);
+
+        container.innerHTML = challenges.map(c => {
+            const isCompleted = c.progress >= c.total;
+            return `
+                <div style="display: flex; align-items: center; justify-content: space-between; padding: 14px 18px; background: var(--bg-surface); border: 1px solid var(--border-subtle); border-radius: var(--radius-md); margin-bottom: 10px;">
+                    <div>
+                        <div style="font-weight: 700; font-size: 14px; margin-bottom: 4px;">${c.title}</div>
+                        <div style="font-size: 12px; color: var(--text-muted);">
+                            پیشرفت: ${pd(c.progress)} از ${pd(c.total)} | پاداش: <strong style="color: var(--gold-light);">+${pd(c.xp)} XP</strong>
+                        </div>
+                    </div>
+                    <div>
+                        ${c.claimed ? `
+                            <span style="font-size: 12px; color: var(--text-dim); background: rgba(255,255,255,0.05); padding: 4px 10px; border-radius: var(--radius-full);">دریافت شده</span>
+                        ` : isCompleted ? `
+                            <button class="btn-gold" style="padding: 6px 14px; font-size: 12px;" onclick="Gamification.claimChallenge('${c.id}')">دریافت پاداش 🎉</button>
+                        ` : `
+                            <span style="font-size: 12px; color: var(--text-dim);">در حال انجام</span>
+                        `}
+                    </div>
+                </div>
+            `;
+        }).join('');
+    }
+
+    function claimChallenge(id) {
+        const challenges = Storage.get('daily_challenges', []);
+        const ch = challenges.find(c => c.id === id);
+        if (ch && !ch.claimed) {
+            ch.claimed = true;
+            Storage.set('daily_challenges', challenges);
+            Storage.addXP(ch.xp);
+
+            renderLevelProgress();
+            renderChallenges();
+
+            if (typeof Utils !== 'undefined') {
+                Utils.showToast(`🎉 تبریک! پاداش +${Utils.toPersianDigits(ch.xp)} امتیاز دریافت شد!`, 'success');
+                Utils.launchConfetti();
+            }
+        }
+    }
+
+    function renderLeaderboard() {
+        const tbody = document.getElementById('game-leaderboard-tbody');
+        if (!tbody) return;
+
+        const board = [
+            { rank: 1, name: 'مهندس رضوانی', avatar: '👨‍🏫', xp: 2850, level: 'استاد بزرگ', badge: '🥇' },
+            { rank: 2, name: 'سارا محمدی', avatar: '👩‍🎓', xp: 1950, level: 'نخبه علمی', badge: '🥈' },
+            { rank: 3, name: 'آرش کیانی', avatar: '🧑‍💻', xp: 1420, level: 'نخبه علمی', badge: '🥉' },
+            { rank: 4, name: 'مریم صالحی', avatar: '👩‍⚕️', xp: 1100, level: 'پژوهشگر', badge: '۴' },
+            { rank: 5, name: 'امیرحسین دهقان', avatar: '👨‍💼', xp: 870, level: 'پژوهشگر', badge: '۵' }
+        ];
+
+        const pd = typeof Utils !== 'undefined' ? Utils.toPersianDigits : (v => v);
+
+        tbody.innerHTML = board.map(item => `
+            <tr>
+                <td style="font-size: 18px; font-weight: 800; text-align: center;">${item.badge}</td>
+                <td>
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <span style="font-size: 20px;">${item.avatar}</span>
+                        <span style="font-weight: 700;">${item.name}</span>
+                    </div>
+                </td>
+                <td><span class="brand-badge">${item.level}</span></td>
+                <td><strong style="color: var(--gold-light);">${pd(item.xp)} XP</strong></td>
+            </tr>
+        `).join('');
+    }
+
+    return {
+        init,
+        renderLevelProgress,
+        claimChallenge
+    };
+})();
+
+if (typeof window !== 'undefined') {
+    window.Gamification = Gamification;
+}

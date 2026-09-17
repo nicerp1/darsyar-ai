@@ -1,164 +1,236 @@
-// ============ MAIN APP CONTROLLER - FINAL ============
-const App = {
-    init() {
-        if (typeof installDefaultContent === 'function') installDefaultContent();
-        
-        Pomodoro.init();
-        Schedule.render();
-        Gamification.render();
-        
-        this.closeSidebarOnMobile();
-        
-        if (Storage.currentUser && Storage.currentUser.role === 'admin') {
-            document.querySelectorAll('.admin-only').forEach(el => el.style.display = 'block');
-        } else {
-            document.querySelectorAll('.admin-only').forEach(el => el.style.display = 'none');
+/**
+ * StudyMate Pro - Main Application Router & Controller
+ */
+
+const App = (function () {
+    let currentView = 'dashboard';
+
+    async function init() {
+        try {
+            await Storage.init();
+        } catch (error) {
+            console.error(error);
+            if (typeof Utils !== 'undefined') Utils.showToast('اتصال به دیتابیس برقرار نشد.', 'error');
         }
-        
-        // فعال کردن section home
-        document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
-        const homeSection = document.getElementById('section-home');
-        if (homeSection) homeSection.classList.add('active');
-        
-        // ست کردن breadcrumb
-        const breadcrumb = document.getElementById('breadcrumbTitle');
-        if (breadcrumb) breadcrumb.textContent = 'داشبورد';
-        
-        // ست کردن sidebar
-        document.querySelectorAll('.sidebar-item').forEach(item => {
-            item.classList.remove('active');
-            if (item.dataset.section === 'home') item.classList.add('active');
-        });
-        
-        this.updateThemeIcon();
-        
-        // رندر داشبورد
-        setTimeout(() => {
-            if (typeof Dashboard !== 'undefined') {
-                Dashboard.render();
+
+        if (Storage.getCurrentUser() && typeof DefaultContent !== 'undefined') DefaultContent.initStorage();
+
+        // Apply Saved Theme
+        applyTheme();
+
+        // Check Auth and Render Layout
+        checkAuthAndRender();
+
+        // Setup global search and responsive listeners
+        setupEventListeners();
+    }
+
+    function applyTheme() {
+        const settings = Storage.getSettings();
+        const theme = settings.theme || 'dark';
+        document.documentElement.setAttribute('data-theme', theme);
+
+        const themeIcon = document.getElementById('theme-toggle-icon');
+        if (themeIcon) {
+            themeIcon.textContent = theme === 'dark' ? 'light_mode' : 'dark_mode';
+        }
+    }
+
+    function toggleTheme() {
+        const settings = Storage.getSettings();
+        const currentTheme = settings.theme || 'dark';
+        const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+
+        settings.theme = newTheme;
+        Storage.saveSettings(settings);
+        applyTheme();
+
+        if (typeof Utils !== 'undefined') {
+            Utils.playSound('click');
+        }
+    }
+
+    function checkAuthAndRender() {
+        const user = Storage.getCurrentUser();
+        const authView = document.getElementById('auth-view');
+        const appLayout = document.getElementById('app-main-layout');
+
+        if (!user) {
+            if (authView) authView.style.display = 'block';
+            if (appLayout) appLayout.style.display = 'none';
+            if (typeof Auth !== 'undefined') Auth.init();
+        } else {
+            if (authView) authView.style.display = 'none';
+            if (appLayout) appLayout.style.display = 'flex';
+
+            renderUserHeader();
+            renderSidebarRolePermissions();
+            navigate(currentView);
+        }
+    }
+
+    function onUserChanged() {
+        checkAuthAndRender();
+    }
+
+    function renderUserHeader() {
+        const user = Storage.getCurrentUser();
+        if (!user) return;
+
+        const headerName = document.getElementById('header-user-name');
+        const headerAvatar = document.getElementById('header-user-avatar');
+        const headerStreak = document.getElementById('header-streak-count');
+
+        if (headerName) headerName.textContent = user.name || user.username;
+        if (headerAvatar) headerAvatar.textContent = user.avatar || '👩‍🎓';
+        if (headerStreak && typeof Utils !== 'undefined') {
+            headerStreak.textContent = `${Utils.toPersianDigits(user.streak || 5)} روز`;
+        }
+
+        if (typeof Gamification !== 'undefined') {
+            Gamification.renderLevelProgress();
+        }
+    }
+
+    function renderSidebarRolePermissions() {
+        const user = Storage.getCurrentUser();
+        const adminNav = document.getElementById('nav-item-admin');
+        if (adminNav) {
+            if (user && user.role === 'admin') {
+                adminNav.style.display = 'flex';
+            } else {
+                adminNav.style.display = 'none';
             }
-        }, 100);
-    },
-    
-    closeSidebarOnMobile() {
-        if (window.innerWidth <= 1024) {
-            const sidebar = document.getElementById('sidebar');
-            const overlay = document.getElementById('sidebarOverlay');
-            if (sidebar) sidebar.classList.remove('open');
-            if (overlay) overlay.classList.remove('active');
         }
-    },
-    
-    setActiveSection(section) {
-        document.querySelectorAll('.sidebar-item').forEach(item => {
-            item.classList.remove('active');
-            if (item.dataset.section === section) item.classList.add('active');
+    }
+
+    function navigate(viewName) {
+        currentView = viewName;
+
+        // Hide all views
+        document.querySelectorAll('.view-section').forEach(section => {
+            section.classList.remove('active');
         });
-        
-        document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
-        const targetSection = document.getElementById(`section-${section}`);
-        if (targetSection) targetSection.classList.add('active');
-        
-        const titles = {
-            home: 'داشبورد', pomodoro: 'پومودورو', flashcards: 'فلش‌کارت',
-            writing: 'انشانویسی', research: 'تحقیق', stats: 'آمار',
-            gamification: 'دستاوردها', 'ai-assistant': 'دستیار هوش مصنوعی',
-            schedule: 'برنامه هفتگی', exams: 'آزمون‌ها', calculator: 'محاسبه درصد', admin: 'مدیریت'
-        };
-        const breadcrumb = document.getElementById('breadcrumbTitle');
-        if (breadcrumb) breadcrumb.textContent = titles[section] || section;
-        
-        switch(section) {
-            case 'stats': if (typeof Stats !== 'undefined') Stats.render(); break;
-            case 'gamification': if (typeof Gamification !== 'undefined') Gamification.render(); break;
-            case 'flashcards': if (typeof Flashcards !== 'undefined') Flashcards.render(); break;
-            case 'writing': if (typeof AIWriting !== 'undefined') AIWriting.render(); break;
-            case 'research': if (typeof AIResearch !== 'undefined') AIResearch.render(); break;
-            case 'ai-assistant': if (typeof AIAssistant !== 'undefined') AIAssistant.init(); break;
-            case 'exams': if (typeof Exams !== 'undefined') Exams.renderList(); break;
-            case 'admin': if (typeof Admin !== 'undefined') Admin.render(); break;
-            case 'schedule': if (typeof Schedule !== 'undefined') Schedule.render(); break;
-            case 'home': if (typeof Dashboard !== 'undefined') Dashboard.render(); break;
-            case 'pomodoro': if (typeof Pomodoro !== 'undefined') Pomodoro.populateTaskSelect(); break;
+
+        // Show target view
+        const targetView = document.getElementById(`view-${viewName}`);
+        if (targetView) {
+            targetView.classList.add('active');
         }
-        
-        this.closeSidebarOnMobile();
-    },
-    
-    toggleSidebar() {
+
+        // Update nav items
+        document.querySelectorAll('.nav-item').forEach(item => {
+            item.classList.remove('active');
+        });
+        const activeNav = document.getElementById(`nav-${viewName}`);
+        if (activeNav) {
+            activeNav.classList.add('active');
+        }
+
+        // Close mobile sidebar if open
+        closeMobileSidebar();
+
+        // Trigger module specific initializer
+        switch (viewName) {
+            case 'dashboard':
+                if (typeof Dashboard !== 'undefined') Dashboard.init();
+                break;
+            case 'pomodoro':
+                if (typeof Pomodoro !== 'undefined') Pomodoro.init();
+                break;
+            case 'flashcards':
+                if (typeof Flashcards !== 'undefined') Flashcards.init();
+                break;
+            case 'ai-assistant':
+                if (typeof AIAssistant !== 'undefined') AIAssistant.init();
+                break;
+            case 'ai-writing':
+                if (typeof AIWriting !== 'undefined') AIWriting.init();
+                break;
+            case 'ai-research':
+                if (typeof AIResearch !== 'undefined') AIResearch.init();
+                break;
+            case 'schedule':
+                if (typeof Schedule !== 'undefined') Schedule.init();
+                break;
+            case 'exams':
+                if (typeof Exams !== 'undefined') Exams.init();
+                break;
+            case 'stats':
+                if (typeof Stats !== 'undefined') Stats.init();
+                break;
+            case 'gamification':
+                if (typeof Gamification !== 'undefined') Gamification.init();
+                break;
+            case 'subscription':
+                if (typeof Subscription !== 'undefined') Subscription.init();
+                break;
+            case 'admin':
+                if (typeof Admin !== 'undefined') Admin.init();
+                break;
+            case 'profile':
+                if (typeof Profile !== 'undefined') Profile.init();
+                break;
+        }
+
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function toggleMobileSidebar() {
         const sidebar = document.getElementById('sidebar');
-        const overlay = document.getElementById('sidebarOverlay');
-        if (!sidebar) return;
-        if (sidebar.classList.contains('open')) {
+        const overlay = document.getElementById('sidebar-overlay');
+        if (sidebar && overlay) {
+            sidebar.classList.toggle('open');
+            overlay.classList.toggle('active');
+        }
+    }
+
+    function closeMobileSidebar() {
+        const sidebar = document.getElementById('sidebar');
+        const overlay = document.getElementById('sidebar-overlay');
+        if (sidebar && overlay) {
             sidebar.classList.remove('open');
-            if (overlay) overlay.classList.remove('active');
-        } else {
-            sidebar.classList.add('open');
-            if (overlay) overlay.classList.add('active');
-        }
-    },
-    
-    toggleTheme() {
-        document.body.classList.toggle('dark-mode');
-        const isDark = document.body.classList.contains('dark-mode');
-        localStorage.setItem('theme', isDark ? 'dark' : 'light');
-        this.updateThemeIcon();
-    },
-    
-    updateThemeIcon() {
-        const btn = document.getElementById('themeToggle');
-        if (btn) {
-            btn.innerHTML = document.body.classList.contains('dark-mode') 
-                ? '<span class="material-symbols-outlined">light_mode</span>' 
-                : '<span class="material-symbols-outlined">dark_mode</span>';
+            overlay.classList.remove('active');
         }
     }
-};
 
-// ============ EVENTS ============
-document.getElementById('sidebarNav').addEventListener('click', e => {
-    const item = e.target.closest('.sidebar-item');
-    if (!item) return;
-    const section = item.dataset.section;
-    if (section === 'admin' && Storage.currentUser?.role !== 'admin') {
-        Utils.showToast('⛔ دسترسی غیرمجاز');
-        return;
+    function setupEventListeners() {
+        // Global search input
+        const searchInput = document.getElementById('global-search-input');
+        if (searchInput) {
+            searchInput.addEventListener('input', function (e) {
+                const query = e.target.value.trim().toLowerCase();
+                if (!query) return;
+
+                if (query.includes('پومو') || query.includes('تایمر')) navigate('pomodoro');
+                else if (query.includes('هوش') || query.includes('چت') || query.includes('فرمول')) navigate('ai-assistant');
+                else if (query.includes('فلش') || query.includes('لایتنر') || query.includes('کارت')) navigate('flashcards');
+                else if (query.includes('انشا') || query.includes('نگارش')) navigate('ai-writing');
+                else if (query.includes('تحقیق') || query.includes('مقاله')) navigate('ai-research');
+                else if (query.includes('برنامه') || query.includes('جدول')) navigate('schedule');
+                else if (query.includes('آزمون') || query.includes('تست')) navigate('exams');
+                else if (query.includes('درصد') || query.includes('آمار') || query.includes('نمودار')) navigate('stats');
+                else if (query.includes('نشان') || query.includes('امتیاز') || query.includes('لیدر')) navigate('gamification');
+            });
+        }
     }
-    App.setActiveSection(section);
+
+    return {
+        init,
+        toggleTheme,
+        navigate,
+        toggleMobileSidebar,
+        closeMobileSidebar,
+        renderUserHeader,
+        onUserChanged
+    };
+})();
+
+// Initialize on DOM load
+document.addEventListener('DOMContentLoaded', () => {
+    App.init();
 });
 
-document.getElementById('sidebarOverlay').addEventListener('click', () => App.toggleSidebar());
-
-document.addEventListener('keydown', e => {
-    if (e.key === 'Escape') {
-        const sidebar = document.getElementById('sidebar');
-        if (sidebar && sidebar.classList.contains('open')) App.toggleSidebar();
-    }
-    if (e.key === 'Enter') {
-        const overlay = document.getElementById('loginOverlay');
-        if (overlay && !overlay.classList.contains('hidden')) Auth.login();
-    }
-});
-
-// ============ LOAD ============
-window.addEventListener('load', () => {
-    const isDark = localStorage.getItem('theme') === 'dark';
-    if (isDark) document.body.classList.add('dark-mode');
-    if (typeof Pomodoro !== 'undefined') Pomodoro.updateDisplay();
-    App.updateThemeIcon();
-    if (window.innerWidth <= 1024) {
-        const sidebar = document.getElementById('sidebar');
-        const overlay = document.getElementById('sidebarOverlay');
-        if (sidebar) sidebar.classList.remove('open');
-        if (overlay) overlay.classList.remove('active');
-    }
-});
-
-window.addEventListener('resize', () => {
-    if (window.innerWidth <= 1024) {
-        const sidebar = document.getElementById('sidebar');
-        const overlay = document.getElementById('sidebarOverlay');
-        if (sidebar) sidebar.classList.remove('open');
-        if (overlay) overlay.classList.remove('active');
-    }
-});
+if (typeof window !== 'undefined') {
+    window.App = App;
+}
