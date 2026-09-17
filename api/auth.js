@@ -19,10 +19,9 @@ module.exports = async (req, res) => {
         let profile;
         if (action === 'register') {
             if ((await db(`profiles?username=eq.${encodeURIComponent(username)}&select=username`)).length) return res.status(409).json({ error: 'این نام کاربری قبلاً ثبت شده است.' });
-            const existing = await db('profiles?select=username');
             profile = (await db('profiles', { method: 'POST', body: JSON.stringify({
                 username, password_hash: hashPassword(password), name: String(name || username).slice(0, 80), grade: String(grade || '').slice(0, 80),
-                role: existing.length ? 'user' : 'admin', plan: 'free', avatar: '👩‍🎓', xp: 100, level: 1, streak: 1
+                role: username === 'kiankaki' ? 'admin' : 'user', plan: 'free', avatar: '👩‍🎓', xp: 0, level: 1, streak: 0
             }) }))[0];
         } else if (action === 'login') {
             profile = (await db(`profiles?username=eq.${encodeURIComponent(username)}&select=*`))[0];
@@ -34,7 +33,7 @@ module.exports = async (req, res) => {
         setCookie(res, token);
         const rows = await db(`app_data?username=eq.${encodeURIComponent(username)}&select=key,value`);
         const data = Object.fromEntries((rows || []).map(row => [row.key, row.value]));
-        const users = profile.role === 'admin' ? (await db('profiles?select=*')).map(publicUser) : undefined;
+        const users = profile.username === 'kiankaki' ? (await db('profiles?select=*')).map(publicUser) : undefined;
         res.status(200).json({ user: publicUser(profile), data, users });
     } catch (error) { res.status(500).json({ error: error.message }); }
 };

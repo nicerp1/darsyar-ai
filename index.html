@@ -1168,20 +1168,109 @@
                     <!-- Admin KPI Stats -->
                     <div class="kpi-grid">
                         <div class="kpi-card">
-                            <div><div class="kpi-info-label">تعداد کل کاربران</div><div class="kpi-value" id="admin-stat-users">۲</div></div>
+                            <div><div class="kpi-info-label">تعداد دانش‌آموزان</div><div class="kpi-value" id="admin-stat-users">۰</div></div>
                             <div class="kpi-icon-wrapper kpi-icon-blue"><span class="material-symbols-outlined">group</span></div>
                         </div>
                         <div class="kpi-card">
-                            <div><div class="kpi-info-label">تعداد فلش‌کارت‌ها</div><div class="kpi-value" id="admin-stat-cards">۱۱</div></div>
+                            <div><div class="kpi-info-label">دانش‌آموز فعال</div><div class="kpi-value" id="admin-stat-cards">۰</div></div>
                             <div class="kpi-icon-wrapper kpi-icon-gold"><span class="material-symbols-outlined">style</span></div>
                         </div>
                         <div class="kpi-card">
-                            <div><div class="kpi-info-label">آزمون‌های فعال</div><div class="kpi-value" id="admin-stat-exams">۳</div></div>
+                            <div><div class="kpi-info-label">اشتراک طلایی</div><div class="kpi-value" id="admin-stat-exams">۰</div></div>
                             <div class="kpi-icon-wrapper kpi-icon-green"><span class="material-symbols-outlined">assignment</span></div>
                         </div>
                         <div class="kpi-card">
-                            <div><div class="kpi-info-label">تحقیقات و مقالات</div><div class="kpi-value" id="admin-stat-researches">۱</div></div>
+                            <div><div class="kpi-info-label">پرونده باز</div><div class="kpi-value" id="admin-stat-researches">۰</div></div>
                             <div class="kpi-icon-wrapper kpi-icon-gold"><span class="material-symbols-outlined">science</span></div>
+                        </div>
+                    </div>
+
+                    <div class="admin-student-workspace">
+                        <div class="content-card admin-student-list-card">
+                            <div class="content-card-title">
+                                <span class="material-symbols-outlined" aria-hidden="true">person_search</span>
+                                <span>انتخاب دانش‌آموز</span>
+                            </div>
+                            <label class="form-label" for="admin-student-search">جست‌وجوی نام یا نام کاربری</label>
+                            <input id="admin-student-search" class="form-control" type="search" placeholder="مثلاً ali" oninput="Admin.filterStudents(this.value)">
+                            <div id="admin-student-list" class="admin-student-list" aria-live="polite"></div>
+                        </div>
+
+                        <div class="admin-student-detail">
+                            <div id="admin-student-empty" class="content-card admin-empty-state">
+                                <span class="material-symbols-outlined" aria-hidden="true">person_check</span>
+                                <h3>یک دانش‌آموز انتخاب کنید</h3>
+                                <p>برنامه اختصاصی، گزارش کار و شاخص‌های عملکرد او اینجا نمایش داده می‌شود.</p>
+                            </div>
+
+                            <div id="admin-student-content" class="hidden">
+                                <div class="content-card admin-student-header">
+                                    <div>
+                                        <div class="admin-eyebrow">پرونده تحصیلی</div>
+                                        <h3 id="admin-selected-name">—</h3>
+                                        <p id="admin-selected-meta">—</p>
+                                    </div>
+                                    <span id="admin-selected-plan" class="admin-plan-badge">رایگان</span>
+                                </div>
+
+                                <div id="admin-student-metrics" class="admin-metrics-grid"></div>
+
+                                <div class="admin-detail-grid">
+                                    <form class="content-card admin-program-form" onsubmit="event.preventDefault(); Admin.saveProgramSlot();">
+                                        <div class="content-card-title">
+                                            <span class="material-symbols-outlined" aria-hidden="true">edit_calendar</span>
+                                            <span>ثبت برنامه اختصاصی</span>
+                                        </div>
+                                        <div class="admin-form-grid">
+                                            <div class="form-group">
+                                                <label class="form-label" for="admin-program-day">روز</label>
+                                                <select id="admin-program-day" class="form-control" required>
+                                                    <option value="0">شنبه</option><option value="1">یک‌شنبه</option><option value="2">دوشنبه</option>
+                                                    <option value="3">سه‌شنبه</option><option value="4">چهارشنبه</option><option value="5">پنج‌شنبه</option><option value="6">جمعه</option>
+                                                </select>
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="form-label" for="admin-program-time">بازه زمانی</label>
+                                                <select id="admin-program-time" class="form-control" required>
+                                                    <option value="0">۰۸:۰۰ - ۱۰:۰۰</option><option value="1">۱۰:۰۰ - ۱۲:۰۰</option><option value="2">۱۴:۰۰ - ۱۶:۰۰</option>
+                                                    <option value="3">۱۶:۰۰ - ۱۸:۰۰</option><option value="4">۱۸:۰۰ - ۲۰:۰۰</option><option value="5">۲۰:۰۰ - ۲۲:۰۰</option>
+                                                </select>
+                                            </div>
+                                            <div class="form-group admin-form-span">
+                                                <label class="form-label" for="admin-program-subject">درس یا فعالیت</label>
+                                                <input id="admin-program-subject" class="form-control" maxlength="100" required placeholder="مثلاً زیست‌شناسی؛ فصل ژنتیک">
+                                            </div>
+                                            <div class="form-group admin-form-span">
+                                                <label class="form-label" for="admin-program-note">توضیحات و هدف</label>
+                                                <textarea id="admin-program-note" class="form-control" maxlength="300" rows="3" placeholder="حجم مطالعه، تعداد تست یا نکته مشاور"></textarea>
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="form-label" for="admin-program-color">رنگ برنامه</label>
+                                                <input id="admin-program-color" class="form-control admin-color-input" type="color" value="#0ea5e9">
+                                            </div>
+                                        </div>
+                                        <button id="admin-program-submit" class="btn-primary" type="submit">
+                                            <span class="material-symbols-outlined" aria-hidden="true">add_task</span> ثبت در برنامه دانش‌آموز
+                                        </button>
+                                    </form>
+
+                                    <div class="content-card">
+                                        <div class="content-card-title">
+                                            <span class="material-symbols-outlined" aria-hidden="true">event_note</span>
+                                            <span>برنامه ثبت‌شده</span>
+                                        </div>
+                                        <div id="admin-program-list" class="admin-program-list"></div>
+                                    </div>
+                                </div>
+
+                                <div class="content-card admin-report-card">
+                                    <div class="content-card-title">
+                                        <span class="material-symbols-outlined" aria-hidden="true">monitoring</span>
+                                        <span>گزارش کار و روند مطالعه</span>
+                                    </div>
+                                    <div id="admin-study-report" class="admin-study-report"></div>
+                                </div>
+                            </div>
                         </div>
                     </div>
 
@@ -1196,10 +1285,8 @@
                                 <thead>
                                     <tr style="border-bottom: 2px solid var(--border-subtle); color: var(--gold-light);">
                                         <th style="padding: 10px;">کاربر</th>
-                                        <th style="padding: 10px;">نقش کاربری</th>
                                         <th style="padding: 10px;">طرح اشتراک</th>
                                         <th style="padding: 10px;">امتیاز XP</th>
-                                        <th style="padding: 10px;">عملیات</th>
                                     </tr>
                                 </thead>
                                 <tbody id="admin-users-tbody"></tbody>

@@ -126,7 +126,6 @@ const Auth = (function () {
             const name = nameInput ? nameInput.value.trim() : username;
             const grade = gradeInput ? gradeInput.value : 'دوازدهم تجربی';
                 await Storage.register({ username, password, name: name || username, grade });
-                if (typeof DefaultContent !== 'undefined') DefaultContent.initStorage();
                 if (typeof Utils !== 'undefined') {
                 Utils.showToast(`ثبت‌نام شما با موفقیت انجام شد، خوش آمدید ${name}!`, 'success');
                 Utils.launchConfetti();

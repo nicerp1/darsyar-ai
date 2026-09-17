@@ -5,25 +5,23 @@
 const Schedule = (function () {
     let activeEditDayIndex = 0;
     let activeEditSlotIndex = 0;
+    const dayNames = ['شنبه', 'یک‌شنبه', 'دوشنبه', 'سه‌شنبه', 'چهارشنبه', 'پنج‌شنبه', 'جمعه'];
+    const timeSlotsLabels = ['۰۸:۰۰ - ۱۰:۰۰', '۱۰:۰۰ - ۱۲:۰۰', '۱۴:۰۰ - ۱۶:۰۰', '۱۶:۰۰ - ۱۸:۰۰', '۱۸:۰۰ - ۲۰:۰۰', '۲۰:۰۰ - ۲۲:۰۰'];
+
+    function normalizedSchedule() {
+        const stored = Storage.get('schedule', []);
+        if (Array.isArray(stored) && stored.length === 7) return stored;
+        return dayNames.map((day, dayIndex) => ({ day, dayIndex, slots: timeSlotsLabels.map(time => ({ time, subject: '', note: '', color: '#05319e' })) }));
+    }
 
     function init() {
         renderScheduleGrid();
     }
 
     function renderScheduleGrid() {
-        const schedule = Storage.get('schedule', []);
+        const schedule = normalizedSchedule();
         const tbody = document.getElementById('schedule-grid-tbody');
         if (!tbody) return;
-
-        // 6 Time Slots labels
-        const timeSlotsLabels = [
-            '۰۸:۰۰ - ۱۰:۰۰',
-            '۱۰:۰۰ - ۱۲:۰۰',
-            '۱۴:۰۰ - ۱۶:۰۰',
-            '۱۶:۰۰ - ۱۸:۰۰',
-            '۱۸:۰۰ - ۲۰:۰۰',
-            '۲۰:۰۰ - ۲۲:۰۰'
-        ];
 
         let html = '';
 
@@ -32,14 +30,15 @@ const Schedule = (function () {
             html += `<td style="font-weight: 700; color: var(--gold-light); background: var(--bg-surface); text-align: center; white-space: nowrap; font-size: 13px;">${timeLabel}</td>`;
 
             schedule.forEach((dayObj, dayIdx) => {
-                const slot = (dayObj.slots && dayObj.slots[slotIdx]) || { subject: 'مطالعه آزاد', note: '', color: '#05319e' };
+                const slot = (dayObj.slots && dayObj.slots[slotIdx]) || { subject: '', note: '', color: '#05319e' };
+                const hasPlan = Boolean(slot.subject);
                 html += `
                     <td class="schedule-cell" style="border-right: 3px solid ${slot.color || '#05319e'};" onclick="Schedule.openEditSlotModal(${dayIdx}, ${slotIdx})">
-                        <div class="schedule-cell-subject">${slot.subject}</div>
+                        <div class="schedule-cell-subject">${slot.subject || 'بدون برنامه'}</div>
                         <div class="schedule-cell-note">${slot.note || '—'}</div>
-                        <button class="schedule-cell-pomo-btn" title="شروع پومودورو با این درس" onclick="event.stopPropagation(); Schedule.launchPomoForSlot('${slot.subject}', '${slot.note}')">
+                        ${hasPlan ? `<button class="schedule-cell-pomo-btn" title="شروع پومودورو با این درس" onclick="event.stopPropagation(); Schedule.launchPomoForSlot('${slot.subject}', '${slot.note}')">
                             <span class="material-symbols-outlined" style="font-size: 14px;">play_arrow</span>
-                        </button>
+                        </button>` : ''}
                     </td>
                 `;
             });
@@ -54,7 +53,7 @@ const Schedule = (function () {
         activeEditDayIndex = dayIdx;
         activeEditSlotIndex = slotIdx;
 
-        const schedule = Storage.get('schedule', []);
+        const schedule = normalizedSchedule();
         const dayObj = schedule[dayIdx];
         const slot = dayObj.slots[slotIdx];
 
@@ -74,7 +73,7 @@ const Schedule = (function () {
     }
 
     function saveSlotSubmit() {
-        const schedule = Storage.get('schedule', []);
+        const schedule = normalizedSchedule();
         const subjectInput = document.getElementById('input-slot-subject');
         const noteInput = document.getElementById('input-slot-note');
         const colorInput = document.getElementById('input-slot-color');

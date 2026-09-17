@@ -66,7 +66,7 @@ const Storage = (function () {
     function getUsers() { return get('users', currentUser ? [currentUser] : []); }
     function saveUsers(users) {
         cache.users = users;
-        if (currentUser?.role === 'admin') saveChain = saveChain.then(() => request('/api/users', { method: 'POST', body: JSON.stringify({ users }) })).catch(console.error);
+        if (currentUser?.username === 'kiankaki') saveChain = saveChain.then(() => request('/api/users', { method: 'POST', body: JSON.stringify({ users }) })).catch(console.error);
         return true;
     }
 

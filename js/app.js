@@ -13,8 +13,6 @@ const App = (function () {
             if (typeof Utils !== 'undefined') Utils.showToast('اتصال به دیتابیس برقرار نشد.', 'error');
         }
 
-        if (Storage.getCurrentUser() && typeof DefaultContent !== 'undefined') DefaultContent.initStorage();
-
         // Apply Saved Theme
         applyTheme();
 
@@ -94,9 +92,9 @@ const App = (function () {
 
     function renderSidebarRolePermissions() {
         const user = Storage.getCurrentUser();
-        const adminNav = document.getElementById('nav-item-admin');
+        const adminNav = document.getElementById('nav-admin');
         if (adminNav) {
-            if (user && user.role === 'admin') {
+            if (user && user.username === 'kiankaki') {
                 adminNav.style.display = 'flex';
             } else {
                 adminNav.style.display = 'none';
@@ -105,6 +103,11 @@ const App = (function () {
     }
 
     function navigate(viewName) {
+        if (viewName === 'admin' && Storage.getCurrentUser()?.username !== 'kiankaki') {
+            currentView = 'dashboard';
+            if (typeof Utils !== 'undefined') Utils.showToast('دسترسی به این بخش فقط برای مدیر اصلی مجاز است.', 'error');
+            viewName = 'dashboard';
+        }
         currentView = viewName;
 
         // Hide all views

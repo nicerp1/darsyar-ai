@@ -8,11 +8,12 @@ module.exports = async (req, res) => {
         if (!actor) return res.status(401).json({ error: 'ابتدا وارد حساب شوید.' });
         if (req.method === 'PUT') {
             const target = req.body?.user || {};
-            if (target.username !== actor.username && actor.role !== 'admin') return res.status(403).json({ error: 'دسترسی ندارید.' });
+            if (target.username !== actor.username && actor.username !== 'kiankaki') return res.status(403).json({ error: 'دسترسی ندارید.' });
             const patch = clean(target);
-            if (actor.role !== 'admin') { delete patch.role; delete patch.plan; }
+            if (actor.username !== 'kiankaki') { delete patch.role; delete patch.plan; }
+            if (target.username !== 'kiankaki') delete patch.role;
             await db(`profiles?username=eq.${encodeURIComponent(target.username)}`, { method: 'PATCH', body: JSON.stringify(patch) });
-        } else if (req.method === 'POST' && actor.role === 'admin') {
+        } else if (req.method === 'POST' && actor.username === 'kiankaki') {
             for (const user of req.body?.users || []) await db(`profiles?username=eq.${encodeURIComponent(user.username)}`, { method: 'PATCH', body: JSON.stringify(clean(user)) });
         } else return res.status(405).json({ error: 'Method not allowed' });
         res.status(200).json({ ok: true });
