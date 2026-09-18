@@ -1,6 +1,6 @@
 # اپلیکیشن Android درسیار
 
-پروژه Native در پوشه `android/` با Capacitor ساخته شده و محتوای امن production را از `https://darsyar-ai.vercel.app` بارگذاری می‌کند.
+پروژه Native در پوشه `android/` با Capacitor ساخته شده است. رابط کاربری داخل خود APK بسته‌بندی می‌شود و سایت را در WebView باز نمی‌کند؛ فقط درخواست‌های API به سرور production و Supabase متصل می‌شوند. اطلاعات آموزشی در مرورگر ذخیره نمی‌شوند.
 
 ## پیش‌نیاز ساخت
 

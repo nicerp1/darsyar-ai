@@ -52,6 +52,156 @@
     --font-family: 'Kalameh', 'Vazirmatn', -apple-system, BlinkMacSystemFont, 'Segoe UI', Tahoma, sans-serif;
 }
 
+/* Bundled Android application shell --------------------------------------- */
+.android-bottom-nav,
+.android-brand-title { display: none; }
+
+html.capacitor-app {
+    --android-nav-height: 72px;
+    --android-safe-top: max(env(safe-area-inset-top), 24px);
+    --android-safe-bottom: max(env(safe-area-inset-bottom), 12px);
+    background: var(--bg-body);
+    min-height: 100%;
+}
+
+.capacitor-app body {
+    padding: 0;
+    min-height: 100dvh;
+    overscroll-behavior-y: none;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.capacitor-app .app-layout { min-height: 100dvh; }
+.capacitor-app .main-wrapper { margin-right: 0; width: 100%; min-width: 0; }
+.capacitor-app .content-body {
+    padding: 16px 16px calc(var(--android-nav-height) + var(--android-safe-bottom) + 24px);
+    max-width: 760px;
+    width: 100%;
+    margin-inline: auto;
+}
+
+.capacitor-app .top-header {
+    min-height: calc(64px + var(--android-safe-top));
+    height: auto;
+    padding: var(--android-safe-top) 16px 8px;
+    background: color-mix(in srgb, var(--bg-body) 88%, transparent);
+    border-bottom: 1px solid var(--border-color);
+    backdrop-filter: blur(18px) saturate(140%);
+    -webkit-backdrop-filter: blur(18px) saturate(140%);
+}
+.capacitor-app .android-brand-title { display: flex; flex-direction: column; margin-left: auto; line-height: 1.2; }
+.capacitor-app .android-brand-title strong { color: var(--gold-light); font-size: 20px; font-weight: 900; }
+.capacitor-app .android-brand-title small { color: var(--text-muted); font-size: 10px; margin-top: 3px; }
+.capacitor-app .header-right,
+.capacitor-app .header-search,
+.capacitor-app .header-streak-badge,
+.capacitor-app .user-meta-name { display: none !important; }
+.capacitor-app .header-left { margin-right: auto; gap: 4px; }
+.capacitor-app .header-left .icon-btn { width: 44px; height: 44px; border-radius: 14px; }
+.capacitor-app .user-profile-menu { min-width: 44px; min-height: 44px; padding: 4px; border-radius: 14px; }
+
+.capacitor-app .android-bottom-nav {
+    position: fixed;
+    z-index: 1500;
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    direction: rtl;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    min-height: calc(var(--android-nav-height) + var(--android-safe-bottom));
+    padding: 8px 8px var(--android-safe-bottom);
+    background: color-mix(in srgb, var(--bg-card) 94%, transparent);
+    border-top: 1px solid var(--border-color);
+    box-shadow: 0 -10px 32px rgba(0, 0, 0, .18);
+    backdrop-filter: blur(22px) saturate(150%);
+    -webkit-backdrop-filter: blur(22px) saturate(150%);
+}
+.capacitor-app .android-nav-item {
+    appearance: none;
+    border: 0;
+    background: transparent;
+    color: var(--text-muted);
+    min-width: 48px;
+    min-height: 56px;
+    padding: 4px 2px;
+    border-radius: 16px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 2px;
+    font-family: inherit;
+    transition: color 160ms ease, background-color 160ms ease, opacity 100ms ease;
+}
+.capacitor-app .android-nav-item:active { opacity: .68; }
+.capacitor-app .android-nav-icon { font-size: 25px; font-variation-settings: 'FILL' 0, 'wght' 450; }
+.capacitor-app .android-nav-label { font-size: 10px; font-weight: 700; white-space: nowrap; }
+.capacitor-app .android-nav-item.active { color: var(--gold-light); background: rgba(245, 193, 66, .08); }
+.capacitor-app .android-nav-item.active .android-nav-icon { font-variation-settings: 'FILL' 1, 'wght' 600; }
+.capacitor-app .android-nav-primary .android-nav-icon {
+    width: 46px;
+    height: 38px;
+    display: grid;
+    place-items: center;
+    color: #111827;
+    background: linear-gradient(135deg, var(--gold-light), var(--gold));
+    border-radius: 15px;
+    box-shadow: 0 8px 20px rgba(245, 193, 66, .25);
+}
+
+.capacitor-app .sidebar {
+    position: fixed;
+    z-index: 1700;
+    top: auto;
+    right: 8px;
+    left: 8px;
+    bottom: calc(var(--android-safe-bottom) + 8px);
+    width: auto;
+    max-height: min(82dvh, 720px);
+    border: 1px solid var(--border-color);
+    border-radius: 28px;
+    transform: translateY(calc(100% + 40px));
+    transition: transform 280ms cubic-bezier(.22, .8, .25, 1);
+    box-shadow: 0 24px 80px rgba(0, 0, 0, .5);
+    overflow: hidden;
+}
+.capacitor-app .sidebar::before {
+    content: '';
+    display: block;
+    width: 42px;
+    height: 4px;
+    margin: 10px auto 0;
+    border-radius: 99px;
+    background: var(--border-subtle);
+}
+.capacitor-app .sidebar.open { transform: translateY(0); }
+.capacitor-app .sidebar-header { padding-top: 10px; }
+.capacitor-app .sidebar-nav { padding-bottom: 16px; }
+.capacitor-app .nav-item { min-height: 52px; border-radius: 14px; }
+.capacitor-app .sidebar-overlay { z-index: 1650; background: rgba(2, 6, 23, .72); backdrop-filter: blur(3px); }
+.capacitor-app .communications-drawer { padding-top: var(--android-safe-top); padding-bottom: var(--android-safe-bottom); }
+.capacitor-app .modal-overlay { padding: calc(var(--android-safe-top) + 12px) 12px calc(var(--android-safe-bottom) + 12px); }
+
+@media (orientation: landscape) and (max-height: 560px) {
+    .capacitor-app .top-header { min-height: calc(52px + env(safe-area-inset-top)); padding-top: env(safe-area-inset-top); }
+    .capacitor-app .android-bottom-nav { --android-nav-height: 60px; grid-template-columns: repeat(5, minmax(64px, 104px)); justify-content: center; }
+    .capacitor-app .android-nav-item { min-height: 48px; flex-direction: row; gap: 6px; }
+    .capacitor-app .android-nav-primary .android-nav-icon { width: 38px; height: 34px; }
+}
+
+@media (min-width: 700px) {
+    .capacitor-app .content-body { padding-inline: 28px; }
+    .capacitor-app .android-bottom-nav { left: 50%; right: auto; width: min(620px, 86vw); transform: translateX(-50%); border: 1px solid var(--border-color); border-bottom: 0; border-radius: 24px 24px 0 0; }
+    .capacitor-app .sidebar { right: 50%; left: auto; width: min(540px, 90vw); transform: translate(50%, calc(100% + 40px)); }
+    .capacitor-app .sidebar.open { transform: translate(50%, 0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .capacitor-app .sidebar,
+    .capacitor-app .android-nav-item { transition: none !important; }
+}
+
 [data-theme="light"] {
     --bg-body: #f1f5f9;
     --bg-sidebar: #ffffff;
