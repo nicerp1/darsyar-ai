@@ -57,7 +57,7 @@ function buildSummary(student, rows) {
 module.exports = async (req, res) => {
     try {
         if (!(await requireOwner(req, res))) return;
-        const username = String(req.method === 'GET' ? req.query?.username : req.body?.username || '').trim().toLowerCase();
+        const username = String((req.method === 'GET' ? req.query?.username : req.body?.username) || '').trim().toLowerCase();
         if (req.method === 'GET' && !username) {
             const students = (await db('profiles?username=neq.kiankaki&select=*')).map(publicUser);
             const rows = await db('app_data?select=username,key,value,updated_at');
