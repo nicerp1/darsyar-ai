@@ -2350,6 +2350,128 @@ a {
     background: rgba(201, 160, 62, 0.22);
 }
 
+/* Android authentication and fixed app chrome (kept at end to override web rules) */
+.capacitor-app,
+.capacitor-app body { scrollbar-width: none; }
+.capacitor-app ::-webkit-scrollbar { width: 0 !important; height: 0 !important; display: none !important; }
+
+.capacitor-app body {
+    padding: 0 !important;
+    overflow-x: hidden;
+}
+.capacitor-app body.auth-active { overflow: hidden !important; }
+.capacitor-app #auth-view {
+    position: fixed;
+    z-index: 3000;
+    inset: 0;
+    overflow: hidden;
+    background: #060b18;
+}
+.capacitor-app .auth-wrapper {
+    position: relative;
+    isolation: isolate;
+    width: 100%;
+    height: 100dvh;
+    min-height: 0;
+    overflow: hidden;
+    padding: calc(var(--android-safe-top) + 16px) max(20px, env(safe-area-inset-right)) calc(var(--android-safe-bottom) + 16px) max(20px, env(safe-area-inset-left));
+    background:
+        radial-gradient(circle at 12% 5%, rgba(5, 49, 158, .58), transparent 38%),
+        radial-gradient(circle at 88% 92%, rgba(201, 160, 62, .28), transparent 36%),
+        linear-gradient(150deg, #071126 0%, #091735 50%, #050912 100%);
+}
+.capacitor-app .auth-wrapper::before,
+.capacitor-app .auth-wrapper::after {
+    content: '';
+    position: absolute;
+    z-index: -1;
+    border-radius: 50%;
+    filter: blur(2px);
+    pointer-events: none;
+}
+.capacitor-app .auth-wrapper::before {
+    width: 170px; height: 170px; top: 5%; right: -65px;
+    background: linear-gradient(135deg, rgba(14, 165, 233, .32), rgba(5, 49, 158, .06));
+}
+.capacitor-app .auth-wrapper::after {
+    width: 210px; height: 210px; left: -90px; bottom: 1%;
+    background: linear-gradient(135deg, rgba(201, 160, 62, .23), rgba(229, 185, 85, .03));
+}
+.capacitor-app .auth-card {
+    position: relative;
+    width: min(100%, 420px);
+    max-height: 100%;
+    overflow: hidden;
+    padding: clamp(20px, 4dvh, 32px) 20px 22px;
+    border: 1px solid rgba(255, 255, 255, .16);
+    border-radius: 30px;
+    background: linear-gradient(145deg, rgba(255, 255, 255, .13), rgba(15, 23, 42, .42));
+    box-shadow: 0 28px 70px rgba(0, 0, 0, .42), inset 0 1px 0 rgba(255, 255, 255, .12);
+    backdrop-filter: blur(24px) saturate(145%);
+    -webkit-backdrop-filter: blur(24px) saturate(145%);
+}
+.capacitor-app .auth-brand { margin-bottom: 8px !important; }
+.capacitor-app .auth-brand .brand-icon {
+    width: 58px; height: 58px; border-radius: 19px;
+    background: linear-gradient(145deg, var(--gold-light), var(--gold));
+    color: #111827;
+    box-shadow: 0 12px 30px rgba(201, 160, 62, .28);
+}
+.capacitor-app .auth-title { margin: 0; color: #fff; font-size: clamp(25px, 4dvh, 32px); font-weight: 900; letter-spacing: -.6px; }
+.capacitor-app .auth-subtitle { margin: 4px 0 0; color: #cbd5e1; font-size: 12px; }
+.capacitor-app .auth-tabs {
+    margin: clamp(14px, 2.8dvh, 20px) 0 14px;
+    border: 1px solid rgba(255, 255, 255, .09);
+    background: rgba(3, 9, 24, .42);
+    border-radius: 15px;
+}
+.capacitor-app .auth-tab-btn { min-height: 44px; border-radius: 11px; }
+.capacitor-app .auth-tab-btn.active { background: linear-gradient(135deg, var(--primary-light), var(--primary)); box-shadow: 0 6px 18px rgba(5, 49, 158, .28); }
+.capacitor-app .auth-card .form-group { margin-bottom: 11px; }
+.capacitor-app .auth-card .form-label { margin-bottom: 4px; color: #dbeafe; font-size: 12px; }
+.capacitor-app .auth-card .form-control {
+    min-height: 48px;
+    border-color: rgba(255, 255, 255, .13);
+    border-radius: 14px;
+    background: rgba(3, 9, 24, .48);
+    color: #fff;
+}
+.capacitor-app .auth-card .form-control:focus { border-color: var(--gold-light); box-shadow: 0 0 0 3px rgba(201, 160, 62, .14); }
+.capacitor-app .auth-card .btn-gold { min-height: 50px; border-radius: 15px; box-shadow: 0 10px 24px rgba(201, 160, 62, .2); }
+
+.capacitor-app .top-header {
+    position: fixed !important;
+    z-index: 1400;
+    top: 0; right: 0; left: 0;
+    width: 100%;
+    min-height: calc(64px + var(--android-safe-top));
+    padding-top: var(--android-safe-top) !important;
+    padding-bottom: 8px;
+    padding-left: max(16px, env(safe-area-inset-left)) !important;
+    padding-right: max(16px, env(safe-area-inset-right)) !important;
+}
+.capacitor-app .content-body {
+    padding-top: calc(64px + var(--android-safe-top) + 16px) !important;
+}
+
+@media (max-height: 690px) {
+    .capacitor-app .auth-card { padding-top: 16px; padding-bottom: 16px; }
+    .capacitor-app .auth-brand .brand-icon { width: 48px; height: 48px; border-radius: 16px; }
+    .capacitor-app .auth-title { font-size: 24px; }
+    .capacitor-app .auth-subtitle { display: none; }
+    .capacitor-app .auth-tabs { margin: 10px 0; }
+    .capacitor-app .auth-card .form-group { margin-bottom: 7px; }
+    .capacitor-app .auth-card .form-control { min-height: 44px; }
+}
+
+@media (orientation: landscape) and (max-height: 560px) {
+    .capacitor-app .auth-wrapper { padding-top: calc(env(safe-area-inset-top) + 8px); padding-bottom: calc(env(safe-area-inset-bottom) + 8px); }
+    .capacitor-app .auth-card { max-width: 680px; padding: 12px 18px; }
+    .capacitor-app .auth-brand, .capacitor-app .auth-title, .capacitor-app .auth-subtitle { display: none !important; }
+    .capacitor-app .auth-card form { display: grid; grid-template-columns: 1fr 1fr; gap: 6px 12px; align-items: end; }
+    .capacitor-app .auth-card form .btn-gold { margin-top: 0 !important; }
+}
+
 /* Owner dashboard: student planning and reporting */
 .admin-student-workspace { display: grid; grid-template-columns: minmax(230px, 300px) minmax(0, 1fr); gap: 20px; margin-top: 24px; align-items: start; }
 .admin-attention-card { margin-top: 20px; border-color: rgba(245,158,11,.35); }

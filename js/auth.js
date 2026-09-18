@@ -28,13 +28,13 @@ const Auth = (function () {
         authContainer.innerHTML = `
             <div class="auth-wrapper">
                 <div class="auth-card animate-fade-in">
-                    <div class="brand-logo" style="justify-content: center; margin-bottom: 12px;">
+                    <div class="brand-logo auth-brand" style="justify-content: center; margin-bottom: 12px;">
                         <div class="brand-icon">
-                            <span class="material-symbols-outlined" style="font-size: 28px;">school</span>
+                            <span class="material-symbols-outlined" style="font-size: 28px;" aria-hidden="true">school</span>
                         </div>
                     </div>
-                    <h2 style="font-size: 22px; font-weight: 800; color: #fff; margin-bottom: 4px;">سامانه هوشمند درسیار</h2>
-                    <p style="font-size: 12px; color: var(--text-muted);">پلتفرم جامع و هوشمند موفقیت تحصیلی و کنکور</p>
+                    <h1 class="auth-title">درسیار</h1>
+                    <p class="auth-subtitle">همراه هوشمند مسیر مطالعه و موفقیت</p>
 
                     <div class="auth-tabs">
                         <button class="auth-tab-btn ${currentTab === 'login' ? 'active' : ''}" onclick="Auth.switchTab('login')">ورود به حساب</button>

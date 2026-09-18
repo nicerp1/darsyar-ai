@@ -54,10 +54,12 @@ const App = (function () {
         const appLayout = document.getElementById('app-main-layout');
 
         if (!user) {
+            document.body.classList.add('auth-active');
             if (authView) authView.style.display = 'block';
             if (appLayout) appLayout.style.display = 'none';
             if (typeof Auth !== 'undefined') Auth.init();
         } else {
+            document.body.classList.remove('auth-active');
             if (authView) authView.style.display = 'none';
             if (appLayout) appLayout.style.display = 'flex';
 
