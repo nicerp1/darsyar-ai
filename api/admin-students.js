@@ -1,8 +1,15 @@
 const { db, getSession, publicUser } = require('./_supabase');
 
 const days = ['شنبه', 'یک‌شنبه', 'دوشنبه', 'سه‌شنبه', 'چهارشنبه', 'پنج‌شنبه', 'جمعه'];
-const times = ['۰۸:۰۰ - ۱۰:۰۰', '۱۰:۰۰ - ۱۲:۰۰', '۱۴:۰۰ - ۱۶:۰۰', '۱۶:۰۰ - ۱۸:۰۰', '۱۸:۰۰ - ۲۰:۰۰', '۲۰:۰۰ - ۲۲:۰۰'];
-const emptySchedule = () => days.map((day, dayIndex) => ({ day, dayIndex, slots: times.map(time => ({ time, subject: '', note: '', color: '#05319e' })) }));
+const emptySchedule = () => days.map((day, dayIndex) => ({ day, dayIndex, tasks: [] }));
+function normalizeSchedule(value) {
+    if (!Array.isArray(value) || value.length !== 7) return emptySchedule();
+    return days.map((day, dayIndex) => {
+        const source = value[dayIndex] || {}, legacy = Array.isArray(source.slots) ? source.slots.filter(item => item?.subject) : [];
+        const tasks = Array.isArray(source.tasks) ? source.tasks : legacy;
+        return { day, dayIndex, tasks: tasks.map((task, index) => ({ id: task.id || `task-${dayIndex}-${index}`, subject: String(task.subject || '').slice(0,100), note: String(task.note || '').slice(0,300), durationMinutes: Math.min(600, Math.max(5, Number(task.durationMinutes) || 60)), color: /^#[0-9a-f]{6}$/i.test(task.color) ? task.color : '#2856d8', status: ['pending','completed','partial','missed'].includes(task.status) ? task.status : 'pending', assignedBy: task.assignedBy })).filter(task => task.subject) };
+    });
+}
 
 async function requireOwner(req, res) {
     const actor = await getSession(req);
@@ -38,8 +45,8 @@ async function saveData(username, key, value) {
 
 function buildSummary(student, rows) {
     const data = Object.fromEntries(rows.map(row => [row.key, row.value]));
-    const schedule = Array.isArray(data.schedule) ? data.schedule : [];
-    const slots = schedule.flatMap(day => Array.isArray(day.slots) ? day.slots : []).filter(slot => slot.subject);
+    const schedule = normalizeSchedule(data.schedule);
+    const slots = schedule.flatMap(day => day.tasks || []);
     const activityRows = rows.filter(row => ['manual_reports', 'study_history', 'exam_results', 'flashcards'].includes(row.key) || (row.key === 'schedule' && slots.some(slot => slot.status && slot.status !== 'pending')));
     const reports = Array.isArray(data.manual_reports) ? data.manual_reports : [];
     const completed = slots.filter(slot => slot.status === 'completed').length;
@@ -84,26 +91,29 @@ module.exports = async (req, res) => {
         }
 
         const data = await getData(username);
-        const schedule = Array.isArray(data.schedule) && data.schedule.length === 7 ? data.schedule : emptySchedule();
+        const schedule = normalizeSchedule(data.schedule);
         const dayIndex = Number(req.body?.dayIndex);
-        const slotIndex = Number(req.body?.slotIndex);
-        if (!Number.isInteger(dayIndex) || dayIndex < 0 || dayIndex > 6 || !Number.isInteger(slotIndex) || slotIndex < 0 || slotIndex > 5) {
-            return res.status(400).json({ error: 'روز یا بازه زمانی معتبر نیست.' });
+        const taskIndex = Number(req.body?.taskIndex);
+        if (!Number.isInteger(dayIndex) || dayIndex < 0 || dayIndex > 6 || !Number.isInteger(taskIndex) || taskIndex < -1) {
+            return res.status(400).json({ error: 'روز یا تسک معتبر نیست.' });
         }
 
         if (req.method === 'POST') {
             const subject = String(req.body?.subject || '').trim().slice(0, 100);
             if (!subject) return res.status(400).json({ error: 'عنوان درس الزامی است.' });
-            const previousStatus = schedule[dayIndex].slots[slotIndex]?.status;
-            schedule[dayIndex].slots[slotIndex] = {
-                time: times[slotIndex], subject,
+            const previous = schedule[dayIndex].tasks[taskIndex];
+            const task = {
+                id: previous?.id || `task-${Date.now()}`, subject,
                 note: String(req.body?.note || '').trim().slice(0, 300),
-                color: /^#[0-9a-f]{6}$/i.test(req.body?.color) ? req.body.color : '#05319e',
-                status: ['pending', 'completed', 'partial', 'missed'].includes(previousStatus) ? previousStatus : 'pending',
+                durationMinutes: Math.min(600, Math.max(5, Number(req.body?.durationMinutes) || 60)),
+                color: /^#[0-9a-f]{6}$/i.test(req.body?.color) ? req.body.color : '#2856d8',
+                status: ['pending', 'completed', 'partial', 'missed'].includes(previous?.status) ? previous.status : 'pending',
                 assignedBy: 'kiankaki', assignedAt: new Date().toISOString()
             };
+            if (taskIndex < 0) schedule[dayIndex].tasks.push(task); else schedule[dayIndex].tasks[taskIndex] = task;
         } else if (req.method === 'DELETE') {
-            schedule[dayIndex].slots[slotIndex] = { time: times[slotIndex], subject: '', note: '', color: '#05319e' };
+            if (taskIndex >= schedule[dayIndex].tasks.length) return res.status(404).json({ error: 'تسک پیدا نشد.' });
+            schedule[dayIndex].tasks.splice(taskIndex, 1);
         } else return res.status(405).json({ error: 'Method not allowed' });
 
         await saveSchedule(username, schedule);

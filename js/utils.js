@@ -370,6 +370,17 @@ const Utils = (function () {
         const el = document.getElementById(elementId);
         if (!el) return;
 
+        const printable = el.cloneNode(true);
+        const sourceCanvases = el.querySelectorAll('canvas');
+        printable.querySelectorAll('canvas').forEach((canvas, index) => {
+            try {
+                const image = document.createElement('img');
+                image.src = sourceCanvases[index].toDataURL('image/png');
+                image.alt = 'نمودار گزارش';
+                canvas.replaceWith(image);
+            } catch (_) { canvas.remove(); }
+        });
+
         const printWin = window.open('', '_blank');
         printWin.document.write(`
             <!DOCTYPE html>
@@ -379,39 +390,30 @@ const Utils = (function () {
                 <title>${title}</title>
                 <link rel="stylesheet" href="fonts/kalameh.css">
                 <style>
-                    body {
-                        font-family: 'Kalameh', 'Vazirmatn', Tahoma, sans-serif;
-                        padding: 24px;
-                        direction: rtl;
-                        color: #1e293b;
-                        line-height: 1.8;
-                    }
-                    .print-header {
-                        border-bottom: 2px solid #05319e;
-                        padding-bottom: 12px;
-                        margin-bottom: 24px;
-                        display: flex;
-                        justify-content: space-between;
-                        align-items: center;
-                    }
-                    .print-header h1 {
-                        color: #05319e;
-                        font-size: 20px;
-                        margin: 0;
-                    }
-                    .print-badge {
-                        background: #f1f5f9;
-                        padding: 4px 12px;
-                        border-radius: 6px;
-                        font-size: 13px;
-                    }
-                    pre, code {
-                        direction: ltr;
-                        text-align: left;
-                        background: #f8fafc;
-                        padding: 8px;
-                        border-radius: 6px;
-                    }
+                    @page { size: A4 portrait; margin: 12mm; }
+                    * { box-sizing: border-box; print-color-adjust: exact; -webkit-print-color-adjust: exact; }
+                    html, body { width: 100%; margin: 0; padding: 0; direction: rtl; color: #172033; background: #fff; font-family: 'Kalameh','Vazirmatn',Tahoma,sans-serif; font-size: 10pt; line-height: 1.55; }
+                    body { padding: 0; }
+                    .print-header { border-bottom: 2px solid #2349b8; padding: 0 0 7mm; margin-bottom: 7mm; display: flex; justify-content: space-between; align-items: center; }
+                    .print-header h1 { color: #173895; font-size: 17pt; margin: 0; }
+                    .print-badge { background: #eef2ff; border: 1px solid #c7d2fe; padding: 2mm 4mm; border-radius: 3mm; font-size: 9pt; }
+                    h1,h2,h3,h4 { color: #173895; break-after: avoid; } p { orphans: 3; widows: 3; }
+                    img,svg,canvas { max-width: 100% !important; height: auto !important; }
+                    button,.schedule-add-task,.task-focus-button,.admin-icon-button { display: none !important; }
+                    .schedule-days-list > #schedule-days-list { display: grid; grid-template-columns: 1fr 1fr; gap: 4mm; }
+                    .schedule-day-card,.content-card,.kpi-card,.output-paper,.admin-report-table-wrap { border: 1px solid #d7deeb; border-radius: 3mm; padding: 3.5mm; background: #fff; break-inside: avoid; box-shadow: none; }
+                    .schedule-day-card header { display:flex; justify-content:space-between; align-items:center; padding-bottom:2mm; border-bottom:1px solid #d7deeb; }
+                    .schedule-day-card header div { display:flex; align-items:center; gap:2mm; } .schedule-day-card h3 { margin:0; font-size:12pt; }
+                    .schedule-day-index,.day-task-number { display:inline-grid; place-items:center; width:7mm; height:7mm; border-radius:50%; background:#2349b8; color:#fff; font-weight:700; }
+                    .schedule-day-tasks { display:grid; gap:2mm; margin-top:2.5mm; }
+                    .day-task { border-right:1.2mm solid var(--task-color,#2349b8); background:#f8fafc; border-radius:2mm; padding:2mm; break-inside:avoid; }
+                    .day-task-main { display:grid !important; grid-template-columns:auto 1fr auto; width:100%; align-items:center; gap:2mm; padding:0; color:#172033; background:transparent; border:0; text-align:right; }
+                    .day-task-copy { display:grid; } .day-task-copy small { color:#64748b; } .day-task-duration { white-space:nowrap; color:#173895; font-size:8.5pt; }
+                    .day-task-footer { margin-top:1mm; } .schedule-status { font-size:8pt; border:1px solid #94a3b8; border-radius:99px; padding:0 2mm; }
+                    table { width:100% !important; border-collapse:collapse !important; table-layout:fixed; font-size:8.5pt; }
+                    th,td { padding:2mm !important; border:1px solid #d7deeb !important; overflow-wrap:anywhere; }
+                    pre,code { direction:ltr; text-align:left; white-space:pre-wrap; background:#f8fafc; padding:2mm; border-radius:2mm; }
+                    @media print { a { color:inherit; text-decoration:none; } }
                 </style>
             </head>
             <body>
@@ -419,7 +421,7 @@ const Utils = (function () {
                     <h1>${title}</h1>
                     <div class="print-badge">${getJalaliDate()}</div>
                 </div>
-                ${el.innerHTML}
+                ${printable.innerHTML}
                 <script>
                     window.onload = function() {
                         window.print();

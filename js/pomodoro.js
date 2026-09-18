@@ -14,10 +14,26 @@ const Pomodoro = (function () {
 
     function init() {
         loadSettings();
+        renderSettings();
         renderTasks();
         renderStats();
         updateDisplay();
         setupScheduleTaskOptions();
+    }
+
+    function renderSettings() {
+        const settings = Storage.getSettings();
+        const values = { 'pomo-setting-work': settings.pomodoroWork || 25, 'pomo-setting-short': settings.pomodoroShortBreak || 5, 'pomo-setting-long': settings.pomodoroLongBreak || 15 };
+        Object.entries(values).forEach(([id, value]) => { const input = document.getElementById(id); if (input) input.value = value; });
+    }
+
+    function saveTimerSettings() {
+        const settings = Storage.getSettings();
+        settings.pomodoroWork = Math.min(180, Math.max(1, Number(document.getElementById('pomo-setting-work')?.value) || 25));
+        settings.pomodoroShortBreak = Math.min(60, Math.max(1, Number(document.getElementById('pomo-setting-short')?.value) || 5));
+        settings.pomodoroLongBreak = Math.min(120, Math.max(1, Number(document.getElementById('pomo-setting-long')?.value) || 15));
+        Storage.saveSettings(settings); resetTimer(); loadSettings(); timeLeft = totalDuration; updateDisplay();
+        Utils?.showToast('زمان‌های تایمر در دیتابیس ذخیره شد.', 'success');
     }
 
     function loadSettings() {
@@ -230,6 +246,7 @@ const Pomodoro = (function () {
     function enterFullscreenFocus() {
         const fs = document.getElementById('focus-fullscreen-overlay');
         if (fs) {
+            const label = document.getElementById('focus-task-name'); if (label) label.textContent = currentTaskName;
             fs.classList.add('active');
             if (document.documentElement.requestFullscreen) {
                 document.documentElement.requestFullscreen().catch(() => {});
@@ -256,9 +273,10 @@ const Pomodoro = (function () {
         const todaySchedule = schedule[todayDayIndex] || schedule[0];
 
         let optionsHtml = `<option value="مطالعه آزاد و یادگیری">📌 مطالعه و تمرکز آزاد</option>`;
-        if (todaySchedule && todaySchedule.slots) {
-            todaySchedule.slots.forEach(slot => {
-                optionsHtml += `<option value="${slot.subject} (${slot.note})">📅 ${slot.subject} - ${slot.time}</option>`;
+        const tasks = todaySchedule?.tasks || todaySchedule?.slots || [];
+        if (tasks.length) {
+            tasks.filter(task => task.subject).forEach(task => {
+                optionsHtml += `<option value="${task.subject}">${task.subject} · ${task.durationMinutes || 60} دقیقه</option>`;
             });
         }
 
@@ -270,10 +288,14 @@ const Pomodoro = (function () {
         };
     }
 
-    function setTaskFromExternal(taskName) {
+    function setTaskFromExternal(taskName, suggestedMinutes) {
         currentTaskName = taskName;
         const labelEl = document.getElementById('pomo-active-task-label');
         if (labelEl) labelEl.textContent = taskName;
+        if (suggestedMinutes) {
+            const settings = Storage.getSettings(); settings.pomodoroWork = Math.min(180, Math.max(1, Number(suggestedMinutes))); Storage.saveSettings(settings);
+            currentMode = 'work'; timerState = 'idle'; loadSettings(); timeLeft = totalDuration; renderSettings(); updateDisplay();
+        }
         if (typeof Utils !== 'undefined') {
             Utils.showToast(`تسک «${taskName}» به تایمر پومودورو متصل شد.`, 'info');
         }
@@ -369,6 +391,7 @@ const Pomodoro = (function () {
         toggleTimer,
         enterFullscreenFocus,
         exitFullscreenFocus,
+        saveTimerSettings,
         setTaskFromExternal,
         addTaskSubmit,
         toggleTaskDone,
