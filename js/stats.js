@@ -8,88 +8,9 @@ const Stats = (function () {
     let doughnutChartInstance = null;
 
     function init() {
-        initPercentageCalculator();
         renderStatsKPIs();
         renderCharts();
         renderExamHistory();
-    }
-
-    // Percentage Calculator Logic
-    function initPercentageCalculator() {
-        const totalInput = document.getElementById('calc-total');
-        const correctInput = document.getElementById('calc-correct');
-        const wrongInput = document.getElementById('calc-wrong');
-        const negToggle = document.getElementById('calc-negative-toggle');
-
-        const recalculate = () => calculatePercentage();
-
-        if (totalInput) totalInput.addEventListener('input', recalculate);
-        if (correctInput) correctInput.addEventListener('input', recalculate);
-        if (wrongInput) wrongInput.addEventListener('input', recalculate);
-        if (negToggle) negToggle.addEventListener('change', recalculate);
-
-        calculatePercentage();
-    }
-
-    function calculatePercentage() {
-        const totalInput = document.getElementById('calc-total');
-        const correctInput = document.getElementById('calc-correct');
-        const wrongInput = document.getElementById('calc-wrong');
-        const negToggle = document.getElementById('calc-negative-toggle');
-
-        const total = parseFloat(totalInput ? totalInput.value : 30) || 0;
-        const correct = parseFloat(correctInput ? correctInput.value : 20) || 0;
-        const wrong = parseFloat(wrongInput ? wrongInput.value : 5) || 0;
-        const hasNegative = negToggle ? negToggle.checked : true;
-
-        const unanswered = Math.max(0, total - (correct + wrong));
-        const unansEl = document.getElementById('calc-unanswered-display');
-        if (unansEl && typeof Utils !== 'undefined') {
-            unansEl.textContent = Utils.toPersianDigits(unanswered);
-        }
-
-        let percentage = 0;
-        if (total > 0) {
-            if (hasNegative) {
-                percentage = ((correct - (wrong / 3)) / total) * 100;
-            } else {
-                percentage = (correct / total) * 100;
-            }
-        }
-
-        const percentEl = document.getElementById('calc-result-percentage');
-        const statusEl = document.getElementById('calc-result-status');
-        const circleEl = document.getElementById('calc-circle-display');
-
-        const formatted = percentage.toFixed(1);
-        if (percentEl && typeof Utils !== 'undefined') {
-            percentEl.textContent = `${Utils.toPersianDigits(formatted)}٪`;
-        }
-
-        let statusText = 'عالی و درخشان 🌟';
-        let statusColor = '#10b981';
-
-        if (percentage >= 80) {
-            statusText = 'رتبه برتر و عالی 🏆';
-            statusColor = '#10b981';
-        } else if (percentage >= 60) {
-            statusText = 'بسیار خوب و رضایت‌بخش 👍';
-            statusColor = '#0ea5e9';
-        } else if (percentage >= 40) {
-            statusText = 'متوسط - نیازمند تمرین بیشتر 📚';
-            statusColor = '#f59e0b';
-        } else {
-            statusText = 'ضعیف - نیازمند بازخوانی مفاهیم ⚠️';
-            statusColor = '#ef4444';
-        }
-
-        if (statusEl) {
-            statusEl.textContent = statusText;
-            statusEl.style.color = statusColor;
-        }
-        if (circleEl) {
-            circleEl.style.borderColor = statusColor;
-        }
     }
 
     function renderStatsKPIs() {
@@ -253,7 +174,6 @@ const Stats = (function () {
 
     return {
         init,
-        calculatePercentage,
         exportPDFReport
     };
 })();

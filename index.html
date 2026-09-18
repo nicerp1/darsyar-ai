@@ -91,7 +91,7 @@
                 </div>
                 <div class="nav-item" id="nav-stats" onclick="App.navigate('stats')">
                     <span class="material-symbols-outlined">analytics</span>
-                    <span>آمار و درصدگیری</span>
+                    <span>آمار و گزارش‌ها</span>
                 </div>
 
                 <div class="nav-section-title">حساب و جوایز</div>
@@ -782,9 +782,9 @@
                             </h2>
                             <p style="font-size: 12px; color: var(--text-muted);">جدول تعاملی ۷ روز هفته × ۶ بازه زمانی مطالعه با قابلیت انتقال مستقیم به پومودورو</p>
                         </div>
-                        <button class="btn-gold" onclick="Schedule.printSchedule()">
-                            <span class="material-symbols-outlined">print</span>
-                            چاپ برنامه هفتگی
+                        <button class="btn-gold schedule-print-button" onclick="Schedule.printSchedule()" aria-label="چاپ برنامه هفتگی">
+                            <span class="material-symbols-outlined" aria-hidden="true">print</span>
+                            <span>چاپ برنامه</span>
                         </button>
                     </div>
 
@@ -925,60 +925,21 @@
 
                 </section>
 
-                <!-- 9. STATS & PERCENTAGE CALCULATOR VIEW -->
+                <!-- 9. STATS VIEW -->
                 <section id="view-stats" class="view-section">
                     
                     <div class="section-heading-bar">
                         <div>
                             <h2 class="section-heading-title">
                                 <span class="material-symbols-outlined" style="color: var(--gold);">analytics</span>
-                                محاسبه درصد آزمون و گزارش آماری
+                                گزارش آماری عملکرد
                             </h2>
-                            <p style="font-size: 12px; color: var(--text-muted);">محاسبه تراز و درصد با فرمول استاندارد سنجش + تحلیل نمودارهای تحصیلی</p>
+                            <p style="font-size: 12px; color: var(--text-muted);">تحلیل روند مطالعه، آزمون‌ها و نمودارهای تحصیلی</p>
                         </div>
                         <button class="btn-gold" onclick="Stats.exportPDFReport()">
                             <span class="material-symbols-outlined">download</span>
                             دانلود گزارش جامع عملکرد
                         </button>
-                    </div>
-
-                    <!-- Percentage Calculator Card -->
-                    <div class="percentage-calculator-card" style="margin-bottom: 30px;">
-                        <h3 style="font-size: 17px; font-weight: 700; text-align: center; margin-bottom: 18px;">
-                            🧮 محاسبه‌گر درصد تستی (با فرمول نمره منفی کنکور)
-                        </h3>
-
-                        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-bottom: 16px;">
-                            <div class="form-group">
-                                <label class="form-label">تعداد کل سوالات</label>
-                                <input type="number" id="calc-total" class="form-control" value="30" min="1">
-                            </div>
-                            <div class="form-group">
-                                <label class="form-label" style="color: var(--success);">پاسخ‌های درست</label>
-                                <input type="number" id="calc-correct" class="form-control" value="20" min="0">
-                            </div>
-                            <div class="form-group">
-                                <label class="form-label" style="color: var(--danger);">پاسخ‌های غلط</label>
-                                <input type="number" id="calc-wrong" class="form-control" value="5" min="0">
-                            </div>
-                        </div>
-
-                        <div style="display: flex; justify-content: space-between; align-items: center; background: var(--bg-surface); padding: 10px 16px; border-radius: var(--radius-md); margin-bottom: 16px;">
-                            <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
-                                <input type="checkbox" id="calc-negative-toggle" checked>
-                                <span>اعمال نمره منفی (یک‌سوم به ازای هر غلط)</span>
-                            </label>
-                            <span style="font-size: 12px; color: var(--text-dim);">بدون پاسخ: <strong id="calc-unanswered-display">۵</strong></span>
-                        </div>
-
-                        <div class="percent-display-circle" id="calc-circle-display">
-                            <div class="percent-big-num" id="calc-result-percentage">۶۱.۱٪</div>
-                            <div style="font-size: 11px; color: var(--text-dim);">درصد نهایی</div>
-                        </div>
-
-                        <div style="text-align: center; font-weight: 700; font-size: 15px;" id="calc-result-status">
-                            بسیار خوب و رضایت‌بخش 👍
-                        </div>
                     </div>
 
                     <!-- Printable Stats Report Area -->
