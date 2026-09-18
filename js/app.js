@@ -88,6 +88,7 @@ const App = (function () {
         if (typeof Gamification !== 'undefined') {
             Gamification.renderLevelProgress();
         }
+        if (typeof Communications !== 'undefined') Communications.init();
     }
 
     function renderSidebarRolePermissions() {

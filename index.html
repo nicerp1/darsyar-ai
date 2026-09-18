@@ -155,9 +155,13 @@
                         <span class="material-symbols-outlined" id="theme-toggle-icon">light_mode</span>
                     </button>
 
-                    <button class="icon-btn" onclick="Utils.showToast('سامانه درسیار پرو آماده و متصل است.', 'info')" title="اعلان‌ها">
-                        <span class="material-symbols-outlined">notifications</span>
-                        <span class="notification-dot"></span>
+                    <button class="icon-btn" onclick="Communications.open('notes')" title="یادداشت‌ها" aria-label="باز کردن یادداشت‌ها">
+                        <span class="material-symbols-outlined" aria-hidden="true">sticky_note_2</span>
+                    </button>
+
+                    <button class="icon-btn" onclick="Communications.open('chat')" title="گفت‌وگو با مشاور" aria-label="باز کردن گفت‌وگو با مشاور">
+                        <span class="material-symbols-outlined" aria-hidden="true">forum</span>
+                        <span id="header-chat-dot" class="notification-dot hidden"></span>
                     </button>
 
                     <div class="user-profile-menu" onclick="App.navigate('profile')">
@@ -1634,6 +1638,36 @@
         </div>
     </div>
 
+    <div id="communications-overlay" class="communications-overlay" onclick="Communications.close()"></div>
+    <aside id="communications-drawer" class="communications-drawer" aria-hidden="true" aria-label="ارتباطات و یادداشت‌ها">
+        <div class="communications-header">
+            <div><strong id="communications-title">ارتباطات</strong><small id="communications-subtitle">یادداشت‌ها و گفت‌وگوی مشاوره‌ای</small></div>
+            <button class="icon-btn" type="button" onclick="Communications.close()" aria-label="بستن پنل"><span class="material-symbols-outlined" aria-hidden="true">close</span></button>
+        </div>
+        <div class="communications-tabs" role="tablist">
+            <button id="communications-tab-chat" type="button" role="tab" onclick="Communications.switchTab('chat')"><span class="material-symbols-outlined" aria-hidden="true">forum</span> گفت‌وگو</button>
+            <button id="communications-tab-notes" type="button" role="tab" onclick="Communications.switchTab('notes')"><span class="material-symbols-outlined" aria-hidden="true">sticky_note_2</span> یادداشت‌ها</button>
+        </div>
+        <section id="communications-chat-panel" class="communications-panel" role="tabpanel">
+            <div id="advisor-student-picker" class="form-group hidden"><label class="form-label" for="advisor-student-select">دانش‌آموز</label><select id="advisor-student-select" class="form-control" onchange="Communications.selectStudent(this.value)"><option value="">انتخاب دانش‌آموز</option></select></div>
+            <div id="advisor-chat-status" class="advisor-chat-status" role="status">گفت‌وگوی مستقیم و خصوصی</div>
+            <div id="advisor-chat-messages" class="advisor-chat-messages" aria-live="polite"></div>
+            <form class="advisor-chat-compose" onsubmit="event.preventDefault(); Communications.sendMessage();">
+                <label class="sr-only" for="advisor-chat-input">متن پیام</label>
+                <textarea id="advisor-chat-input" class="form-control" rows="2" maxlength="1000" placeholder="پیام خود را بنویسید…" required></textarea>
+                <button id="advisor-chat-send" class="btn-gold" type="submit"><span class="material-symbols-outlined" aria-hidden="true">send</span><span>ارسال</span></button>
+            </form>
+        </section>
+        <section id="communications-notes-panel" class="communications-panel hidden" role="tabpanel">
+            <form class="quick-note-form" onsubmit="event.preventDefault(); Communications.addNote();">
+                <label class="form-label" for="quick-note-input">یادداشت جدید</label>
+                <textarea id="quick-note-input" class="form-control" rows="3" maxlength="500" placeholder="کاری که نباید فراموش شود…" required></textarea>
+                <button class="btn-primary" type="submit"><span class="material-symbols-outlined" aria-hidden="true">add</span> افزودن یادداشت</button>
+            </form>
+            <div id="quick-notes-list" class="quick-notes-list" aria-live="polite"></div>
+        </section>
+    </aside>
+
     <!-- Fullscreen Focus Overlay for Pomodoro -->
     <div id="focus-fullscreen-overlay" class="focus-fullscreen-overlay">
         <button class="btn-exit-focus" onclick="Pomodoro.exitFullscreenFocus()">
@@ -1667,6 +1701,7 @@
     <script src="js/gamification.js"></script>
     <script src="js/schedule.js"></script>
     <script src="js/exams.js"></script>
+    <script src="js/communications.js"></script>
     <script src="js/admin.js"></script>
     <script src="js/profile.js"></script>
     <script src="js/subscription.js"></script>
