@@ -29,16 +29,58 @@ async function saveSchedule(username, schedule) {
     });
 }
 
+async function saveData(username, key, value) {
+    await db('app_data?on_conflict=username,key', {
+        method: 'POST', prefer: 'resolution=merge-duplicates,return=minimal',
+        body: JSON.stringify({ username, key, value, updated_at: new Date().toISOString() })
+    });
+}
+
+function buildSummary(student, rows) {
+    const data = Object.fromEntries(rows.map(row => [row.key, row.value]));
+    const schedule = Array.isArray(data.schedule) ? data.schedule : [];
+    const slots = schedule.flatMap(day => Array.isArray(day.slots) ? day.slots : []).filter(slot => slot.subject);
+    const activityRows = rows.filter(row => ['manual_reports', 'study_history', 'exam_results', 'flashcards'].includes(row.key) || (row.key === 'schedule' && slots.some(slot => slot.status && slot.status !== 'pending')));
+    const reports = Array.isArray(data.manual_reports) ? data.manual_reports : [];
+    const completed = slots.filter(slot => slot.status === 'completed').length;
+    const missed = slots.filter(slot => slot.status === 'missed').length;
+    const reportMinutes = reports.reduce((sum, item) => sum + Number(item.minutes || 0), 0);
+    const latest = activityRows.map(row => row.updated_at).filter(Boolean).sort().at(-1) || student.registered_at;
+    const staleDays = latest ? Math.floor((Date.now() - new Date(latest).getTime()) / 864e5) : 999;
+    const reasons = [];
+    if (!activityRows.length) reasons.push('بدون فعالیت');
+    else if (staleDays >= 7) reasons.push(`${staleDays} روز بدون ثبت`);
+    if (missed) reasons.push(`${missed} برنامه انجام‌نشده`);
+    return { username: student.username, latestActivity: latest, staleDays, planned: slots.length, completed, missed, reports: reports.length, reportMinutes, adherence: slots.length ? Math.round((completed / slots.length) * 100) : 0, status: reasons.length ? 'attention' : 'active', reasons };
+}
+
 module.exports = async (req, res) => {
     try {
         if (!(await requireOwner(req, res))) return;
         const username = String(req.method === 'GET' ? req.query?.username : req.body?.username || '').trim().toLowerCase();
+        if (req.method === 'GET' && !username) {
+            const students = (await db('profiles?username=neq.kiankaki&select=*')).map(publicUser);
+            const rows = await db('app_data?select=username,key,value,updated_at');
+            return res.status(200).json({ students, summaries: students.map(student => buildSummary(student, rows.filter(row => row.username === student.username))) });
+        }
         if (!username || username === 'kiankaki') return res.status(400).json({ error: 'دانش‌آموز معتبر انتخاب نشده است.' });
         const student = await getStudent(username);
         if (!student) return res.status(404).json({ error: 'کاربر پیدا نشد.' });
 
         if (req.method === 'GET') {
             return res.status(200).json({ student: publicUser(student), data: await getData(username) });
+        }
+
+        if (req.method === 'PATCH' && req.body?.action === 'saveNote') {
+            const note = String(req.body?.note || '').trim().slice(0, 2000);
+            await saveData(username, 'admin_note', { text: note, updatedAt: new Date().toISOString(), updatedBy: 'kiankaki' });
+            return res.status(200).json({ ok: true, note });
+        }
+
+        if (req.method === 'DELETE' && req.body?.action === 'deleteStudent') {
+            if (String(req.body?.confirmation || '').trim().toLowerCase() !== username) return res.status(400).json({ error: 'برای حذف، نام کاربری باید دقیق وارد شود.' });
+            await db(`profiles?username=eq.${encodeURIComponent(username)}`, { method: 'DELETE' });
+            return res.status(200).json({ ok: true, deleted: username });
         }
 
         const data = await getData(username);

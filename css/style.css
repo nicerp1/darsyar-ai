@@ -2162,6 +2162,32 @@ a {
 
 /* Owner dashboard: student planning and reporting */
 .admin-student-workspace { display: grid; grid-template-columns: minmax(230px, 300px) minmax(0, 1fr); gap: 20px; margin-top: 24px; align-items: start; }
+.admin-attention-card { margin-top: 20px; border-color: rgba(245,158,11,.35); }
+.admin-count-badge { display: inline-grid; place-items: center; min-width: 26px; height: 26px; margin-right: auto; padding: 0 8px; color: #f59e0b; background: rgba(245,158,11,.12); border: 1px solid currentColor; border-radius: 999px; font-size: 12px; }
+.admin-attention-list { display: grid; grid-template-columns: repeat(4,minmax(0,1fr)); gap: 10px; margin-top: 14px; }
+.admin-attention-item { min-height: 68px; display: flex; align-items: center; gap: 10px; padding: 10px; color: var(--text-primary); background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: var(--radius-md); text-align: right; cursor: pointer; }
+.admin-attention-item:hover { border-color: #f59e0b; background: var(--bg-card-hover); }
+.admin-attention-item > .material-symbols-outlined:first-child { color: #f59e0b; }
+.admin-attention-item > span:nth-child(2) { min-width: 0; flex: 1; display: grid; gap: 3px; }
+.admin-attention-item small { color: var(--text-muted); font-size: 11px; overflow-wrap: anywhere; }
+.admin-all-good { grid-column: 1/-1; display: flex; align-items: center; gap: 8px; padding: 14px; color: #22c55e; background: rgba(34,197,94,.08); border-radius: var(--radius-md); }
+.admin-filter-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 12px; }
+.admin-filter-grid .form-label { font-size: 11px; }
+.admin-state-dot { width: 11px; height: 11px; flex: 0 0 11px; border: 2px solid var(--bg-card); border-radius: 50%; box-shadow: 0 0 0 1px currentColor; }
+.admin-state-dot.active { color: #22c55e; background: #22c55e; }
+.admin-state-dot.attention { color: #f59e0b; background: #f59e0b; }
+.admin-header-actions { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.admin-status-pill { padding: 7px 12px; border: 1px solid currentColor; border-radius: 999px; font-size: 12px; white-space: nowrap; }
+.admin-status-pill.active { color: #22c55e; background: rgba(34,197,94,.08); }
+.admin-status-pill.attention { color: #f59e0b; background: rgba(245,158,11,.08); }
+.admin-note-footer { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 12px; }
+.admin-note-footer small { color: var(--text-muted); }
+.admin-danger-zone { border-color: rgba(239,68,68,.35); }
+.admin-danger-zone .content-card-title, .admin-danger-zone p { color: var(--danger); }
+.admin-danger-zone p { margin: 12px 0 20px; font-size: 12px; line-height: 1.8; }
+.admin-danger-button { min-height: 44px; display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 9px 14px; color: #fff; background: #b91c1c; border: 1px solid #ef4444; border-radius: var(--radius-sm); cursor: pointer; }
+.admin-danger-button:hover { background: #991b1b; }
+.admin-danger-button:disabled, #admin-refresh:disabled, #admin-note-save:disabled { opacity: .5; cursor: wait; }
 .admin-student-list-card { position: sticky; top: 88px; }
 .admin-student-list { display: grid; gap: 8px; margin-top: 14px; max-height: 560px; overflow-y: auto; }
 .admin-student-item, .admin-user-link { width: 100%; display: flex; align-items: center; gap: 10px; text-align: right; color: var(--text-primary); background: transparent; border: 1px solid transparent; border-radius: var(--radius-md); cursor: pointer; }
@@ -2212,11 +2238,13 @@ a {
 .hidden { display: none !important; }
 
 @media (max-width: 1200px) {
+    .admin-attention-list { grid-template-columns: repeat(2,minmax(0,1fr)); }
     .admin-metrics-grid { grid-template-columns: repeat(3, 1fr); }
     .admin-detail-grid { grid-template-columns: 1fr; }
 }
 
 @media (max-width: 760px) {
+    .admin-attention-list { grid-template-columns: 1fr; }
     .admin-student-workspace { grid-template-columns: 1fr; }
     .admin-student-list-card { position: static; }
     .admin-student-list { max-height: 260px; }
@@ -2225,6 +2253,8 @@ a {
     .admin-form-grid { grid-template-columns: 1fr; }
     .admin-form-span { grid-column: auto; }
     .admin-student-header { align-items: flex-start; }
+    .admin-header-actions { width: 100%; }
+    .admin-note-footer { align-items: stretch; flex-direction: column; }
     .manual-report-form { grid-template-columns: 1fr 1fr; }
     .manual-report-notes { grid-column: 1 / -1; }
     .manual-report-form > button { grid-column: 1 / -1; }
