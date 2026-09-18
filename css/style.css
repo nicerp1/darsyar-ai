@@ -96,6 +96,11 @@ html, body {
     transition: background-color 0.3s ease, color 0.3s ease;
 }
 
+.capacitor-app body { padding-top: env(safe-area-inset-top); padding-bottom: env(safe-area-inset-bottom); }
+.capacitor-app .top-header { padding-left: max(16px, env(safe-area-inset-left)); padding-right: max(16px, env(safe-area-inset-right)); }
+.capacitor-app .communications-drawer { padding-top: env(safe-area-inset-top); padding-bottom: env(safe-area-inset-bottom); }
+.capacitor-app button, .capacitor-app .nav-item { touch-action: manipulation; }
+
 button, input, select, textarea {
     font-family: inherit;
     font-size: inherit;

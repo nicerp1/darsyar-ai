@@ -1,0 +1,8 @@
+{
+  "appId": "ir.darsyar.app",
+  "appName": "درسیار",
+  "webDir": "www",
+  "server": { "url": "https://darsyar-ai.vercel.app", "androidScheme": "https", "cleartext": false, "allowNavigation": ["darsyar-ai.vercel.app"] },
+  "android": { "allowMixedContent": false, "backgroundColor": "#090e1a" },
+  "plugins": { "SplashScreen": { "launchShowDuration": 1400, "launchAutoHide": true, "backgroundColor": "#090e1a", "showSpinner": false }, "StatusBar": { "style": "LIGHT", "backgroundColor": "#0f172a" } }
+}
