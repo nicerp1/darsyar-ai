@@ -9,8 +9,11 @@ const Pomodoro = (function () {
     let totalDuration = 25 * 60;
     let timerInterval = null;
     let autoSaveInterval = null;
+    let timerEndsAt = null;
     let secondsStudiedThisSession = 0;
     let currentTaskName = 'مطالعه و تمرکز آزاد';
+    let visibilityListenerReady = false;
+    const NOTIFICATION_ID = 25025;
 
     function init() {
         loadSettings();
@@ -19,6 +22,10 @@ const Pomodoro = (function () {
         renderStats();
         updateDisplay();
         setupScheduleTaskOptions();
+        if (!visibilityListenerReady) {
+            document.addEventListener('visibilitychange', reconcileTimer);
+            visibilityListenerReady = true;
+        }
     }
 
     function renderSettings() {
@@ -33,7 +40,57 @@ const Pomodoro = (function () {
         settings.pomodoroShortBreak = Math.min(60, Math.max(1, Number(document.getElementById('pomo-setting-short')?.value) || 5));
         settings.pomodoroLongBreak = Math.min(120, Math.max(1, Number(document.getElementById('pomo-setting-long')?.value) || 15));
         Storage.saveSettings(settings); resetTimer(); loadSettings(); timeLeft = totalDuration; updateDisplay();
+        Utils?.closeModal('modal-pomodoro-settings');
         Utils?.showToast('زمان‌های تایمر در دیتابیس ذخیره شد.', 'success');
+    }
+
+    function openSettings() {
+        renderSettings();
+        Utils?.openModal('modal-pomodoro-settings');
+    }
+
+    function localNotifications() {
+        if (!window.DarsyarPlatform?.native) return null;
+        return window.Capacitor?.Plugins?.LocalNotifications || null;
+    }
+
+    async function scheduleCompletionNotification() {
+        const notifications = localNotifications();
+        if (!notifications || !timerEndsAt) return;
+        try {
+            const permission = await notifications.checkPermissions();
+            const status = permission.display === 'granted' ? permission : await notifications.requestPermissions();
+            if (status.display !== 'granted') return;
+            await notifications.createChannel?.({ id: 'pomodoro', name: 'پایان پومودورو', description: 'اعلان پایان زمان تمرکز و استراحت', importance: 5, visibility: 1, vibration: true, sound: 'default' });
+            await notifications.cancel({ notifications: [{ id: NOTIFICATION_ID }] });
+            await notifications.schedule({ notifications: [{
+                id: NOTIFICATION_ID,
+                title: currentMode === 'work' ? 'زمان تمرکز تمام شد' : 'زمان استراحت تمام شد',
+                body: currentMode === 'work' ? 'عالی بود! حالا چند دقیقه استراحت کن.' : 'برای جلسه بعدی آماده‌ای؟',
+                channelId: 'pomodoro',
+                sound: 'default',
+                schedule: { at: new Date(timerEndsAt), allowWhileIdle: true },
+                extra: { destination: 'pomodoro' }
+            }] });
+        } catch (error) {
+            console.warn('Pomodoro notification could not be scheduled.', error);
+        }
+    }
+
+    async function cancelCompletionNotification() {
+        const notifications = localNotifications();
+        if (!notifications) return;
+        try { await notifications.cancel({ notifications: [{ id: NOTIFICATION_ID }] }); } catch (_) {}
+    }
+
+    function reconcileTimer() {
+        if (timerState !== 'running' || !timerEndsAt) return;
+        const remaining = Math.max(0, Math.ceil((timerEndsAt - Date.now()) / 1000));
+        const elapsed = Math.max(0, timeLeft - remaining);
+        if (currentMode === 'work') secondsStudiedThisSession += elapsed;
+        timeLeft = remaining;
+        updateDisplay();
+        if (timeLeft <= 0) onTimerComplete();
     }
 
     function loadSettings() {
@@ -83,23 +140,20 @@ const Pomodoro = (function () {
         if (timerState === 'running') return;
 
         timerState = 'running';
+        timerEndsAt = Date.now() + (timeLeft * 1000);
         updateControlButtons();
+        scheduleCompletionNotification();
 
         if (typeof Utils !== 'undefined') {
             Utils.playSound('click');
         }
 
         timerInterval = setInterval(() => {
-            timeLeft--;
-            if (currentMode === 'work') {
-                secondsStudiedThisSession++;
-            }
-
+            const previous = timeLeft;
+            timeLeft = Math.max(0, Math.ceil((timerEndsAt - Date.now()) / 1000));
+            if (currentMode === 'work') secondsStudiedThisSession += Math.max(0, previous - timeLeft);
             updateDisplay();
-
-            if (timeLeft <= 0) {
-                onTimerComplete();
-            }
+            if (timeLeft <= 0) onTimerComplete();
         }, 1000);
 
         // Auto-save every 30 seconds
@@ -117,6 +171,8 @@ const Pomodoro = (function () {
         timerState = 'paused';
         clearInterval(timerInterval);
         clearInterval(autoSaveInterval);
+        timerEndsAt = null;
+        cancelCompletionNotification();
         updateControlButtons();
 
         if (currentMode === 'work' && secondsStudiedThisSession > 0) {
@@ -139,14 +195,15 @@ const Pomodoro = (function () {
     }
 
     function onTimerComplete() {
+        const completedMode = currentMode;
         pauseTimer();
         timerState = 'idle';
 
-        if (typeof Utils !== 'undefined') {
+        if (typeof Utils !== 'undefined' && !window.DarsyarPlatform?.native) {
             Utils.playSound('timerEnd');
         }
 
-        if (currentMode === 'work') {
+        if (completedMode === 'work') {
             if (secondsStudiedThisSession > 0) {
                 saveProgressToHistory(secondsStudiedThisSession);
                 secondsStudiedThisSession = 0;
@@ -306,11 +363,12 @@ const Pomodoro = (function () {
         const container = document.getElementById('pomo-tasks-list');
         if (!container) return;
 
-        const tasks = Storage.get('pomo_tasks', [
-            { id: 't1', title: 'مرور فصل ۱ زیست‌شناسی (پروتئین‌سازی)', done: true },
-            { id: 't2', title: 'حل ۲۰ تست سینتیک شیمی', done: false },
-            { id: 't3', title: 'مشاهده ویدیوی آموزشی مشتق و دیفرانسیل', done: false }
-        ]);
+        const tasks = Storage.get('pomo_tasks', []);
+
+        if (!tasks.length) {
+            container.innerHTML = '<p class="pomo-empty-tasks">هنوز تسکی برای تمرکز ثبت نشده است.</p>';
+            return;
+        }
 
         container.innerHTML = tasks.map(t => `
             <div style="display: flex; align-items: center; justify-content: space-between; padding: 10px 14px; background: var(--bg-surface); border-radius: var(--radius-md); margin-bottom: 8px; border: 1px solid var(--border-subtle);">
@@ -369,17 +427,17 @@ const Pomodoro = (function () {
 
     function renderStats() {
         const history = Storage.get('study_history', []);
-        const todayLog = history[history.length - 1] || { sessions: 4, hours: 3.5 };
+        const todayLog = history[history.length - 1] || { sessions: 0, hours: 0 };
         const weekHours = history.reduce((acc, h) => acc + h.hours, 0);
-        const user = Storage.getCurrentUser() || { streak: 5 };
+        const user = Storage.getCurrentUser() || { streak: 0 };
 
         const sTodayEl = document.getElementById('pomo-stat-today-sessions');
         const sWeekEl = document.getElementById('pomo-stat-week-hours');
         const sStreakEl = document.getElementById('pomo-stat-streak');
 
-        if (sTodayEl && typeof Utils !== 'undefined') sTodayEl.textContent = Utils.toPersianDigits(todayLog.sessions || 4);
+        if (sTodayEl && typeof Utils !== 'undefined') sTodayEl.textContent = Utils.toPersianDigits(todayLog.sessions || 0);
         if (sWeekEl && typeof Utils !== 'undefined') sWeekEl.textContent = Utils.toPersianDigits(weekHours.toFixed(1));
-        if (sStreakEl && typeof Utils !== 'undefined') sStreakEl.textContent = Utils.toPersianDigits(user.streak || 5);
+        if (sStreakEl && typeof Utils !== 'undefined') sStreakEl.textContent = Utils.toPersianDigits(user.streak || 0);
     }
 
     return {
@@ -392,6 +450,7 @@ const Pomodoro = (function () {
         enterFullscreenFocus,
         exitFullscreenFocus,
         saveTimerSettings,
+        openSettings,
         setTaskFromExternal,
         addTaskSubmit,
         toggleTaskDone,

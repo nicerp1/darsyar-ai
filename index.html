@@ -330,19 +330,21 @@
                 <!-- 2. POMODORO VIEW -->
                 <section id="view-pomodoro" class="view-section">
                     <div class="pomodoro-container">
+                        <div class="pomo-page-heading">
+                            <div>
+                                <h2>تمرکز</h2>
+                                <p>یک بازه آرام برای مطالعه عمیق</p>
+                            </div>
+                            <button class="pomo-settings-button" type="button" onclick="Pomodoro.openSettings()" aria-label="تنظیم زمان‌های پومودورو">
+                                <span class="material-symbols-outlined" aria-hidden="true">settings</span>
+                            </button>
+                        </div>
                         
                         <div class="pomodoro-modes-nav">
                             <button class="pomo-tab-btn active" id="pomo-tab-work" onclick="Pomodoro.switchMode('work')">تمرکز</button>
                             <button class="pomo-tab-btn" id="pomo-tab-shortBreak" onclick="Pomodoro.switchMode('shortBreak')">استراحت کوتاه</button>
                             <button class="pomo-tab-btn" id="pomo-tab-longBreak" onclick="Pomodoro.switchMode('longBreak')">استراحت بلند</button>
                         </div>
-
-                        <form class="pomo-custom-settings" onsubmit="event.preventDefault(); Pomodoro.saveTimerSettings();">
-                            <label><span>تمرکز</span><input id="pomo-setting-work" type="number" min="1" max="180" inputmode="numeric"><small>دقیقه</small></label>
-                            <label><span>استراحت کوتاه</span><input id="pomo-setting-short" type="number" min="1" max="60" inputmode="numeric"><small>دقیقه</small></label>
-                            <label><span>استراحت بلند</span><input id="pomo-setting-long" type="number" min="1" max="120" inputmode="numeric"><small>دقیقه</small></label>
-                            <button class="btn-primary" type="submit"><span class="material-symbols-outlined" aria-hidden="true">save</span> ذخیره زمان‌ها</button>
-                        </form>
 
                         <!-- Active Task Pill -->
                         <div style="margin-bottom: 20px; display: inline-flex; align-items: center; gap: 8px; background: var(--bg-surface); border: 1px solid var(--border-color); padding: 8px 18px; border-radius: var(--radius-full);">
@@ -1267,6 +1269,28 @@
 
         </div>
 
+    </div>
+
+    <!-- MODAL 1: Edit Daily Goal -->
+    <div id="modal-pomodoro-settings" class="modal-overlay">
+        <div class="modal-box pomo-settings-modal" role="dialog" aria-modal="true" aria-labelledby="pomo-settings-title">
+            <div class="modal-header">
+                <div class="modal-title" id="pomo-settings-title"><span class="material-symbols-outlined" aria-hidden="true">timer</span> تنظیم پومودورو</div>
+                <button class="modal-close-btn" type="button" onclick="Utils.closeModal('modal-pomodoro-settings')" aria-label="بستن تنظیمات">✕</button>
+            </div>
+            <form onsubmit="event.preventDefault(); Pomodoro.saveTimerSettings();">
+                <div class="modal-body pomo-settings-fields">
+                    <label><span>زمان تمرکز</span><div><input id="pomo-setting-work" type="number" min="1" max="180" inputmode="numeric"><small>دقیقه</small></div></label>
+                    <label><span>استراحت کوتاه</span><div><input id="pomo-setting-short" type="number" min="1" max="60" inputmode="numeric"><small>دقیقه</small></div></label>
+                    <label><span>استراحت بلند</span><div><input id="pomo-setting-long" type="number" min="1" max="120" inputmode="numeric"><small>دقیقه</small></div></label>
+                    <p class="pomo-notification-note"><span class="material-symbols-outlined" aria-hidden="true">notifications_active</span> در پایان هر بازه، اعلان صوتی پخش می‌شود.</p>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn-primary" type="button" onclick="Utils.closeModal('modal-pomodoro-settings')">انصراف</button>
+                    <button class="btn-gold" type="submit">ذخیره تنظیمات</button>
+                </div>
+            </form>
+        </div>
     </div>
 
     <!-- MODAL 1: Edit Daily Goal -->

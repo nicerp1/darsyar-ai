@@ -1193,6 +1193,20 @@ a {
     text-align: center;
 }
 
+.pomo-page-heading { display:flex; align-items:center; justify-content:space-between; gap:16px; margin-bottom:18px; text-align:right; }
+.pomo-page-heading h2 { margin:0; font-size:24px; }
+.pomo-page-heading p { margin-top:3px; color:var(--text-muted); font-size:12px; }
+.pomo-settings-button { width:48px; height:48px; display:grid; place-items:center; flex:0 0 auto; color:var(--text-main); background:var(--bg-card); border:1px solid var(--border-color); border-radius:15px; cursor:pointer; }
+.pomo-settings-button:focus-visible { outline:2px solid var(--gold); outline-offset:2px; }
+.pomo-settings-fields { display:grid; gap:12px; }
+.pomo-settings-fields > label { display:flex; align-items:center; justify-content:space-between; gap:16px; min-height:58px; padding:10px 12px; color:var(--text-main); background:var(--bg-surface); border:1px solid var(--border-subtle); border-radius:14px; }
+.pomo-settings-fields > label > div { display:flex; align-items:center; gap:8px; }
+.pomo-settings-fields input { width:82px; height:44px; padding:6px 10px; color:var(--text-main); text-align:center; background:var(--bg-input); border:1px solid var(--border-color); border-radius:11px; }
+.pomo-settings-fields small { color:var(--text-muted); }
+.pomo-notification-note { display:flex; align-items:center; gap:8px; color:var(--text-muted); font-size:11px; line-height:1.7; }
+.pomo-notification-note .material-symbols-outlined { color:var(--gold-light); }
+.pomo-empty-tasks { padding:22px 12px; color:var(--text-muted); text-align:center; font-size:12px; }
+
 .pomodoro-modes-nav {
     display: flex;
     justify-content: center;
@@ -2694,6 +2708,7 @@ a {
 .capacitor-app .form-control { min-height:48px; border-radius:14px; background:rgba(5,10,24,.46); border-color:var(--mobile-line); }.capacitor-app .btn-primary,.capacitor-app .btn-gold { min-height:48px; border-radius:14px; }
 .capacitor-app .modal-box { width:min(100%,520px); max-height:calc(100dvh - var(--android-safe-top) - var(--android-safe-bottom) - 24px); border-radius:26px; background:color-mix(in srgb,var(--bg-card) 92%,transparent); border:1px solid var(--mobile-line); backdrop-filter:blur(24px); }.capacitor-app .modal-body { overflow-y:auto; }
 .capacitor-app .pomodoro-container { max-width:100%; }.capacitor-app .pomodoro-modes-nav { display:grid; grid-template-columns:repeat(3,1fr); gap:6px; padding:5px; margin-bottom:12px; background:var(--mobile-glass); border:1px solid var(--mobile-line); border-radius:16px; }.capacitor-app .pomo-tab-btn { min-height:44px; padding:7px 5px; border:0; border-radius:12px; font-size:11px; background:transparent; }.capacitor-app .pomo-dial-wrap { width:min(66vw,260px); height:min(66vw,260px); margin-bottom:20px; }.capacitor-app .pomo-circle-progress { transition:none; }.capacitor-app .btn-pomo-main:hover,.capacitor-app .btn-pomo-secondary:hover { transform:none; }
+.capacitor-app button[onclick*="print"],.capacitor-app button[onclick*="Print"],.capacitor-app button[onclick*="exportPDF"],.capacitor-app .schedule-print-button { display:none!important; }
 .capacitor-app .schedule-days-list > #schedule-days-list { grid-template-columns:1fr; gap:12px; }.capacitor-app .schedule-day-card { padding:13px; }.capacitor-app .day-task-main { grid-template-columns:auto minmax(0,1fr); }.capacitor-app .day-task-duration { grid-column:2; }.capacitor-app .day-task-footer { padding-right:39px; }
 
 @media (max-width:600px) { .schedule-days-list > #schedule-days-list { grid-template-columns:1fr; }.pomo-custom-settings { grid-template-columns:repeat(3,1fr); }.pomo-custom-settings .btn-primary { grid-column:1/-1; }.day-task-main { grid-template-columns:auto minmax(0,1fr); }.day-task-duration { grid-column:2; } }
