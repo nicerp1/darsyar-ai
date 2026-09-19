@@ -4,6 +4,7 @@
 
 const App = (function () {
     let currentView = 'dashboard';
+    const features = Object.freeze({ exams: false, gamification: false, subscription: false });
 
     async function init() {
         try {
@@ -15,12 +16,23 @@ const App = (function () {
 
         // Apply Saved Theme
         applyTheme();
+        applyFeatureVisibility();
 
         // Check Auth and Render Layout
         checkAuthAndRender();
 
         // Setup global search and responsive listeners
         setupEventListeners();
+    }
+
+    function isFeatureEnabled(feature) {
+        return features[feature] !== false;
+    }
+
+    function applyFeatureVisibility() {
+        document.querySelectorAll('[data-feature]').forEach(element => {
+            element.classList.toggle('hidden', !isFeatureEnabled(element.dataset.feature));
+        });
     }
 
     function applyTheme() {
@@ -107,6 +119,7 @@ const App = (function () {
     }
 
     function navigate(viewName) {
+        if (!isFeatureEnabled(viewName)) viewName = 'dashboard';
         if (viewName === 'admin' && !Storage.isManager()) {
             currentView = 'dashboard';
             if (typeof Utils !== 'undefined') Utils.showToast('دسترسی به این بخش فقط برای مدیر اصلی مجاز است.', 'error');
@@ -215,9 +228,7 @@ const App = (function () {
                 else if (query.includes('انشا') || query.includes('نگارش')) navigate('ai-writing');
                 else if (query.includes('تحقیق') || query.includes('مقاله')) navigate('ai-research');
                 else if (query.includes('برنامه') || query.includes('جدول')) navigate('schedule');
-                else if (query.includes('آزمون') || query.includes('تست')) navigate('exams');
                 else if (query.includes('درصد') || query.includes('آمار') || query.includes('نمودار')) navigate('stats');
-                else if (query.includes('نشان') || query.includes('امتیاز') || query.includes('لیدر')) navigate('gamification');
             });
         }
     }
@@ -229,6 +240,7 @@ const App = (function () {
         toggleMobileSidebar,
         closeMobileSidebar,
         renderUserHeader,
+        isFeatureEnabled,
         onUserChanged
     };
 })();

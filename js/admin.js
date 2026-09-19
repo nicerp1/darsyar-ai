@@ -14,7 +14,7 @@ const Admin = (function () {
         document.getElementById('admin-system-settings')?.classList.toggle('hidden', !owner);
         document.getElementById('advisor-unlink-student')?.classList.toggle('hidden', owner);
         document.getElementById('admin-delete-student')?.classList.toggle('hidden', !owner);
-        document.getElementById('admin-plan-control')?.classList.toggle('hidden', !owner);
+        document.getElementById('admin-plan-control')?.classList.toggle('hidden', !owner || !App.isFeatureEnabled('subscription'));
         document.getElementById('admin-role-title').textContent = owner ? 'مرکز مدیریت پلتفرم' : 'پنل مشاوره درسیار';
         document.getElementById('admin-role-subtitle').textContent = owner ? 'نمای کلی دانش‌آموزان، کیفیت سرویس و عملیات آموزشی.' : 'دانش‌آموزها، برنامه‌ها و گزارش‌های مطالعه را یک‌جا مدیریت کنید.';
         const model = document.getElementById('admin-ai-model'); if (model) model.value = Storage.getSettings().aiModel || 'gapgpt-qwen-3.5';

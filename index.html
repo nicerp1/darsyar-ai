@@ -91,7 +91,7 @@
                     <span class="material-symbols-outlined">calendar_month</span>
                     <span>برنامه مطالعاتی هفتگی</span>
                 </div>
-                <div class="nav-item" id="nav-exams" onclick="App.navigate('exams')">
+                <div class="nav-item" id="nav-exams" data-feature="exams" onclick="App.navigate('exams')">
                     <span class="material-symbols-outlined">assignment</span>
                     <span>آزمون‌ها و کارنامه</span>
                 </div>
@@ -101,11 +101,11 @@
                 </div>
 
                 <div class="nav-section-title">حساب و جوایز</div>
-                <div class="nav-item" id="nav-gamification" onclick="App.navigate('gamification')">
+                <div class="nav-item" id="nav-gamification" data-feature="gamification" onclick="App.navigate('gamification')">
                     <span class="material-symbols-outlined">military_tech</span>
                     <span>نشان‌ها و رتبه‌بندی</span>
                 </div>
-                <div class="nav-item" id="nav-subscription" onclick="App.navigate('subscription')">
+                <div class="nav-item" id="nav-subscription" data-feature="subscription" onclick="App.navigate('subscription')">
                     <span class="material-symbols-outlined">workspace_premium</span>
                     <span>ارتقای اشتراک VIP</span>
                 </div>
@@ -120,7 +120,7 @@
             </nav>
 
             <div class="sidebar-footer">
-                <div class="user-xp-widget" onclick="App.navigate('gamification')" style="cursor: pointer;">
+                <div class="user-xp-widget" data-feature="gamification" onclick="App.navigate('gamification')" style="cursor: pointer;">
                     <div class="user-xp-header">
                         <span class="user-level-badge" id="sidebar-user-level">سطح ۲</span>
                         <span style="font-size: 11px; color: var(--gold-light);">امتیاز XP ⚡</span>
@@ -844,7 +844,7 @@
                 </section>
 
                 <!-- 8. EXAMS & ONLINE TESTING VIEW -->
-                <section id="view-exams" class="view-section">
+                <section id="view-exams" class="view-section" data-feature="exams">
                     
                     <!-- Catalog View -->
                     <div id="exams-catalog-view">
@@ -933,7 +933,7 @@
                                 <span class="material-symbols-outlined" style="color: var(--gold);">analytics</span>
                                 گزارش آماری عملکرد
                             </h2>
-                            <p style="font-size: 12px; color: var(--text-muted);">تحلیل روند مطالعه، آزمون‌ها و نمودارهای تحصیلی</p>
+                            <p style="font-size: 12px; color: var(--text-muted);">تحلیل روند مطالعه و نمودارهای تحصیلی</p>
                         </div>
                         <button class="btn-gold" onclick="Stats.exportPDFReport()">
                             <span class="material-symbols-outlined">download</span>
@@ -988,7 +988,7 @@
                             </div>
                         </div>
 
-                        <div class="content-card" style="margin-top: 20px;">
+                        <div class="content-card" data-feature="exams" style="margin-top: 20px;">
                             <div class="content-card-title" style="margin-bottom: 14px;">🥧 توزیع زمانی بین دروس مختلف</div>
                             <div style="height: 240px; max-width: 400px; margin: 0 auto;"><canvas id="chart-stats-doughnut"></canvas></div>
                         </div>
@@ -1018,7 +1018,7 @@
                 </section>
 
                 <!-- 10. GAMIFICATION VIEW -->
-                <section id="view-gamification" class="view-section">
+                <section id="view-gamification" class="view-section" data-feature="gamification">
                     
                     <!-- Level Status Card -->
                     <div class="dashboard-header-banner" style="background: linear-gradient(135deg, #05319e 0%, #03143f 100%);">
@@ -1082,7 +1082,7 @@
                 </section>
 
                 <!-- 11. SUBSCRIPTION VIEW -->
-                <section id="view-subscription" class="view-section">
+                <section id="view-subscription" class="view-section" data-feature="subscription">
                     <div style="text-align: center; max-width: 700px; margin: 0 auto 30px;">
                         <span class="brand-badge" style="font-size: 12px;">پلن‌های ویژه درسیار</span>
                         <h2 style="font-size: 26px; font-weight: 800; margin: 10px 0;">دسترسی نامحدود به پیشرفته‌ترین امکانات</h2>
@@ -1175,7 +1175,7 @@
                         <main class="counselor-profile">
                             <div id="admin-student-empty" class="counselor-empty"><span class="material-symbols-outlined" aria-hidden="true">person_search</span><h3>پرونده یک دانش‌آموز را باز کنید</h3><p>از فهرست کنار صفحه انتخاب کنید تا برنامه، گزارش‌ها و وضعیت او نمایش داده شود.</p></div>
                             <div id="admin-student-content" class="hidden">
-                                <header class="counselor-student-header"><div class="counselor-student-identity"><span id="admin-selected-avatar" class="counselor-avatar">د</span><div><span class="counselor-kicker">پرونده تحصیلی</span><h3 id="admin-selected-name">—</h3><p id="admin-selected-meta">—</p></div></div><div class="counselor-header-actions"><span id="admin-selected-status" class="admin-status-pill">—</span><span id="admin-selected-plan" class="admin-plan-badge">رایگان</span><select id="admin-plan-control" class="admin-plan-control hidden" aria-label="تغییر اشتراک" onchange="Admin.changeSelectedPlan(this.value)"><option value="free">رایگان</option><option value="silver">نقره‌ای</option><option value="gold">طلایی</option></select><button type="button" class="counselor-chat-button" onclick="Admin.openStudentChat()"><span class="material-symbols-outlined" aria-hidden="true">chat</span> پیام</button></div></header>
+                                <header class="counselor-student-header"><div class="counselor-student-identity"><span id="admin-selected-avatar" class="counselor-avatar">د</span><div><span class="counselor-kicker">پرونده تحصیلی</span><h3 id="admin-selected-name">—</h3><p id="admin-selected-meta">—</p></div></div><div class="counselor-header-actions"><span id="admin-selected-status" class="admin-status-pill">—</span><span id="admin-selected-plan" data-feature="subscription" class="admin-plan-badge">رایگان</span><select id="admin-plan-control" data-feature="subscription" class="admin-plan-control hidden" aria-label="تغییر اشتراک" onchange="Admin.changeSelectedPlan(this.value)"><option value="free">رایگان</option><option value="silver">نقره‌ای</option><option value="gold">طلایی</option></select><button type="button" class="counselor-chat-button" onclick="Admin.openStudentChat()"><span class="material-symbols-outlined" aria-hidden="true">chat</span> پیام</button></div></header>
                                 <div id="admin-student-metrics" class="counselor-metrics"></div>
 
                                 <div class="counselor-action-grid">
@@ -1216,7 +1216,7 @@
 
                             <div style="background: var(--bg-surface); padding: 12px; border-radius: var(--radius-md); border: 1px solid var(--border-subtle); text-align: right;">
                                 <div style="font-size: 12px; margin-bottom: 4px;" id="profile-role-badge">دانش‌آموز کوشا 🎓</div>
-                                <div style="font-size: 12px; color: var(--gold-light);" id="profile-plan-badge">پلن: رایگان</div>
+                                <div style="font-size: 12px; color: var(--gold-light);" data-feature="subscription" id="profile-plan-badge">پلن: رایگان</div>
                             </div>
                         </div>
 

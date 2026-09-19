@@ -16,9 +16,21 @@ android {
             ignoreAssetsPattern '!.svn:!.git:!.ds_store:!*.scc:.*:!CVS:!thumbs.db:!picasa.ini:!*~'
         }
     }
+    signingConfigs {
+        release {
+            def keyStorePath = System.getenv("DARSYAR_KEYSTORE_PATH")
+            if (keyStorePath) {
+                storeFile file(keyStorePath)
+                storePassword System.getenv("DARSYAR_KEYSTORE_PASSWORD")
+                keyAlias System.getenv("DARSYAR_KEY_ALIAS")
+                keyPassword System.getenv("DARSYAR_KEY_PASSWORD")
+            }
+        }
+    }
     buildTypes {
         release {
             minifyEnabled false
+            signingConfig signingConfigs.release
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }

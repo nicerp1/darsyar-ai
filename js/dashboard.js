@@ -152,8 +152,7 @@ const Dashboard = (function () {
             { id: 'ai', title: 'دستیار هوش مصنوعی', icon: 'smart_toy', desc: 'رفع اشکال درسی و محاسبات ریاضی', view: 'ai-assistant', color: '#c9a03e' },
             { id: 'flash', title: 'فلش‌کارت و لایتنر', icon: 'style', desc: 'مرور هوشمند مطالب و واژگان', view: 'flashcards', color: '#10b981' },
             { id: 'writing', title: 'انشانویسی هوشمند', icon: 'edit_note', desc: 'نگارش انشا با ساختار و آرایه ادبی', view: 'ai-writing', color: '#8b5cf6' },
-            { id: 'research', title: 'تحقیق و مقاله علمی', icon: 'menu_book', desc: 'تولید مقاله با استناد و رفرنس', view: 'ai-research', color: '#0ea5e9' },
-            { id: 'exams', title: 'آزمون آنلاین', icon: 'assignment', desc: 'سنجش یادگیری با کارنامه دقیق', view: 'exams', color: '#f59e0b' }
+            { id: 'research', title: 'تحقیق و مقاله علمی', icon: 'menu_book', desc: 'تولید مقاله با استناد و رفرنس', view: 'ai-research', color: '#0ea5e9' }
         ];
 
         grid.innerHTML = actions.map(act => `
