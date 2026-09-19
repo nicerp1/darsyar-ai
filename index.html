@@ -627,6 +627,7 @@
                                     <option value="کوتاه (حدود ۲۰۰ کلمه)">کوتاه (حدود ۲۰۰ کلمه)</option>
                                     <option value="متوسط (حدود ۴۰۰ کلمه)" selected>متوسط (حدود ۴۰۰ کلمه)</option>
                                     <option value="بلند و تشریحی (۷۰۰ کلمه)">بلند و مفصل (۷۰۰ کلمه)</option>
+                                    <option value="بسیار بلند (حدود ۱۲۰۰ کلمه)">بسیار بلند (حدود ۱۲۰۰ کلمه)</option>
                                 </select>
                             </div>
 
@@ -726,6 +727,7 @@
                                     <option value="۳ بخش">۳ بخش (خلاصه)</option>
                                     <option value="۵ بخش" selected>۵ بخش (استاندارد)</option>
                                     <option value="۷ بخش">۷ بخش (جامع و کامل)</option>
+                                    <option value="۹ بخش">۹ بخش (پروژه مفصل)</option>
                                 </select>
                             </div>
 
@@ -1136,171 +1138,52 @@
                     </div>
                 </section>
 
-                <!-- 12. ADMIN PANEL VIEW (Only for role === 'admin') -->
-                <section id="view-admin" class="view-section">
-                    <div class="section-heading-bar">
-                        <div>
-                            <h2 class="section-heading-title">
-                                <span class="material-symbols-outlined" style="color: var(--gold);">admin_panel_settings</span>
-                                پنل مدیریت ارشد درسیار
-                            </h2>
-                            <p style="font-size: 12px; color: var(--text-muted);">مدیریت حساب کاربران، محتوا، آزمون‌ها و تنظیمات سرویس AI</p>
-                        </div>
-                        <div style="display: flex; gap: 8px;">
-                            <button id="admin-refresh" class="btn-primary" onclick="Admin.refreshOverview()">
-                                <span class="material-symbols-outlined" aria-hidden="true">refresh</span>
-                                به‌روزرسانی اطلاعات
-                            </button>
-                        </div>
+                <!-- 12. COUNSELING OPERATIONS CENTER -->
+                <section id="view-admin" class="view-section counselor-center">
+                    <header class="counselor-hero">
+                        <div class="counselor-hero-copy"><span class="counselor-kicker">مرکز عملیات آموزشی</span><h2 id="admin-role-title">پنل مشاوره درسیار</h2><p id="admin-role-subtitle">دانش‌آموزها، برنامه‌ها و گزارش‌های مطالعه را یک‌جا مدیریت کنید.</p></div>
+                        <button id="admin-refresh" class="counselor-refresh" type="button" onclick="Admin.refreshOverview()"><span class="material-symbols-outlined" aria-hidden="true">sync</span><span>همگام‌سازی</span></button>
+                    </header>
+
+                    <section id="advisor-link-card" class="counselor-connect hidden" aria-labelledby="advisor-link-title">
+                        <div><span class="material-symbols-outlined" aria-hidden="true">person_add</span><div><h3 id="advisor-link-title">افزودن دانش‌آموز</h3><p>نام کاربری دقیق دانش‌آموز را وارد کنید؛ اطلاعات حساب یا رمز او نمایش داده نمی‌شود.</p></div></div>
+                        <form onsubmit="event.preventDefault(); Admin.linkStudent();"><label class="sr-only" for="advisor-link-username">نام کاربری دانش‌آموز</label><input id="advisor-link-username" class="form-control" autocomplete="off" placeholder="username@ بدون علامت"><button id="advisor-link-submit" class="btn-gold" type="submit"><span class="material-symbols-outlined" aria-hidden="true">add</span> اتصال</button></form>
+                    </section>
+
+                    <div class="counselor-kpis" aria-label="خلاصه عملکرد">
+                        <article><span class="material-symbols-outlined" aria-hidden="true">groups</span><small>دانش‌آموزان من</small><strong id="admin-stat-users">۰</strong></article>
+                        <article><span class="material-symbols-outlined" aria-hidden="true">verified</span><small>فعال این هفته</small><strong id="admin-stat-cards">۰</strong></article>
+                        <article><span class="material-symbols-outlined" aria-hidden="true">task_alt</span><small>تسک‌های انجام‌شده</small><strong id="admin-stat-exams">۰</strong></article>
+                        <article class="attention"><span class="material-symbols-outlined" aria-hidden="true">notification_important</span><small>نیازمند پیگیری</small><strong id="admin-stat-researches">۰</strong></article>
                     </div>
 
-                    <!-- Admin KPI Stats -->
-                    <div class="kpi-grid">
-                        <div class="kpi-card">
-                            <div><div class="kpi-info-label">تعداد دانش‌آموزان</div><div class="kpi-value" id="admin-stat-users">۰</div></div>
-                            <div class="kpi-icon-wrapper kpi-icon-blue"><span class="material-symbols-outlined">group</span></div>
-                        </div>
-                        <div class="kpi-card">
-                            <div><div class="kpi-info-label">دانش‌آموز فعال</div><div class="kpi-value" id="admin-stat-cards">۰</div></div>
-                            <div class="kpi-icon-wrapper kpi-icon-gold"><span class="material-symbols-outlined">style</span></div>
-                        </div>
-                        <div class="kpi-card">
-                            <div><div class="kpi-info-label">اشتراک طلایی</div><div class="kpi-value" id="admin-stat-exams">۰</div></div>
-                            <div class="kpi-icon-wrapper kpi-icon-green"><span class="material-symbols-outlined">assignment</span></div>
-                        </div>
-                        <div class="kpi-card">
-                            <div><div class="kpi-info-label">نیازمند پیگیری</div><div class="kpi-value" id="admin-stat-researches">۰</div></div>
-                            <div class="kpi-icon-wrapper kpi-icon-gold"><span class="material-symbols-outlined">notification_important</span></div>
-                        </div>
-                    </div>
+                    <div class="counselor-layout">
+                        <aside class="counselor-roster">
+                            <div class="counselor-panel-title"><div><span class="material-symbols-outlined" aria-hidden="true">school</span><h3>دانش‌آموزان</h3></div><span id="admin-roster-count">۰ نفر</span></div>
+                            <label class="counselor-search"><span class="material-symbols-outlined" aria-hidden="true">search</span><input id="admin-student-search" type="search" placeholder="جست‌وجوی نام یا یوزرنیم" oninput="Admin.applyFilters()"></label>
+                            <div class="counselor-filter-row"><select id="admin-status-filter" aria-label="فیلتر وضعیت" onchange="Admin.applyFilters()"><option value="all">همه وضعیت‌ها</option><option value="attention">نیازمند پیگیری</option><option value="active">فعال</option></select><select id="admin-grade-filter" aria-label="فیلتر مقطع" onchange="Admin.applyFilters()"><option value="all">همه مقاطع</option></select></div>
+                            <div id="admin-attention-list" class="counselor-priority" aria-live="polite"></div>
+                            <div id="admin-student-list" class="counselor-student-list" aria-live="polite"></div>
+                        </aside>
 
-                    <div class="content-card admin-attention-card">
-                        <div class="content-card-title"><span class="material-symbols-outlined" aria-hidden="true">notifications_active</span><span>نیازمند پیگیری</span><span id="admin-attention-count" class="admin-count-badge">۰</span></div>
-                        <p class="manual-report-help">دانش‌آموزانی که فعالیتی ندارند، بیش از یک هفته گزارش نداده‌اند یا برنامه انجام‌نشده دارند.</p>
-                        <div id="admin-attention-list" class="admin-attention-list" aria-live="polite"></div>
-                    </div>
-
-                    <div class="admin-student-workspace">
-                        <div class="content-card admin-student-list-card">
-                            <div class="content-card-title">
-                                <span class="material-symbols-outlined" aria-hidden="true">person_search</span>
-                                <span>انتخاب دانش‌آموز</span>
-                            </div>
-                            <label class="form-label" for="admin-student-search">جست‌وجوی نام یا نام کاربری</label>
-                            <input id="admin-student-search" class="form-control" type="search" placeholder="مثلاً ali" oninput="Admin.applyFilters()">
-                            <div class="admin-filter-grid">
-                                <div><label class="form-label" for="admin-status-filter">وضعیت</label><select id="admin-status-filter" class="form-control" onchange="Admin.applyFilters()"><option value="all">همه</option><option value="attention">نیازمند پیگیری</option><option value="active">فعال</option></select></div>
-                                <div><label class="form-label" for="admin-grade-filter">مقطع</label><select id="admin-grade-filter" class="form-control" onchange="Admin.applyFilters()"><option value="all">همه مقاطع</option></select></div>
-                            </div>
-                            <div id="admin-student-list" class="admin-student-list" aria-live="polite"></div>
-                        </div>
-
-                        <div class="admin-student-detail">
-                            <div id="admin-student-empty" class="content-card admin-empty-state">
-                                <span class="material-symbols-outlined" aria-hidden="true">person_check</span>
-                                <h3>یک دانش‌آموز انتخاب کنید</h3>
-                                <p>برنامه اختصاصی، گزارش کار و شاخص‌های عملکرد او اینجا نمایش داده می‌شود.</p>
-                            </div>
-
+                        <main class="counselor-profile">
+                            <div id="admin-student-empty" class="counselor-empty"><span class="material-symbols-outlined" aria-hidden="true">person_search</span><h3>پرونده یک دانش‌آموز را باز کنید</h3><p>از فهرست کنار صفحه انتخاب کنید تا برنامه، گزارش‌ها و وضعیت او نمایش داده شود.</p></div>
                             <div id="admin-student-content" class="hidden">
-                                <div class="content-card admin-student-header">
-                                    <div>
-                                        <div class="admin-eyebrow">پرونده تحصیلی</div>
-                                        <h3 id="admin-selected-name">—</h3>
-                                        <p id="admin-selected-meta">—</p>
-                                    </div>
-                                    <div class="admin-header-actions"><span id="admin-selected-status" class="admin-status-pill">—</span><span id="admin-selected-plan" class="admin-plan-badge">رایگان</span></div>
+                                <header class="counselor-student-header"><div class="counselor-student-identity"><span id="admin-selected-avatar" class="counselor-avatar">د</span><div><span class="counselor-kicker">پرونده تحصیلی</span><h3 id="admin-selected-name">—</h3><p id="admin-selected-meta">—</p></div></div><div class="counselor-header-actions"><span id="admin-selected-status" class="admin-status-pill">—</span><span id="admin-selected-plan" class="admin-plan-badge">رایگان</span><select id="admin-plan-control" class="admin-plan-control hidden" aria-label="تغییر اشتراک" onchange="Admin.changeSelectedPlan(this.value)"><option value="free">رایگان</option><option value="silver">نقره‌ای</option><option value="gold">طلایی</option></select><button type="button" class="counselor-chat-button" onclick="Admin.openStudentChat()"><span class="material-symbols-outlined" aria-hidden="true">chat</span> پیام</button></div></header>
+                                <div id="admin-student-metrics" class="counselor-metrics"></div>
+
+                                <div class="counselor-action-grid">
+                                    <section class="counselor-card counselor-program-card"><div class="counselor-card-heading"><div><span class="material-symbols-outlined" aria-hidden="true">calendar_month</span><h4>برنامه هفتگی</h4></div><button type="button" onclick="Admin.openStudentSchedule()">ویرایش کامل</button></div><div id="admin-program-list" class="admin-program-list"></div></section>
+                                    <section class="counselor-card"><div class="counselor-card-heading"><div><span class="material-symbols-outlined" aria-hidden="true">clinical_notes</span><h4>یادداشت خصوصی</h4></div></div><textarea id="admin-private-note" class="form-control" rows="6" maxlength="2000" placeholder="هدف جلسه بعد، نقطه ضعف یا نکته پیگیری..."></textarea><div class="admin-note-footer"><small id="admin-note-updated">هنوز یادداشتی ثبت نشده است.</small><button id="admin-note-save" class="btn-primary" type="button" onclick="Admin.savePrivateNote()">ذخیره</button></div></section>
                                 </div>
 
-                                <div id="admin-student-metrics" class="admin-metrics-grid"></div>
-
-                                <div class="admin-detail-grid">
-                                    <div class="content-card admin-program-form">
-                                        <div class="content-card-title">
-                                            <span class="material-symbols-outlined" aria-hidden="true">edit_calendar</span>
-                                            <span>ویرایش برنامه اختصاصی</span>
-                                        </div>
-                                        <p class="manual-report-help">ویرایش برنامه حالا داخل خود صفحه برنامه انجام می‌شود تا کل هفته را یک‌جا ببینید.</p>
-                                        <button class="btn-primary" type="button" onclick="Admin.openStudentSchedule()">
-                                            <span class="material-symbols-outlined" aria-hidden="true">calendar_month</span> باز کردن برنامه این دانش‌آموز
-                                        </button>
-                                    </div>
-
-                                    <div class="content-card">
-                                        <div class="content-card-title">
-                                            <span class="material-symbols-outlined" aria-hidden="true">event_note</span>
-                                            <span>برنامه ثبت‌شده</span>
-                                        </div>
-                                        <div id="admin-program-list" class="admin-program-list"></div>
-                                    </div>
-                                </div>
-
-                                <div class="admin-detail-grid">
-                                    <div class="content-card">
-                                        <div class="content-card-title"><span class="material-symbols-outlined" aria-hidden="true">clinical_notes</span><span>یادداشت خصوصی ادمین</span></div>
-                                        <label class="form-label" for="admin-private-note">نکته پیگیری درباره این دانش‌آموز</label>
-                                        <textarea id="admin-private-note" class="form-control" rows="4" maxlength="2000" placeholder="مثلاً تماس با والدین، مبحث نیازمند مرور یا هدف جلسه بعد"></textarea>
-                                        <div class="admin-note-footer"><small id="admin-note-updated">هنوز یادداشتی ثبت نشده است.</small><button id="admin-note-save" class="btn-primary" type="button" onclick="Admin.savePrivateNote()">ذخیره یادداشت</button></div>
-                                    </div>
-                                    <div class="content-card admin-danger-zone">
-                                        <div class="content-card-title"><span class="material-symbols-outlined" aria-hidden="true">warning</span><span>مدیریت حساب</span></div>
-                                        <p>حذف دانش‌آموز، پروفایل، برنامه‌ها، گزارش‌ها و نشست‌های ورود او را برای همیشه پاک می‌کند.</p>
-                                        <button id="admin-delete-student" class="admin-danger-button" type="button" onclick="Admin.deleteSelectedStudent()"><span class="material-symbols-outlined" aria-hidden="true">person_remove</span> حذف کامل دانش‌آموز</button>
-                                    </div>
-                                </div>
-
-                                <div class="content-card admin-report-card">
-                                    <div class="content-card-title">
-                                        <span class="material-symbols-outlined" aria-hidden="true">monitoring</span>
-                                        <span>گزارش کار و روند مطالعه</span>
-                                    </div>
-                                    <div id="admin-study-report" class="admin-study-report"></div>
-                                </div>
+                                <section class="counselor-card counselor-report-card"><div class="counselor-card-heading"><div><span class="material-symbols-outlined" aria-hidden="true">monitoring</span><h4>گزارش فعالیت و پیشرفت</h4></div></div><div id="admin-study-report" class="admin-study-report"></div></section>
+                                <section class="counselor-account-actions"><div><strong>مدیریت ارتباط</strong><p>مشاور می‌تواند اتصال را قطع کند؛ حذف دائمی حساب فقط برای مدیر اصلی ممکن است.</p></div><div><button id="advisor-unlink-student" class="btn-primary hidden" type="button" onclick="Admin.unlinkSelectedStudent()"><span class="material-symbols-outlined" aria-hidden="true">link_off</span> قطع اتصال</button><button id="admin-delete-student" class="admin-danger-button hidden" type="button" onclick="Admin.deleteSelectedStudent()"><span class="material-symbols-outlined" aria-hidden="true">person_remove</span> حذف کامل حساب</button></div></section>
                             </div>
-                        </div>
+                        </main>
                     </div>
 
-                    <!-- Users Management Table -->
-                    <div class="content-card" style="margin-top: 24px;">
-                        <div class="content-card-title" style="margin-bottom: 16px;">
-                            <span class="material-symbols-outlined" style="color: var(--gold);">manage_accounts</span>
-                            <span>مدیریت کاربران و تغییر دسترسی‌ها</span>
-                        </div>
-                        <div style="overflow-x: auto;">
-                            <table style="width: 100%; border-collapse: collapse; text-align: right; font-size: 13.5px;">
-                                <thead>
-                                    <tr style="border-bottom: 2px solid var(--border-subtle); color: var(--gold-light);">
-                                        <th style="padding: 10px;">کاربر</th>
-                                        <th style="padding: 10px;">طرح اشتراک</th>
-                                        <th style="padding: 10px;">امتیاز XP</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="admin-users-tbody"></tbody>
-                            </table>
-                        </div>
-                    </div>
-
-                    <!-- AI model settings. The API key stays server-side in Vercel. -->
-                    <div class="content-card" style="margin-top: 24px;">
-                        <div class="content-card-title" style="margin-bottom: 16px;">
-                            <span class="material-symbols-outlined" style="color: var(--gold);">api</span>
-                            <span>تنظیمات مدل هوش مصنوعی</span>
-                        </div>
-                        <div style="display: grid; grid-template-columns: 1fr; gap: 16px;">
-                            <div class="form-group">
-                                <label class="form-label">مدل هوش مصنوعی</label>
-                                <select id="admin-ai-model" class="form-control">
-                                    <option value="gapgpt-qwen-3.5" selected>gapgpt-qwen-3.5</option>
-                                    <option value="gapgpt-llama-3">gapgpt-llama-3</option>
-                                    <option value="gapgpt-deepseek">gapgpt-deepseek</option>
-                                </select>
-                            </div>
-                        </div>
-                        <button class="btn-gold" onclick="Admin.saveSystemSettings()">
-                            ذخیره تنظیمات مدل
-                        </button>
-                    </div>
-
+                    <section id="admin-system-settings" class="counselor-card counselor-system hidden"><div class="counselor-card-heading"><div><span class="material-symbols-outlined" aria-hidden="true">tune</span><h4>تنظیمات هوش مصنوعی پلتفرم</h4></div></div><div><select id="admin-ai-model" class="form-control"><option value="gapgpt-qwen-3.5">gapgpt-qwen-3.5</option><option value="gapgpt-llama-3">gapgpt-llama-3</option><option value="gapgpt-deepseek">gapgpt-deepseek</option></select><button class="btn-gold" onclick="Admin.saveSystemSettings()">ذخیره مدل</button></div></section>
                 </section>
 
                 <!-- 13. USER PROFILE VIEW -->
@@ -1484,12 +1367,17 @@
                 </div>
                 <div class="form-group">
                     <label class="form-label">متن جزوه یا پاراگراف درسی</label>
-                    <textarea id="input-ai-fc-text" class="form-control" style="height: 120px; resize: none;" placeholder="بخشی از متن کتاب یا جزوه خود را اینجا پیست کنید تا سوال و جواب‌های کلیدی استخراج شود..."></textarea>
+                    <textarea id="input-ai-fc-text" class="form-control" style="min-height: 180px; resize: vertical;" maxlength="24000" placeholder="متن کتاب یا جزوه را وارد کنید؛ نکات مهم، جای‌خالی‌ها و سوال‌های مفهومی استخراج می‌شوند..."></textarea>
+                    <small class="field-help">برای نتیجه بهتر، حداقل یک پاراگراف کامل وارد کنید.</small>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="input-ai-fc-count">تعداد کارت پیشنهادی</label>
+                    <select id="input-ai-fc-count" class="form-control"><option value="6">۶ کارت</option><option value="8" selected>۸ کارت</option><option value="10">۱۰ کارت</option><option value="12">۱۲ کارت</option></select>
                 </div>
             </div>
             <div class="modal-footer">
                 <button class="btn-primary" onclick="Utils.closeModal('modal-ai-flashcards')">انصراف</button>
-                <button class="btn-gold" onclick="Flashcards.generateAIFlashcardsSubmit()">استخراج خودکار کارت‌ها</button>
+                <button id="btn-ai-flashcards" class="btn-gold" onclick="Flashcards.generateAIFlashcardsSubmit()"><span class="material-symbols-outlined">auto_awesome</span> استخراج حرفه‌ای کارت‌ها</button>
             </div>
         </div>
     </div>
@@ -1649,7 +1537,6 @@
     <script src="js/platform.js"></script>
     <script src="data/storage.js"></script>
     <script src="js/utils.js"></script>
-    <script src="js/default-content.js"></script>
     <script src="js/auth.js"></script>
     <script src="js/dashboard.js"></script>
     <script src="js/pomodoro.js"></script>

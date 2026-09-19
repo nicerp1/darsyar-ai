@@ -97,8 +97,9 @@ const App = (function () {
         const user = Storage.getCurrentUser();
         const adminNav = document.getElementById('nav-admin');
         if (adminNav) {
-            if (user && user.username === 'kiankaki') {
+            if (user && ['admin', 'advisor'].includes(user.accountType)) {
                 adminNav.style.display = 'flex';
+                const label = adminNav.querySelector('span:last-child'); if (label) label.textContent = user.accountType === 'advisor' ? 'پنل مشاوره' : 'مدیریت پلتفرم';
             } else {
                 adminNav.style.display = 'none';
             }
@@ -106,7 +107,7 @@ const App = (function () {
     }
 
     function navigate(viewName) {
-        if (viewName === 'admin' && Storage.getCurrentUser()?.username !== 'kiankaki') {
+        if (viewName === 'admin' && !Storage.isManager()) {
             currentView = 'dashboard';
             if (typeof Utils !== 'undefined') Utils.showToast('دسترسی به این بخش فقط برای مدیر اصلی مجاز است.', 'error');
             viewName = 'dashboard';

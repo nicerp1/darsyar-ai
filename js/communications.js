@@ -2,7 +2,7 @@
 const Communications = (function () {
     let activeTab = 'chat', selectedStudent = '', adminMessages = [], initialized = false;
     const esc = value => String(value ?? '').replace(/[&<>'"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[c]));
-    const isAdmin = () => Storage.getCurrentUser()?.username === 'kiankaki';
+    const isManager = () => Storage.isManager();
 
     function init() {
         if (!Storage.getCurrentUser()) return;
@@ -15,9 +15,9 @@ const Communications = (function () {
 
     function populateStudents() {
         const picker = document.getElementById('advisor-student-picker'), select = document.getElementById('advisor-student-select');
-        picker?.classList.toggle('hidden', !isAdmin());
-        if (!select || !isAdmin()) return;
-        const students = Storage.getUsers().filter(user => user.username !== 'kiankaki');
+        picker?.classList.toggle('hidden', !isManager());
+        if (!select || !isManager()) return;
+        const students = Storage.getUsers().filter(user => user.accountType !== 'advisor' && user.username !== 'kiankaki');
         select.innerHTML = '<option value="">انتخاب دانش‌آموز</option>' + students.map(user => `<option value="${esc(user.username)}">${esc(user.name || user.username)} (@${esc(user.username)})</option>`).join('');
         if (selectedStudent && students.some(user => user.username === selectedStudent)) select.value = selectedStudent;
     }
@@ -48,7 +48,7 @@ const Communications = (function () {
 
     async function loadChat() {
         const status = document.getElementById('advisor-chat-status');
-        if (isAdmin()) {
+        if (isManager()) {
             if (!selectedStudent) { adminMessages = []; if (status) status.textContent = 'برای شروع گفت‌وگو یک دانش‌آموز انتخاب کنید.'; renderMessages([]); return; }
             if (status) status.textContent = 'در حال دریافت گفت‌وگو…';
             try {
@@ -69,20 +69,20 @@ const Communications = (function () {
 
     function renderMessages(messages) {
         const box = document.getElementById('advisor-chat-messages'); if (!box) return;
-        const viewer = isAdmin() ? 'advisor' : 'student';
-        box.innerHTML = messages.map(message => `<article class="advisor-message ${message.sender === viewer ? 'mine' : 'theirs'}"><strong>${esc(message.sender === 'advisor' ? 'مشاور' : message.senderName || 'دانش‌آموز')}</strong><p>${esc(message.text)}</p><time>${new Date(message.createdAt).toLocaleString('fa-IR')}</time></article>`).join('') || '<div class="communications-empty"><span class="material-symbols-outlined" aria-hidden="true">chat_bubble</span><p>هنوز پیامی ثبت نشده است؛ اولین پیام را ارسال کنید.</p></div>';
+        const viewer = isManager() ? 'advisor' : 'student';
+        box.innerHTML = messages.map(message => `<article class="advisor-message ${message.sender === viewer ? 'mine' : 'theirs'}"><strong>${esc(message.senderName || (message.sender === 'advisor' ? 'مشاور' : 'دانش‌آموز'))}</strong><p>${esc(message.text)}</p><time>${new Date(message.createdAt).toLocaleString('fa-IR')}</time></article>`).join('') || '<div class="communications-empty"><span class="material-symbols-outlined" aria-hidden="true">chat_bubble</span><p>هنوز پیامی ثبت نشده است؛ اولین پیام را ارسال کنید.</p></div>';
         box.scrollTop = box.scrollHeight;
     }
 
     async function sendMessage() {
         const input = document.getElementById('advisor-chat-input'), button = document.getElementById('advisor-chat-send'), text = input?.value.trim();
         if (!text) return Utils.showToast('متن پیام را وارد کنید.', 'warning');
-        if (isAdmin() && !selectedStudent) return Utils.showToast('ابتدا دانش‌آموز را انتخاب کنید.', 'warning');
+        if (isManager() && !selectedStudent) return Utils.showToast('ابتدا دانش‌آموز را انتخاب کنید.', 'warning');
         if (button) button.disabled = true;
         try {
-            const response = await fetch('/api/chat', { method: 'POST', credentials: 'same-origin', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ username: isAdmin() ? selectedStudent : undefined, text }) });
+            const response = await fetch('/api/chat', { method: 'POST', credentials: 'same-origin', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ username: isManager() ? selectedStudent : undefined, text }) });
             const payload = await response.json(); if (!response.ok) throw new Error(payload.error || 'ارسال پیام انجام نشد.');
-            if (isAdmin()) adminMessages = payload.messages;
+            if (isManager()) adminMessages = payload.messages;
             renderMessages(payload.messages);
             input.value = ''; Utils.showToast('پیام ذخیره شد.', 'success');
         } catch (error) { Utils.showToast(error.message, 'error'); }
@@ -90,7 +90,7 @@ const Communications = (function () {
     }
 
     function updateUnread() {
-        const dot = document.getElementById('header-chat-dot'); if (!dot || isAdmin()) return dot?.classList.add('hidden');
+        const dot = document.getElementById('header-chat-dot'); if (!dot || isManager()) return dot?.classList.add('hidden');
         const lastRead = new Date(Storage.get('chat_last_read', 0)).getTime();
         const unread = (Storage.get('advisor_chat', []) || []).some(message => message.sender === 'advisor' && new Date(message.createdAt).getTime() > lastRead);
         dot.classList.toggle('hidden', !unread);

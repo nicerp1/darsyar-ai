@@ -66,7 +66,7 @@ const Storage = (function () {
     function getUsers() { return get('users', currentUser ? [currentUser] : []); }
     function saveUsers(users) {
         cache.users = users;
-        if (currentUser?.username === 'kiankaki') saveChain = saveChain.then(() => request('/api/users', { method: 'POST', body: JSON.stringify({ users }) })).catch(console.error);
+        if (currentUser?.accountType === 'admin') saveChain = saveChain.then(() => request('/api/users', { method: 'POST', body: JSON.stringify({ users }) })).catch(console.error);
         return true;
     }
 
@@ -91,9 +91,10 @@ const Storage = (function () {
     function getSettings() {
         return get('settings', { theme: 'dark', aiModel: 'gapgpt-qwen-3.5', soundEnabled: true, dailyGoalHours: 4, pomodoroWork: 25, pomodoroShortBreak: 5, pomodoroLongBreak: 15 });
     }
+    function isManager() { return ['admin', 'advisor'].includes(currentUser?.accountType); }
     function saveSettings(settings) { return set('settings', settings); }
 
-    return { init, get, set, remove, getCurrentUser, setCurrentUser, login, register, logout, getUsers, saveUsers, updateUser, addXP, getSettings, saveSettings };
+    return { init, get, set, remove, getCurrentUser, setCurrentUser, login, register, logout, getUsers, saveUsers, updateUser, addXP, getSettings, saveSettings, isManager };
 })();
 
 window.Storage = Storage;

@@ -81,6 +81,7 @@ const AIWriting = (function () {
     async function craftEssay(topic, length, grade, tone) {
         const settings = Storage.getSettings();
         try {
+            const targetWords = length.includes('۱۲۰۰') ? 1200 : length.includes('۷۰۰') ? 700 : length.includes('۲۰۰') ? 200 : 400;
             const prompt = `یک انشای فارسی کامل، شیوا و استاندارد بنویس:
 موضوع: «${topic}»
 طول انشا: ${length}
@@ -90,7 +91,9 @@ const AIWriting = (function () {
 انشا باید دارای ساختار زیر باشد:
 1. مقدمه جذاب همراه با بیت شعر یا حکمت متناسب
 2. دو الی سه بند (پاراگراف) بدنه اصلی با بهره‌گیری از آرایه‌های ادبی (تشبیه، استعاره، تضاد، سجع)
-3. نتیجه‌گیری تاثیرگذار و پیام اخلاقی یا فلسفی.`;
+3. نتیجه‌گیری تاثیرگذار و پیام اخلاقی یا فلسفی.
+
+متن باید واقعاً حدود ${targetWords} کلمه باشد، نیمه‌کاره تمام نشود، تکرار نداشته باشد و پایان مشخص داشته باشد. فقط متن نهایی انشا را بنویس.`;
 
             const res = await fetch('/api/ai', {
                 method: 'POST',
@@ -102,14 +105,16 @@ const AIWriting = (function () {
                         { role: 'user', content: prompt }
                     ],
                     temperature: 0.75,
-                    max_tokens: 1000
+                    max_tokens: targetWords >= 1200 ? 5200 : targetWords >= 700 ? 3400 : targetWords >= 400 ? 2200 : 1200
                 })
             });
 
             if (res.ok) {
                 const data = await res.json();
                 if (data.choices && data.choices[0]) {
-                    return data.choices[0].message.content;
+                    const content = data.choices[0].message.content;
+                    if (!content || content.trim().length < Math.min(500, targetWords * 2)) throw new Error('پاسخ تولیدشده ناقص بود.');
+                    return content.trim();
                 }
             }
         } catch (error) { console.warn('AI service unavailable, using fallback.', error); }

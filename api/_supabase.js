@@ -36,4 +36,35 @@ async function getSession(req) {
     return (await db(`profiles?username=eq.${encodeURIComponent(sessions[0].username)}&select=*`))?.[0] || null;
 }
 function publicUser(row) { if (!row) return null; const { password_hash, ...user } = row; return user; }
-module.exports = { db, hashPassword, verifyPassword, getSession, publicUser, crypto };
+async function getDataValue(username, key, fallback = null) {
+    const rows = await db(`app_data?username=eq.${encodeURIComponent(username)}&key=eq.${encodeURIComponent(key)}&select=value`);
+    return rows?.[0]?.value ?? fallback;
+}
+async function getAccountType(username) {
+    if (username === 'kiankaki') return 'admin';
+    const value = await getDataValue(username, 'account_type', 'student');
+    return value === 'advisor' ? 'advisor' : 'student';
+}
+async function getLinkedStudents(username) {
+    const value = await getDataValue(username, 'linked_students', []);
+    return Array.isArray(value) ? [...new Set(value.map(item => String(item || '').trim().toLowerCase()).filter(Boolean))] : [];
+}
+async function canManageStudent(actor, username) {
+    if (!actor || !username || username === 'kiankaki') return false;
+    if (actor.username === 'kiankaki') return true;
+    if (await getAccountType(actor.username) !== 'advisor') return false;
+    return (await getLinkedStudents(actor.username)).includes(username);
+}
+async function decorateUser(row) {
+    if (!row) return null;
+    return { ...publicUser(row), accountType: await getAccountType(row.username) };
+}
+async function listManagedStudents(actor) {
+    const usernames = actor.username === 'kiankaki'
+        ? (await db('profiles?username=neq.kiankaki&select=username')).map(row => row.username)
+        : await getLinkedStudents(actor.username);
+    const rows = await Promise.all(usernames.map(async username => (await db(`profiles?username=eq.${encodeURIComponent(username)}&select=*`))[0] || null));
+    const decorated = await Promise.all(rows.filter(Boolean).map(decorateUser));
+    return decorated.filter(user => user.accountType === 'student');
+}
+module.exports = { db, hashPassword, verifyPassword, getSession, publicUser, getDataValue, getAccountType, getLinkedStudents, canManageStudent, decorateUser, listManagedStudents, crypto };

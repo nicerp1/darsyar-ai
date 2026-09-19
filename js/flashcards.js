@@ -269,7 +269,7 @@ const Flashcards = (function () {
         }
     }
 
-    function generateAIFlashcardsSubmit() {
+    async function generateAIFlashcardsSubmit() {
         const textInput = document.getElementById('input-ai-fc-text');
         const catSelect = document.getElementById('input-ai-fc-category');
         if (!textInput || !textInput.value.trim()) {
@@ -281,35 +281,34 @@ const Flashcards = (function () {
 
         const rawText = textInput.value.trim();
         const category = catSelect ? catSelect.value : 'زیست';
-
-        // Intelligent client-side rule-based QA extraction + AI format parsing
-        const sentences = rawText.split(/[.\n!؟?]/).filter(s => s.trim().length > 15);
-        const newGeneratedCards = [];
-
-        sentences.slice(0, 4).forEach((sentence, idx) => {
-            const clean = sentence.trim();
-            newGeneratedCards.push({
-                id: 'fc-ai-' + Date.now() + '-' + idx,
-                category: category,
-                categoryName: category,
-                question: `نکته کلیدی و مفهوم جمله زیر را بیان کنید:\n«${clean.substring(0, 60)}...»`,
-                answer: clean,
-                box: 1,
-                createdDate: new Date().toISOString().split('T')[0]
-            });
-        });
-
-        if (newGeneratedCards.length === 0) {
-            newGeneratedCards.push({
-                id: 'fc-ai-' + Date.now(),
-                category: category,
-                categoryName: category,
-                question: `مفهوم اصلی درس ${category}:`,
-                answer: rawText,
-                box: 1,
-                createdDate: new Date().toISOString().split('T')[0]
+        if (rawText.length < 80) return Utils.showToast('برای استخراج حرفه‌ای، حداقل یک پاراگراف کامل وارد کنید.', 'warning');
+        const requestedCount = Math.min(15, Math.max(4, Number(document.getElementById('input-ai-fc-count')?.value) || 8));
+        const button = document.getElementById('btn-ai-flashcards'); if (button) { button.disabled = true; button.innerHTML = '<span class="material-symbols-outlined">hourglass_top</span> تحلیل نکات متن…'; }
+        let generated = [];
+        try {
+            const settings = Storage.getSettings();
+            const response = await fetch('/api/ai', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({
+                model: settings.aiModel || 'gapgpt-qwen-3.5', temperature: 0.25, max_tokens: 3200,
+                messages: [
+                    { role: 'system', content: 'تو طراح حرفه‌ای فلش‌کارت آموزشی هستی. فقط JSON معتبر و بدون markdown برگردان.' },
+                    { role: 'user', content: `از متن زیر دقیقاً ${requestedCount} فلش‌کارت باکیفیت استخراج کن. کارت‌ها ترکیبی از این سه نوع باشند: ۱) سوال مفهومی و پاسخ کوتاه، ۲) جای‌خالی با نماد _____ و پاسخ واژه حذف‌شده، ۳) سوال تحلیلی که رابطه علت و معلولی یا مقایسه‌ای بسنجد. نکات کم‌اهمیت و سوال‌های مبهم را حذف کن. پاسخ‌ها مستقل، دقیق و حداکثر سه جمله باشند. خروجی فقط آرایه JSON با ساختار [{"type":"concept|cloze|analysis","question":"...","answer":"..."}] باشد.\n\nمتن درس:\n${rawText.slice(0, 24000)}` }
+                ]
+            }) });
+            const payload = await response.json(); if (!response.ok) throw new Error(payload.error || 'سرویس هوش مصنوعی پاسخ نداد.');
+            const raw = String(payload.choices?.[0]?.message?.content || '').replace(/^```(?:json)?/i, '').replace(/```$/,'').trim();
+            const parsed = JSON.parse(raw); generated = (Array.isArray(parsed) ? parsed : parsed.cards || []).filter(item => item?.question && item?.answer).slice(0, requestedCount);
+        } catch (error) {
+            console.warn('AI flashcard extraction fallback:', error);
+            const sentences = rawText.split(/[.\n!؟?]/).map(item => item.trim()).filter(item => item.length > 35);
+            generated = sentences.slice(0, requestedCount).map((sentence, index) => {
+                const words = sentence.split(/\s+/).filter(word => word.length > 4);
+                const keyword = words.sort((a, b) => b.length - a.length)[0] || 'مفهوم کلیدی';
+                return index % 2 ? { type: 'cloze', question: sentence.replace(keyword, '_____'), answer: keyword } : { type: 'concept', question: `بر اساس متن، نکته اصلی درباره «${keyword}» چیست؟`, answer: sentence };
             });
         }
+        if (!generated.length) { if (button) button.disabled = false; return Utils.showToast('از این متن نکته قابل‌استخراجی پیدا نشد.', 'warning'); }
+        const now = Date.now();
+        const newGeneratedCards = generated.map((item, idx) => ({ id: `fc-ai-${now}-${idx}`, category, categoryName: category, question: String(item.question).trim().slice(0, 600), answer: String(item.answer).trim().slice(0, 1200), cardType: ['concept','cloze','analysis'].includes(item.type) ? item.type : 'concept', box: 1, createdDate: new Date().toISOString().split('T')[0] }));
 
         const cards = Storage.get('flashcards', []);
         cards.unshift(...newGeneratedCards);
@@ -326,6 +325,7 @@ const Flashcards = (function () {
             Utils.showToast(`هوش مصنوعی ${Utils.toPersianDigits(newGeneratedCards.length)} فلش‌کارت از متن شما استخراج کرد!`, 'success');
             Utils.launchConfetti();
         }
+        if (button) { button.disabled = false; button.innerHTML = '<span class="material-symbols-outlined">auto_awesome</span> استخراج حرفه‌ای کارت‌ها'; }
     }
 
     return {

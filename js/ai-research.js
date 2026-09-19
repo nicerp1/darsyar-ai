@@ -81,6 +81,8 @@ const AIResearch = (function () {
     async function craftResearchPaper(topic, level, count, style) {
         const settings = Storage.getSettings();
         try {
+            const sectionCount = Number(String(count).match(/\d|۳|۵|۷|۹/)?.[0]?.replace('۳','3').replace('۵','5').replace('۷','7').replace('۹','9')) || 5;
+            const targetWords = sectionCount >= 9 ? 2400 : sectionCount >= 7 ? 1800 : sectionCount >= 5 ? 1200 : 750;
             const prompt = `یک مقاله و گزارش پژوهشی استاندارد، عمیق و علمی به زبان فارسی تدوین کن:
 عنوان پژوهش: «${topic}»
 مقطع و سطح مخاطب: ${level}
@@ -93,7 +95,9 @@ const AIResearch = (function () {
 3. پیشینه پژوهش و چارچوب نظری
 4. یافته‌ها، تحلیل و بحث موشکافانه
 5. نتیجه‌گیری، دستاوردها و پیشنهادهای کاربردی
-6. فهرست منابع معتبر استاندارد متناسب با سبک ${style}.`;
+6. فهرست منابع معتبر استاندارد متناسب با سبک ${style}.
+
+حدود ${targetWords} کلمه بنویس و متن را نیمه‌کاره رها نکن. منبع، نویسنده، آمار یا DOI ساختگی تولید نکن؛ اگر منبع دقیق و قابل‌اطمینان در اختیار نداری، بخش «منابع پیشنهادی برای بررسی» بده و صریحاً نیاز به راستی‌آزمایی را ذکر کن. فقط مقاله نهایی را بنویس.`;
 
             const res = await fetch('/api/ai', {
                 method: 'POST',
@@ -105,17 +109,19 @@ const AIResearch = (function () {
                         { role: 'user', content: prompt }
                     ],
                     temperature: 0.65,
-                    max_tokens: 1400
+                    max_tokens: sectionCount >= 9 ? 6000 : sectionCount >= 7 ? 5600 : sectionCount >= 5 ? 4200 : 2800
                 })
             });
 
             if (res.ok) {
                 const data = await res.json();
                 if (data.choices && data.choices[0]) {
-                    return data.choices[0].message.content;
+                    const content = data.choices[0].message.content;
+                    if (!content || content.trim().length < Math.min(1200, targetWords * 2)) throw new Error('پاسخ پژوهش ناقص بود.');
+                    return content.trim();
                 }
             }
-        } catch (error) { console.warn('AI service unavailable, using fallback.', error); }
+        } catch (error) { console.warn('AI research service unavailable.', error); throw error; }
 
         // Built-in academic research generator
         return `# 📑 گزارش پژوهشی و مقاله علمی: «${topic}»

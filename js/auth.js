@@ -43,12 +43,17 @@ const Auth = (function () {
 
                     <form id="auth-form" onsubmit="event.preventDefault(); Auth.handleAuthSubmit();">
                         ${currentTab === 'register' ? `
+                            <fieldset class="auth-role-picker">
+                                <legend>نوع حساب کاربری</legend>
+                                <label class="auth-role-option active"><input type="radio" name="auth-account-type" value="student" checked onchange="Auth.updateRoleFields()"><span class="material-symbols-outlined" aria-hidden="true">school</span><span><strong>دانش‌آموز</strong><small>برنامه، تمرکز و گزارش مطالعه</small></span></label>
+                                <label class="auth-role-option"><input type="radio" name="auth-account-type" value="advisor" onchange="Auth.updateRoleFields()"><span class="material-symbols-outlined" aria-hidden="true">supervisor_account</span><span><strong>مشاور</strong><small>مدیریت دانش‌آموز و برنامه اختصاصی</small></span></label>
+                            </fieldset>
                             <div class="form-group" style="text-align: right;">
                                 <label class="form-label">نام و نام خانوادگی</label>
                                 <input type="text" id="auth-name" class="form-control" placeholder="مثال: علی رضایی" required>
                             </div>
-                            <div class="form-group" style="text-align: right;">
-                                <label class="form-label">رشته و مقطع تحصیلی</label>
+                            <div id="auth-grade-group" class="form-group" style="text-align: right;">
+                                <label id="auth-grade-label" class="form-label">رشته و مقطع تحصیلی</label>
                                 <select id="auth-grade" class="form-control">
                                     <option value="دوازدهم تجربی">دوازدهم تجربی</option>
                                     <option value="دوازدهم ریاضی">دوازدهم ریاضی</option>
@@ -84,6 +89,16 @@ const Auth = (function () {
     function switchTab(tab) {
         currentTab = tab;
         renderAuthUI();
+    }
+
+    function updateRoleFields() {
+        const type = document.querySelector('input[name="auth-account-type"]:checked')?.value || 'student';
+        document.querySelectorAll('.auth-role-option').forEach(label => label.classList.toggle('active', label.querySelector('input')?.checked));
+        const label = document.getElementById('auth-grade-label');
+        const select = document.getElementById('auth-grade');
+        if (label) label.textContent = type === 'advisor' ? 'حوزه تخصص مشاوره' : 'رشته و مقطع تحصیلی';
+        if (select && type === 'advisor') select.innerHTML = '<option value="مشاور تحصیلی">مشاور تحصیلی</option><option value="مشاور کنکور">مشاور کنکور</option><option value="برنامه‌ریز درسی">برنامه‌ریز درسی</option><option value="مشاور دانشگاهی">مشاور دانشگاهی</option>';
+        else if (select) select.innerHTML = '<option value="دوازدهم تجربی">دوازدهم تجربی</option><option value="دوازدهم ریاضی">دوازدهم ریاضی</option><option value="دوازدهم انسانی">دوازدهم انسانی</option><option value="دانشجوی کارشناسی">دانشجوی کارشناسی</option><option value="پایه‌های دهم و یازدهم">پایه‌های دهم و یازدهم</option><option value="سایر مقاطع">سایر مقاطع</option>';
     }
 
     function fillDemo(type) {
@@ -123,9 +138,10 @@ const Auth = (function () {
             } else {
             const nameInput = document.getElementById('auth-name');
             const gradeInput = document.getElementById('auth-grade');
+            const accountType = document.querySelector('input[name="auth-account-type"]:checked')?.value || 'student';
             const name = nameInput ? nameInput.value.trim() : username;
             const grade = gradeInput ? gradeInput.value : 'دوازدهم تجربی';
-                await Storage.register({ username, password, name: name || username, grade });
+                await Storage.register({ username, password, name: name || username, grade, accountType });
                 if (typeof Utils !== 'undefined') {
                 Utils.showToast(`ثبت‌نام شما با موفقیت انجام شد، خوش آمدید ${name}!`, 'success');
                 Utils.launchConfetti();
@@ -153,6 +169,7 @@ const Auth = (function () {
     return {
         init,
         switchTab,
+        updateRoleFields,
         fillDemo,
         handleAuthSubmit,
         logout

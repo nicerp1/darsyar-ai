@@ -25,7 +25,7 @@ const Schedule = (function () {
     const current = () => normalize(adminTarget ? adminSchedule : null);
 
     async function init() {
-        const isAdmin = Storage.getCurrentUser()?.username === 'kiankaki';
+        const isAdmin = Storage.isManager();
         document.getElementById('schedule-admin-tools')?.classList.toggle('hidden', !isAdmin);
         populateStudents();
         const date = document.getElementById('report-date'); if (date) { date.max = localDate(); if (!date.value) date.value = date.max; }
@@ -33,8 +33,8 @@ const Schedule = (function () {
         else { adminTarget = null; adminSchedule = null; updateContext(); renderDays(); renderReports(); }
     }
     function populateStudents() {
-        const select = document.getElementById('schedule-admin-student'); if (!select || Storage.getCurrentUser()?.username !== 'kiankaki') return;
-        const students = Storage.getUsers().filter(user => user.username !== 'kiankaki');
+        const select = document.getElementById('schedule-admin-student'); if (!select || !Storage.isManager()) return;
+        const students = Storage.getUsers().filter(user => user.accountType !== 'advisor' && user.username !== 'kiankaki');
         select.innerHTML = '<option value="">برنامه خودم</option>' + students.map(user => `<option value="${esc(user.username)}">${esc(user.name || user.username)} (@${esc(user.username)})</option>`).join('');
         select.value = adminTarget?.username || '';
     }

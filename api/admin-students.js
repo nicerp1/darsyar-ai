@@ -1,4 +1,4 @@
-const { db, getSession, publicUser } = require('./_supabase');
+const { db, getSession, decorateUser, getAccountType, getLinkedStudents, canManageStudent, listManagedStudents } = require('./_supabase');
 
 const days = ['شنبه', 'یک‌شنبه', 'دوشنبه', 'سه‌شنبه', 'چهارشنبه', 'پنج‌شنبه', 'جمعه'];
 const emptySchedule = () => days.map((day, dayIndex) => ({ day, dayIndex, tasks: [] }));
@@ -11,13 +11,14 @@ function normalizeSchedule(value) {
     });
 }
 
-async function requireOwner(req, res) {
+async function requireManager(req, res) {
     const actor = await getSession(req);
-    if (!actor || actor.username !== 'kiankaki') {
-        res.status(403).json({ error: 'دسترسی فقط برای مدیر اصلی مجاز است.' });
+    const accountType = actor ? await getAccountType(actor.username) : null;
+    if (!actor || !['admin', 'advisor'].includes(accountType)) {
+        res.status(403).json({ error: 'دسترسی فقط برای مدیر یا مشاور مجاز است.' });
         return null;
     }
-    return actor;
+    return { actor, accountType };
 }
 
 async function getStudent(username) {
@@ -63,28 +64,47 @@ function buildSummary(student, rows) {
 
 module.exports = async (req, res) => {
     try {
-        if (!(await requireOwner(req, res))) return;
+        const manager = await requireManager(req, res); if (!manager) return;
+        const { actor, accountType } = manager;
         const username = String((req.method === 'GET' ? req.query?.username : req.body?.username) || '').trim().toLowerCase();
         if (req.method === 'GET' && !username) {
-            const students = (await db('profiles?username=neq.kiankaki&select=*')).map(publicUser);
+            const students = await listManagedStudents(actor);
             const rows = await db('app_data?select=username,key,value,updated_at');
-            return res.status(200).json({ students, summaries: students.map(student => buildSummary(student, rows.filter(row => row.username === student.username))) });
+            return res.status(200).json({ students, accountType, summaries: students.map(student => buildSummary(student, rows.filter(row => row.username === student.username))) });
+        }
+        if (req.method === 'POST' && req.body?.action === 'linkStudent') {
+            if (accountType !== 'advisor') return res.status(403).json({ error: 'این قابلیت برای حساب مشاور است.' });
+            if (!username || username === actor.username || username === 'kiankaki') return res.status(400).json({ error: 'نام کاربری دانش‌آموز معتبر نیست.' });
+            const target = await getStudent(username);
+            if (!target || await getAccountType(username) !== 'student') return res.status(404).json({ error: 'دانش‌آموزی با این نام کاربری پیدا نشد.' });
+            const linked = await getLinkedStudents(actor.username);
+            if (!linked.includes(username)) linked.push(username);
+            await saveData(actor.username, 'linked_students', linked);
+            return res.status(200).json({ ok: true, student: await decorateUser(target) });
+        }
+        if (req.method === 'DELETE' && req.body?.action === 'unlinkStudent') {
+            if (accountType !== 'advisor') return res.status(403).json({ error: 'این قابلیت برای حساب مشاور است.' });
+            const linked = (await getLinkedStudents(actor.username)).filter(item => item !== username);
+            await saveData(actor.username, 'linked_students', linked);
+            return res.status(200).json({ ok: true });
         }
         if (!username || username === 'kiankaki') return res.status(400).json({ error: 'دانش‌آموز معتبر انتخاب نشده است.' });
+        if (!(await canManageStudent(actor, username))) return res.status(403).json({ error: 'این دانش‌آموز به حساب شما متصل نیست.' });
         const student = await getStudent(username);
         if (!student) return res.status(404).json({ error: 'کاربر پیدا نشد.' });
 
         if (req.method === 'GET') {
-            return res.status(200).json({ student: publicUser(student), data: await getData(username) });
+            return res.status(200).json({ student: await decorateUser(student), data: await getData(username), manager: { username: actor.username, accountType } });
         }
 
         if (req.method === 'PATCH' && req.body?.action === 'saveNote') {
             const note = String(req.body?.note || '').trim().slice(0, 2000);
-            await saveData(username, 'admin_note', { text: note, updatedAt: new Date().toISOString(), updatedBy: 'kiankaki' });
+            await saveData(username, 'admin_note', { text: note, updatedAt: new Date().toISOString(), updatedBy: actor.username });
             return res.status(200).json({ ok: true, note });
         }
 
         if (req.method === 'DELETE' && req.body?.action === 'deleteStudent') {
+            if (accountType !== 'admin') return res.status(403).json({ error: 'حذف کامل حساب فقط برای مدیر اصلی مجاز است.' });
             if (String(req.body?.confirmation || '').trim().toLowerCase() !== username) return res.status(400).json({ error: 'برای حذف، نام کاربری باید دقیق وارد شود.' });
             await db(`profiles?username=eq.${encodeURIComponent(username)}`, { method: 'DELETE' });
             return res.status(200).json({ ok: true, deleted: username });
@@ -108,7 +128,7 @@ module.exports = async (req, res) => {
                 durationMinutes: Math.min(600, Math.max(5, Number(req.body?.durationMinutes) || 60)),
                 color: /^#[0-9a-f]{6}$/i.test(req.body?.color) ? req.body.color : '#2856d8',
                 status: ['pending', 'completed', 'partial', 'missed'].includes(previous?.status) ? previous.status : 'pending',
-                assignedBy: 'kiankaki', assignedAt: new Date().toISOString()
+                assignedBy: actor.username, assignedAt: new Date().toISOString()
             };
             if (taskIndex < 0) schedule[dayIndex].tasks.push(task); else schedule[dayIndex].tasks[taskIndex] = task;
         } else if (req.method === 'DELETE') {

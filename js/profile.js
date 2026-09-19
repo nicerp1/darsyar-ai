@@ -23,14 +23,14 @@ const Profile = (function () {
 
         if (nameInput) nameInput.value = user.name || '';
         if (usernameInput) usernameInput.value = user.username || '';
-        if (gradeSelect) gradeSelect.value = user.grade || 'دوازدهم تجربی';
+        if (gradeSelect) { if (user.grade && ![...gradeSelect.options].some(option => option.value === user.grade)) gradeSelect.add(new Option(user.grade, user.grade)); gradeSelect.value = user.grade || 'دوازدهم تجربی'; }
         if (emailInput) emailInput.value = user.email || `${user.username}@studymate.ir`;
 
         selectedAvatar = user.avatar || '👩‍🎓';
         if (avatarPreview) avatarPreview.textContent = selectedAvatar;
 
         if (roleBadge) {
-            roleBadge.textContent = user.role === 'admin' ? 'مدیر ارشد سیستم 👑' : 'دانش‌آموز کوشا 🎓';
+            roleBadge.textContent = user.accountType === 'admin' ? 'مدیر ارشد سیستم 👑' : user.accountType === 'advisor' ? 'مشاور تحصیلی 👨‍🏫' : 'دانش‌آموز کوشا 🎓';
         }
         if (planBadge) {
             const planNames = { 'free': 'رایگان 🌱', 'silver': 'نقره‌ای 🥈', 'gold': 'طلایی VIP 👑' };
