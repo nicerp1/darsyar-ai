@@ -35,6 +35,10 @@ const Auth = (function () {
                     </div>
                     <h1 class="auth-title">درسیار</h1>
                     <p class="auth-subtitle">همراه هوشمند مسیر مطالعه و موفقیت</p>
+                    <div class="auth-welcome-copy">
+                        <h2>${currentTab === 'login' ? 'خوش آمدید!' : 'شروع مسیر پیشرفت'}</h2>
+                        <p>${currentTab === 'login' ? 'با تمرکز بیشتر، به نسخه بهتر خودت نزدیک‌تر شو.' : 'حساب مناسب خودت را بساز و هوشمندانه‌تر درس بخوان.'}</p>
+                    </div>
 
                     <div class="auth-tabs">
                         <button class="auth-tab-btn ${currentTab === 'login' ? 'active' : ''}" onclick="Auth.switchTab('login')">ورود به حساب</button>
@@ -65,15 +69,17 @@ const Auth = (function () {
                             </div>
                         ` : ''}
 
-                        <div class="form-group" style="text-align: right;">
+                        <div class="form-group auth-field" style="text-align: right;">
                             <label class="form-label">نام کاربری</label>
-                            <input type="text" id="auth-username" class="form-control" placeholder="مثال: admin یا user" required autocomplete="username">
+                            <div class="auth-input-wrap"><span class="material-symbols-outlined" aria-hidden="true">person</span><input type="text" id="auth-username" class="form-control" placeholder="نام کاربری خود را وارد کنید" required autocomplete="username"></div>
                         </div>
 
-                        <div class="form-group" style="text-align: right;">
+                        <div class="form-group auth-field" style="text-align: right;">
                             <label class="form-label">رمز عبور</label>
-                            <input type="password" id="auth-password" class="form-control" placeholder="رمز عبور خود را وارد کنید" required autocomplete="current-password">
+                            <div class="auth-input-wrap"><span class="material-symbols-outlined" aria-hidden="true">lock</span><input type="password" id="auth-password" class="form-control" placeholder="رمز عبور خود را وارد کنید" required autocomplete="${currentTab === 'login' ? 'current-password' : 'new-password'}"><button type="button" onclick="Auth.togglePassword()" aria-label="نمایش یا پنهان کردن رمز عبور"><span class="material-symbols-outlined" id="auth-password-icon" aria-hidden="true">visibility</span></button></div>
                         </div>
+
+                        ${currentTab === 'login' ? '<button class="auth-forgot" type="button" onclick="Utils.showToast(\'برای بازیابی رمز با پشتیبانی درسیار تماس بگیرید.\', \'info\')">رمز عبور را فراموش کرده‌اید؟</button>' : ''}
 
                         <button type="submit" id="btn-auth-submit" class="btn-gold" style="width: 100%; margin-top: 10px;">
                             <span class="material-symbols-outlined">${currentTab === 'login' ? 'login' : 'person_add'}</span>
@@ -99,6 +105,13 @@ const Auth = (function () {
         if (label) label.textContent = type === 'advisor' ? 'حوزه تخصص مشاوره' : 'رشته و مقطع تحصیلی';
         if (select && type === 'advisor') select.innerHTML = '<option value="مشاور تحصیلی">مشاور تحصیلی</option><option value="مشاور کنکور">مشاور کنکور</option><option value="برنامه‌ریز درسی">برنامه‌ریز درسی</option><option value="مشاور دانشگاهی">مشاور دانشگاهی</option>';
         else if (select) select.innerHTML = '<option value="دوازدهم تجربی">دوازدهم تجربی</option><option value="دوازدهم ریاضی">دوازدهم ریاضی</option><option value="دوازدهم انسانی">دوازدهم انسانی</option><option value="دانشجوی کارشناسی">دانشجوی کارشناسی</option><option value="پایه‌های دهم و یازدهم">پایه‌های دهم و یازدهم</option><option value="سایر مقاطع">سایر مقاطع</option>';
+    }
+
+    function togglePassword() {
+        const input = document.getElementById('auth-password'), icon = document.getElementById('auth-password-icon');
+        if (!input) return;
+        const visible = input.type === 'text'; input.type = visible ? 'password' : 'text';
+        if (icon) icon.textContent = visible ? 'visibility' : 'visibility_off';
     }
 
     function fillDemo(type) {
@@ -170,6 +183,7 @@ const Auth = (function () {
         init,
         switchTab,
         updateRoleFields,
+        togglePassword,
         fillDemo,
         handleAuthSubmit,
         logout
