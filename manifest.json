@@ -4,8 +4,8 @@
   "description": "دستیار تحصیلی و کنکوری هوشمند برای دانش‌آموزان و دانشجویان ایرانی",
   "start_url": "./index.html",
   "display": "standalone",
-  "background_color": "#0b132b",
-  "theme_color": "#05319e",
+  "background_color": "#031037",
+  "theme_color": "#031037",
   "orientation": "portrait-primary",
   "icons": [
     {
@@ -16,7 +16,8 @@
     {
       "src": "icons/icon-512.png",
       "sizes": "512x512",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any maskable"
     }
   ]
 }

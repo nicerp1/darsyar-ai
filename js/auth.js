@@ -30,7 +30,7 @@ const Auth = (function () {
                 <div class="auth-card animate-fade-in">
                     <div class="brand-logo auth-brand" style="justify-content: center; margin-bottom: 12px;">
                         <div class="brand-icon">
-                            <span class="material-symbols-outlined" style="font-size: 28px;" aria-hidden="true">school</span>
+                            <img src="icons/icon-192.png" alt="نشان درسیار" width="58" height="58">
                         </div>
                     </div>
                     <h1 class="auth-title">درسیار</h1>
