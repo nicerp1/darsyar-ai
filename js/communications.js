@@ -24,6 +24,7 @@ const Communications = (function () {
 
     function open(tab = 'chat') {
         init();
+        if (window.DarsyarPlatform?.native) document.body.classList.add('communications-page-open');
         document.getElementById('communications-overlay')?.classList.add('open');
         const drawer = document.getElementById('communications-drawer'); drawer?.classList.add('open'); drawer?.setAttribute('aria-hidden', 'false');
         switchTab(tab);
@@ -31,6 +32,7 @@ const Communications = (function () {
     }
 
     function close() {
+        document.body.classList.remove('communications-page-open');
         document.getElementById('communications-overlay')?.classList.remove('open');
         const drawer = document.getElementById('communications-drawer'); drawer?.classList.remove('open'); drawer?.setAttribute('aria-hidden', 'true');
     }
