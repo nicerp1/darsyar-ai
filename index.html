@@ -697,6 +697,22 @@
                         </div>
 
                     </div>
+                    <div class="content-card account-safety-card">
+                        <div><span class="material-symbols-outlined" aria-hidden="true">verified_user</span><div><strong>حریم خصوصی و مدیریت حساب</strong><p>قوانین استفاده، شیوه نگهداری داده‌ها و راه حذف کامل حساب را مدیریت کنید.</p></div></div>
+                        <div><button type="button" class="btn-primary" onclick="App.navigate('legal')"><span class="material-symbols-outlined" aria-hidden="true">policy</span> قوانین و حریم خصوصی</button><a class="btn-primary" href="https://t.me/DarsyarStu" target="_blank" rel="noopener"><span class="material-symbols-outlined" aria-hidden="true">support_agent</span> پشتیبانی</a><button type="button" class="admin-danger-button" onclick="Profile.openDeleteAccount()"><span class="material-symbols-outlined" aria-hidden="true">delete_forever</span> حذف حساب</button></div>
+                    </div>
+                </section>
+
+                <section id="view-legal" class="view-section legal-view">
+                    <div class="section-heading-bar"><div><h2 class="section-heading-title"><span class="material-symbols-outlined" aria-hidden="true">policy</span> قوانین و حریم خصوصی</h2><p>نسخه لازم‌الاجرا از ۳۰ شهریور ۱۴۰۵</p></div><button type="button" class="btn-primary" onclick="App.navigate('profile')"><span class="material-symbols-outlined" aria-hidden="true">arrow_forward</span> بازگشت</button></div>
+                    <div class="legal-grid">
+                        <article class="content-card"><h3>داده‌هایی که نگهداری می‌کنیم</h3><p>نام کاربری، نام نمایشی، مقطع، نوع حساب، برنامه‌ها، گزارش مطالعه، تنظیمات تمرکز، فلش‌کارت‌ها و پیام‌های مشاوره‌ای برای ارائه خدمت در پایگاه داده درسیار ذخیره می‌شوند. رمز عبور به‌صورت رمزنگاری‌شده نگهداری می‌شود.</p></article>
+                        <article class="content-card"><h3>کاربرد هوش مصنوعی</h3><p>متنی که در ابزارهای هوشمند وارد می‌کنید برای تولید پاسخ به ارائه‌دهنده پردازش هوش مصنوعی ارسال می‌شود. اطلاعات هویتی، رمز عبور، شماره تماس و نشانی خود را در این ابزارها وارد نکنید.</p></article>
+                        <article class="content-card"><h3>کودکان و رضایت والدین</h3><p>ساخت حساب برای افراد زیر ۱۸ سال فقط با اطلاع و رضایت والد یا سرپرست قانونی مجاز است. والدین می‌توانند از طریق پشتیبانی درخواست بررسی یا حذف حساب را مطرح کنند.</p></article>
+                        <article class="content-card"><h3>گفت‌وگوی مشاوره‌ای</h3><p>گفت‌وگو فقط میان دانش‌آموز و مشاور متصل‌شده انجام می‌شود. پیام نامناسب را گزارش کنید و در صورت نیاز گفت‌وگو را متوقف کنید. درسیار جایگزین خدمات پزشکی، روان‌شناسی یا فوریتی نیست.</p></article>
+                        <article class="content-card"><h3>حقوق شما</h3><p>می‌توانید اطلاعات پروفایل را ویرایش یا حساب خود را حذف کنید. حذف حساب، داده‌های وابسته را به‌طور دائمی پاک می‌کند و قابل بازگشت نیست.</p></article>
+                        <article class="content-card"><h3>پشتیبانی</h3><p>برای پرسش، گزارش تخلف یا درخواست مرتبط با داده‌ها با «درسیار استودیو» در تلگرام <a href="https://t.me/DarsyarStu" target="_blank" rel="noopener">@DarsyarStu</a> تماس بگیرید.</p></article>
+                    </div>
                 </section>
 
                 <!-- 6. AI RESEARCH VIEW -->
@@ -1252,8 +1268,12 @@
                             </div>
 
                             <div class="form-group">
-                                <label class="form-label">رمز عبور جدید (در صورت تمایل به تغییر)</label>
-                                <input type="password" id="profile-new-password" class="form-control" placeholder="رمز عبور جدید...">
+                                <label class="form-label">رمز عبور فعلی (فقط برای تغییر رمز)</label>
+                                <input type="password" id="profile-current-password" class="form-control" autocomplete="current-password">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">رمز عبور جدید؛ حداقل ۸ نویسه</label>
+                                <input type="password" id="profile-new-password" class="form-control" autocomplete="new-password" placeholder="اگر نمی‌خواهید تغییر کند، خالی بگذارید">
                             </div>
 
                             <button class="btn-gold" style="width: 100%; margin-top: 10px;" onclick="Profile.saveProfileSubmit()">
@@ -1513,6 +1533,14 @@
         </div>
     </div>
 
+    <div id="modal-delete-account" class="modal-overlay">
+        <div class="modal-box delete-account-modal" role="dialog" aria-modal="true" aria-labelledby="delete-account-title">
+            <div class="modal-header"><div class="modal-title" id="delete-account-title"><span class="material-symbols-outlined" aria-hidden="true">warning</span> حذف دائمی حساب</div><button class="icon-btn" type="button" onclick="Utils.closeModal('modal-delete-account')" aria-label="بستن"><span class="material-symbols-outlined" aria-hidden="true">close</span></button></div>
+            <div class="modal-body"><p>همه برنامه‌ها، گزارش‌ها، پیام‌ها و اطلاعات حساب برای همیشه حذف می‌شوند. این کار قابل بازگشت نیست.</p><div class="form-group"><label class="form-label" for="delete-account-username">برای تأیید، نام کاربری خود را وارد کنید</label><input id="delete-account-username" class="form-control" autocomplete="off"></div><div class="form-group"><label class="form-label" for="delete-account-password">رمز عبور</label><input id="delete-account-password" type="password" class="form-control" autocomplete="current-password"></div></div>
+            <div class="modal-footer"><button class="btn-primary" type="button" onclick="Utils.closeModal('modal-delete-account')">انصراف</button><button id="delete-account-submit" class="admin-danger-button" type="button" onclick="Profile.confirmDeleteAccount()">حذف دائمی</button></div>
+        </div>
+    </div>
+
     <div id="communications-overlay" class="communications-overlay" onclick="Communications.close()"></div>
     <aside id="communications-drawer" class="communications-drawer" aria-hidden="true" aria-label="ارتباطات و یادداشت‌ها">
         <div class="communications-header">
@@ -1526,6 +1554,7 @@
         <section id="communications-chat-panel" class="communications-panel" role="tabpanel">
             <div id="advisor-student-picker" class="form-group hidden"><label class="form-label" for="advisor-student-select">دانش‌آموز</label><select id="advisor-student-select" class="form-control" onchange="Communications.selectStudent(this.value)"><option value="">انتخاب دانش‌آموز</option></select></div>
             <div id="advisor-chat-status" class="advisor-chat-status" role="status">گفت‌وگوی مستقیم و خصوصی</div>
+            <div class="chat-safety-notice"><span class="material-symbols-outlined" aria-hidden="true">shield</span><p>شماره تماس، نشانی، رمز عبور یا اطلاعات خصوصی را ارسال نکنید.</p><button id="advisor-chat-block" type="button" onclick="Communications.toggleBlock()">توقف گفت‌وگو</button></div>
             <div id="advisor-chat-messages" class="advisor-chat-messages" aria-live="polite"></div>
             <form class="advisor-chat-compose" onsubmit="event.preventDefault(); Communications.sendMessage();">
                 <label class="sr-only" for="advisor-chat-input">متن پیام</label>

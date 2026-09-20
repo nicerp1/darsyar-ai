@@ -58,11 +58,12 @@ const Profile = (function () {
         renderAvatarOptions();
     }
 
-    function saveProfileSubmit() {
+    async function saveProfileSubmit() {
         const nameInput = document.getElementById('profile-name');
         const gradeSelect = document.getElementById('profile-grade');
         const emailInput = document.getElementById('profile-email');
         const newPassInput = document.getElementById('profile-new-password');
+        const currentPassInput = document.getElementById('profile-current-password');
 
         if (!nameInput || !nameInput.value.trim()) {
             if (typeof Utils !== 'undefined') {
@@ -79,12 +80,14 @@ const Profile = (function () {
         user.email = emailInput ? emailInput.value.trim() : user.email;
         user.avatar = selectedAvatar;
 
-        if (newPassInput && newPassInput.value.trim().length > 0) {
-            user.password = newPassInput.value.trim();
-            newPassInput.value = '';
-        }
-
-        Storage.updateUser(user);
+        try {
+            if (newPassInput?.value) {
+                if (!currentPassInput?.value) return Utils.showToast('برای تغییر رمز، رمز عبور فعلی را وارد کنید.', 'warning');
+                await Storage.changePassword(currentPassInput.value, newPassInput.value);
+                newPassInput.value = ''; currentPassInput.value = '';
+            }
+            Storage.updateUser(user);
+        } catch (error) { return Utils.showToast(error.message || 'ذخیره تغییرات انجام نشد.', 'error'); }
 
         if (typeof App !== 'undefined') {
             App.renderUserHeader();
@@ -95,10 +98,36 @@ const Profile = (function () {
         }
     }
 
+    function openDeleteAccount() {
+        if (Storage.getCurrentUser()?.username === 'kiankaki') return Utils.showToast('حساب مدیر اصلی از داخل برنامه قابل حذف نیست.', 'warning');
+        const username = document.getElementById('delete-account-username'), password = document.getElementById('delete-account-password');
+        if (username) username.value = '';
+        if (password) password.value = '';
+        Utils.openModal('modal-delete-account');
+        setTimeout(() => username?.focus(), 80);
+    }
+
+    async function confirmDeleteAccount() {
+        const confirmation = document.getElementById('delete-account-username')?.value.trim().toLowerCase();
+        const password = document.getElementById('delete-account-password')?.value || '';
+        const button = document.getElementById('delete-account-submit');
+        if (!confirmation || !password) return Utils.showToast('نام کاربری و رمز عبور را وارد کنید.', 'warning');
+        if (button) button.disabled = true;
+        try {
+            await Storage.deleteAccount(confirmation, password);
+            Utils.closeModal('modal-delete-account');
+            Utils.showToast('حساب و اطلاعات شما برای همیشه حذف شد.', 'success');
+            App.onUserChanged();
+        } catch (error) { Utils.showToast(error.message || 'حذف حساب انجام نشد.', 'error'); }
+        finally { if (button) button.disabled = false; }
+    }
+
     return {
         init,
         selectAvatar,
-        saveProfileSubmit
+        saveProfileSubmit,
+        openDeleteAccount,
+        confirmDeleteAccount
     };
 })();
 

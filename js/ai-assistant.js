@@ -92,7 +92,7 @@ const AIAssistant = (function () {
 
         if (!isAdminOrVip && usage.count >= MAX_DAILY_FREE_QUOTA) {
             if (typeof Utils !== 'undefined') {
-                Utils.showToast('سقف ۱۰ پیام رایگان امروز شما تکمیل شده است! جهت استفاده نامحدود، اشتراک خود را ارتقا دهید.', 'warning');
+                Utils.showToast('سهمیه روزانه ابزار هوشمند تکمیل شده است؛ فردا دوباره می‌توانید رایگان استفاده کنید.', 'warning');
             }
             return;
         }

@@ -138,5 +138,5 @@ module.exports = async (req, res) => {
 
         await saveSchedule(username, schedule);
         return res.status(200).json({ ok: true, schedule });
-    } catch (error) { return res.status(500).json({ error: error.message }); }
+    } catch (error) { console.error('api/admin-students.js failed:', error); return res.status(500).json({ error: 'در حال حاضر ارتباط با سرور برقرار نشد. لطفاً دوباره تلاش کنید.' }); }
 };

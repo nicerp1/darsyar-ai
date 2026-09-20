@@ -1,6 +1,6 @@
 /** Header notes and private advisor/student chat. */
 const Communications = (function () {
-    let activeTab = 'chat', selectedStudent = '', adminMessages = [], initialized = false;
+    let activeTab = 'chat', selectedStudent = '', adminMessages = [], chatBlocked = null, initialized = false;
     const esc = value => String(value ?? '').replace(/[&<>'"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[c]));
     const isManager = () => Storage.isManager();
 
@@ -51,19 +51,19 @@ const Communications = (function () {
     async function loadChat() {
         const status = document.getElementById('advisor-chat-status');
         if (isManager()) {
-            if (!selectedStudent) { adminMessages = []; if (status) status.textContent = 'برای شروع گفت‌وگو یک دانش‌آموز انتخاب کنید.'; renderMessages([]); return; }
+            if (!selectedStudent) { adminMessages = []; chatBlocked = null; if (status) status.textContent = 'برای شروع گفت‌وگو یک دانش‌آموز انتخاب کنید.'; renderMessages([]); syncChatState(); return; }
             if (status) status.textContent = 'در حال دریافت گفت‌وگو…';
             try {
                 const response = await fetch(`/api/chat?username=${encodeURIComponent(selectedStudent)}`, { credentials: 'same-origin' });
                 const payload = await response.json(); if (!response.ok) throw new Error(payload.error || 'دریافت پیام‌ها انجام نشد.');
-                adminMessages = Array.isArray(payload.messages) ? payload.messages : [];
+                adminMessages = Array.isArray(payload.messages) ? payload.messages : []; chatBlocked = payload.blocked || null;
                 const student = Storage.getUsers().find(user => user.username === selectedStudent);
-                if (status) status.textContent = `گفت‌وگوی خصوصی با ${student?.name || selectedStudent}`; renderMessages(adminMessages);
+                if (status) status.textContent = `گفت‌وگوی خصوصی با ${student?.name || selectedStudent}`; renderMessages(adminMessages); syncChatState();
             } catch (error) { if (status) status.textContent = 'دریافت پیام‌ها ناموفق بود.'; Utils.showToast(error.message, 'error'); }
         } else {
             try {
                 const response = await fetch('/api/chat', { credentials: 'same-origin' }); const payload = await response.json(); if (!response.ok) throw new Error(payload.error);
-                const messages = Array.isArray(payload.messages) ? payload.messages : []; if (status) status.textContent = 'گفت‌وگوی خصوصی شما با مشاور'; renderMessages(messages);
+                const messages = Array.isArray(payload.messages) ? payload.messages : []; chatBlocked = payload.blocked || null; if (status) status.textContent = 'گفت‌وگوی خصوصی شما با مشاور'; renderMessages(messages); syncChatState();
                 Storage.set('chat_last_read', new Date().toISOString()); document.getElementById('header-chat-dot')?.classList.add('hidden');
             } catch (error) { if (status) status.textContent = 'دریافت پیام‌ها ناموفق بود.'; Utils.showToast(error.message, 'error'); }
         }
@@ -72,7 +72,7 @@ const Communications = (function () {
     function renderMessages(messages) {
         const box = document.getElementById('advisor-chat-messages'); if (!box) return;
         const viewer = isManager() ? 'advisor' : 'student';
-        box.innerHTML = messages.map(message => `<article class="advisor-message ${message.sender === viewer ? 'mine' : 'theirs'}"><strong>${esc(message.senderName || (message.sender === 'advisor' ? 'مشاور' : 'دانش‌آموز'))}</strong><p>${esc(message.text)}</p><time>${new Date(message.createdAt).toLocaleString('fa-IR')}</time></article>`).join('') || '<div class="communications-empty"><span class="material-symbols-outlined" aria-hidden="true">chat_bubble</span><p>هنوز پیامی ثبت نشده است؛ اولین پیام را ارسال کنید.</p></div>';
+        box.innerHTML = messages.map(message => `<article class="advisor-message ${message.sender === viewer ? 'mine' : 'theirs'}"><strong>${esc(message.senderName || (message.sender === 'advisor' ? 'مشاور' : 'دانش‌آموز'))}</strong><p>${esc(message.text)}</p><div class="advisor-message-meta"><time>${new Date(message.createdAt).toLocaleString('fa-IR')}</time>${message.sender !== viewer ? `<button type="button" onclick="Communications.reportMessage('${esc(message.id)}')" aria-label="گزارش پیام"><span class="material-symbols-outlined" aria-hidden="true">flag</span> گزارش</button>` : ''}</div></article>`).join('') || '<div class="communications-empty"><span class="material-symbols-outlined" aria-hidden="true">chat_bubble</span><p>هنوز پیامی ثبت نشده است؛ اولین پیام را ارسال کنید.</p></div>';
         box.scrollTop = box.scrollHeight;
     }
 
@@ -89,6 +89,34 @@ const Communications = (function () {
             input.value = ''; Utils.showToast('پیام ذخیره شد.', 'success');
         } catch (error) { Utils.showToast(error.message, 'error'); }
         finally { if (button) button.disabled = false; input?.focus(); }
+    }
+
+    function syncChatState() {
+        const input = document.getElementById('advisor-chat-input'), send = document.getElementById('advisor-chat-send'), block = document.getElementById('advisor-chat-block'), status = document.getElementById('advisor-chat-status');
+        if (input) input.disabled = Boolean(chatBlocked);
+        if (send) send.disabled = Boolean(chatBlocked);
+        if (block) block.textContent = chatBlocked ? 'ادامه گفت‌وگو' : 'توقف گفت‌وگو';
+        if (chatBlocked && status) status.textContent = 'این گفت‌وگو متوقف شده است.';
+    }
+
+    async function reportMessage(messageId) {
+        if (!window.confirm('این پیام به‌عنوان محتوای نامناسب گزارش شود؟')) return;
+        try {
+            const response = await fetch('/api/chat', { method: 'POST', credentials: 'same-origin', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ username: isManager() ? selectedStudent : undefined, action: 'report', messageId, reason: 'محتوای نامناسب یا نقض حریم خصوصی' }) });
+            const payload = await response.json(); if (!response.ok) throw new Error(payload.error || 'ثبت گزارش انجام نشد.');
+            Utils.showToast('گزارش شما برای بررسی ثبت شد.', 'success');
+        } catch (error) { Utils.showToast(error.message, 'error'); }
+    }
+
+    async function toggleBlock() {
+        if (isManager() && !selectedStudent) return Utils.showToast('ابتدا دانش‌آموز را انتخاب کنید.', 'warning');
+        const next = !chatBlocked;
+        if (next && !window.confirm('ارسال پیام در این گفت‌وگو متوقف شود؟')) return;
+        try {
+            const response = await fetch('/api/chat', { method: 'POST', credentials: 'same-origin', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ username: isManager() ? selectedStudent : undefined, action: 'block', blocked: next }) });
+            const payload = await response.json(); if (!response.ok) throw new Error(payload.error || 'تغییر وضعیت گفت‌وگو انجام نشد.');
+            chatBlocked = payload.blocked || null; syncChatState(); Utils.showToast(next ? 'گفت‌وگو متوقف شد.' : 'گفت‌وگو دوباره فعال شد.', 'success');
+        } catch (error) { Utils.showToast(error.message, 'error'); }
     }
 
     function updateUnread() {
@@ -116,6 +144,6 @@ const Communications = (function () {
         Storage.set('quick_notes', (Storage.get('quick_notes', []) || []).filter(note => note.id !== id)); renderNotes(); Utils.showToast('یادداشت حذف شد.', 'info');
     }
 
-    return { init, open, close, switchTab, selectStudent, sendMessage, addNote, removeNote };
+    return { init, open, close, switchTab, selectStudent, sendMessage, reportMessage, toggleBlock, addNote, removeNote };
 })();
 window.Communications = Communications;

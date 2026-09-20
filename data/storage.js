@@ -63,6 +63,12 @@ const Storage = (function () {
         Object.keys(cache).forEach(key => delete cache[key]);
     }
 
+    async function deleteAccount(confirmation, password) {
+        await request('/api/users', { method: 'DELETE', body: JSON.stringify({ confirmation, password }) });
+        currentUser = null;
+        Object.keys(cache).forEach(key => delete cache[key]);
+    }
+
     function getUsers() { return get('users', currentUser ? [currentUser] : []); }
     function saveUsers(users) {
         cache.users = users;
@@ -80,6 +86,11 @@ const Storage = (function () {
         return true;
     }
 
+    async function changePassword(currentPassword, newPassword) {
+        if (!currentUser) throw new Error('ابتدا وارد حساب شوید.');
+        await request('/api/users', { method: 'PUT', body: JSON.stringify({ user: { username: currentUser.username, currentPassword, newPassword } }) });
+    }
+
     function addXP(amount) {
         if (!currentUser) return;
         const xp = (currentUser.xp || 0) + amount;
@@ -94,7 +105,7 @@ const Storage = (function () {
     function isManager() { return ['admin', 'advisor'].includes(currentUser?.accountType); }
     function saveSettings(settings) { return set('settings', settings); }
 
-    return { init, get, set, remove, getCurrentUser, setCurrentUser, login, register, logout, getUsers, saveUsers, updateUser, addXP, getSettings, saveSettings, isManager };
+    return { init, get, set, remove, getCurrentUser, setCurrentUser, login, register, logout, deleteAccount, getUsers, saveUsers, updateUser, changePassword, addXP, getSettings, saveSettings, isManager };
 })();
 
 window.Storage = Storage;
