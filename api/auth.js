@@ -1,4 +1,4 @@
-const { db, hashPassword, verifyPassword, decorateUser, listManagedStudents, crypto } = require('./_supabase');
+const { db, hashPassword, verifyPassword, decorateUser, listManagedStudents, findStudentAdvisor, crypto } = require('./_supabase');
 
 function setCookie(res, token, maxAge = 60 * 60 * 24 * 30) {
     res.setHeader('Set-Cookie', `studymate_session=${encodeURIComponent(token)}; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=${maxAge}`);
@@ -40,6 +40,7 @@ module.exports = async (req, res) => {
         const rows = await db(`app_data?username=eq.${encodeURIComponent(username)}&select=key,value`);
         const data = Object.fromEntries((rows || []).filter(row => row.key !== 'chat_reports').map(row => [row.key, row.value]));
         const user = await decorateUser(profile);
+        if (user.accountType === 'student') user.advisor = await findStudentAdvisor(user.username);
         const users = ['admin', 'advisor'].includes(user.accountType) ? await listManagedStudents(profile) : undefined;
         res.status(200).json({ user, data, users });
     } catch (error) { console.error('api/auth.js failed:', error); res.status(500).json({ error: 'در حال حاضر ارتباط با سرور برقرار نشد. لطفاً دوباره تلاش کنید.' }); }

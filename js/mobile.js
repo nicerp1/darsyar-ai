@@ -15,7 +15,7 @@
 
     function currentView() { return document.querySelector('.view-section.active')?.id?.replace('view-', '') || 'dashboard'; }
     function syncActiveNavigation(view = currentView()) {
-        const toolViews = ['ai-assistant','flashcards','ai-writing','ai-research'];
+        const toolViews = ['ai-assistant','flashcards','ai-writing','ai-research','admin'];
         const direct = destinations.some(item => item.view === view) ? view : (toolViews.includes(view) ? 'mobile-tools' : 'dashboard');
         document.querySelectorAll('.android-nav-item').forEach(button => {
             const selected = button.dataset.mobileView === direct;
@@ -67,6 +67,7 @@
         if (document.getElementById('view-mobile-tools')) return;
         const section = document.createElement('section'); section.id = 'view-mobile-tools'; section.className = 'view-section android-tools-hub';
         section.innerHTML = `<header><small>جعبه‌ابزار هوشمند</small><h1>برای هر مرحله، یک ابزار آماده است</h1><p>یادگیری، مرور و نگارش را از همین‌جا شروع کن.</p></header><div class="android-tools-grid">
+            <button id="android-counselor-tool" class="hidden" type="button" onclick="App.navigate('admin')"><span class="material-symbols-outlined" aria-hidden="true">manage_accounts</span><span><strong>پنل مدیریت مشاور</strong><small>دانش‌آموزان، برنامه‌ها و گزارش‌ها</small></span><i class="material-symbols-outlined" aria-hidden="true">chevron_left</i></button>
             <button type="button" onclick="App.navigate('ai-assistant')"><span class="material-symbols-outlined" aria-hidden="true">smart_toy</span><span><strong>دستیار هوشمند</strong><small>پرسش درسی و حل مسئله</small></span><i class="material-symbols-outlined" aria-hidden="true">chevron_left</i></button>
             <button type="button" onclick="App.navigate('flashcards')"><span class="material-symbols-outlined" aria-hidden="true">style</span><span><strong>فلش‌کارت هوشمند</strong><small>مرور نکات و سوال حرفه‌ای</small></span><i class="material-symbols-outlined" aria-hidden="true">chevron_left</i></button>
             <button type="button" onclick="App.navigate('ai-writing')"><span class="material-symbols-outlined" aria-hidden="true">edit_note</span><span><strong>انشانویس</strong><small>نگارش خلاقانه و ساختاریافته</small></span><i class="material-symbols-outlined" aria-hidden="true">chevron_left</i></button>
@@ -74,6 +75,11 @@
             <button type="button" onclick="Communications.open('notes')"><span class="material-symbols-outlined" aria-hidden="true">note_stack</span><span><strong>یادداشت‌های من</strong><small>ثبت نکته و کارهای مهم</small></span><i class="material-symbols-outlined" aria-hidden="true">chevron_left</i></button>
         </div>`;
         document.querySelector('.content-body')?.appendChild(section);
+    }
+
+    function updateRoleAccess() {
+        const manager = Boolean(window.Storage?.isManager?.());
+        document.getElementById('android-counselor-tool')?.classList.toggle('hidden', !manager);
     }
 
     function decorateAiChat() {
@@ -101,8 +107,14 @@
             <div><strong>${esc(task.subject)}</strong><small>${esc(task.note || 'تسک برنامه‌ریزی‌شده امروز')}</small></div>
             <span class="android-task-time"><span class="material-symbols-outlined" aria-hidden="true">schedule</span>${Utils.toPersianDigits(task.durationMinutes || 60)} دقیقه</span>
         </article>`).join('');
+        const manager = Storage.isManager(), advisor = user.advisor;
+        const relationshipCard = manager
+            ? `<button class="android-advisor-card" type="button" onclick="App.navigate('admin')"><span class="android-advisor-avatar"><span class="material-symbols-outlined" aria-hidden="true">manage_accounts</span></span><span><small>فضای کاری مشاور</small><strong>مدیریت دانش‌آموزان</strong><em>برنامه، گزارش و گفت‌وگو</em></span><span class="material-symbols-outlined" aria-hidden="true">chevron_left</span></button>`
+            : advisor
+                ? `<button class="android-advisor-card" type="button" onclick="Communications.open('chat')"><span class="android-advisor-avatar"><span class="material-symbols-outlined" aria-hidden="true">support_agent</span></span><span><small>مشاور شما</small><strong>${esc(advisor.name || advisor.username)}</strong><em><i></i> گفت‌وگوی خصوصی</em></span><span class="material-symbols-outlined" aria-hidden="true">chevron_left</span></button>`
+                : `<button class="android-advisor-card android-self-plan" type="button" onclick="App.navigate('schedule')"><span class="android-advisor-avatar"><span class="material-symbols-outlined" aria-hidden="true">edit_calendar</span></span><span><small>مطالعه مستقل</small><strong>برنامه خودت را بساز</strong><em>هر زمان خواستی به مشاور متصل شو</em></span><span class="material-symbols-outlined" aria-hidden="true">chevron_left</span></button>`;
         shell.innerHTML = `<section class="android-welcome"><div class="android-welcome-orbit"><span class="material-symbols-outlined" aria-hidden="true">auto_awesome</span></div><div><small>${greeting}</small><h1>${esc(user.name || user.username)} جان</h1><p>امروز قرار نیست کامل باشی؛ فقط یک قدم جلوتر برو.</p></div></section>
-            <button class="android-advisor-card" type="button" onclick="Communications.open('chat')"><span class="android-advisor-avatar"><span class="material-symbols-outlined" aria-hidden="true">support_agent</span></span><span><small>مشاور شما</small><strong>گفت‌وگو با مشاور</strong><em><i></i> آماده گفت‌وگو</em></span><span class="material-symbols-outlined" aria-hidden="true">chevron_left</span></button>
+            ${relationshipCard}
             <section class="android-plan-card"><header><div><span class="material-symbols-outlined" aria-hidden="true">calendar_today</span><h2>برنامه امروز</h2></div><small>${Utils.toPersianDigits(tasks.length)} تسک</small></header>
             <div class="android-today-list">${taskMarkup || '<div class="android-empty-plan"><span class="material-symbols-outlined" aria-hidden="true">event_available</span><p>برنامه امروز هنوز خالی است.</p></div>'}</div>
             <button class="android-focus-cta" type="button" onclick="App.navigate('pomodoro')"><span class="material-symbols-outlined" aria-hidden="true">play_arrow</span>شروع تمرکز</button></section>
@@ -147,10 +159,10 @@
         plugins.App.exitApp?.();
     });
     document.addEventListener('DOMContentLoaded', () => {
-        createToolsHub(); createBottomNavigation(); decorateHeader(); decorateAiChat(); renderMobileDashboard(); setupScheduleDays(); syncActiveNavigation();
+        createToolsHub(); createBottomNavigation(); decorateHeader(); decorateAiChat(); updateRoleAccess(); renderMobileDashboard(); setupScheduleDays(); syncActiveNavigation();
         document.getElementById('sidebar-overlay')?.addEventListener('click', closeMoreSheet);
         document.querySelectorAll('#sidebar .nav-item').forEach(item => item.addEventListener('click', () => window.setTimeout(closeMoreSheet, 80)));
         const content = document.querySelector('.content-body');
-        if (content) new MutationObserver(() => { const view = currentView(); syncActiveNavigation(view); document.body.classList.toggle('ai-chat-page-open', view === 'ai-assistant'); if (view === 'dashboard') renderMobileDashboard(); if (view === 'schedule') setupScheduleDays(); }).observe(content, { subtree: true, attributes: true, attributeFilter: ['class'] });
+        if (content) new MutationObserver(() => { const view = currentView(); updateRoleAccess(); syncActiveNavigation(view); document.body.classList.toggle('ai-chat-page-open', view === 'ai-assistant'); if (view === 'dashboard') renderMobileDashboard(); if (view === 'schedule') setupScheduleDays(); }).observe(content, { subtree: true, attributes: true, attributeFilter: ['class'] });
     });
 })();

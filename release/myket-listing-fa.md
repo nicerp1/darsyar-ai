@@ -7,7 +7,7 @@
 - راه پشتیبانی: https://t.me/DarsyarStu
 - نشانی حریم خصوصی: https://darsyar-ai.vercel.app/privacy.html
 - شناسه برنامه: `ir.darsyar.app`
-- نسخه: `1.0.5` (`versionCode 6`)
+- نسخه: `1.0.6` (`versionCode 7`)
 
 ## توضیح کوتاه
 
@@ -47,4 +47,3 @@
 4. پنل مشاور و فهرست دانش‌آموزان ساختگی
 5. آمار مطالعه
 6. فلش‌کارت هوشمند
-

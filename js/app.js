@@ -39,6 +39,7 @@ const App = (function () {
         const settings = Storage.getSettings();
         const theme = settings.theme || 'dark';
         document.documentElement.setAttribute('data-theme', theme);
+        window.DarsyarPlatform?.setTheme?.(theme);
 
         const themeIcon = document.getElementById('theme-toggle-icon');
         if (themeIcon) {
@@ -96,7 +97,7 @@ const App = (function () {
         if (headerName) headerName.textContent = user.name || user.username;
         if (headerAvatar) headerAvatar.textContent = user.avatar || '👩‍🎓';
         if (headerStreak && typeof Utils !== 'undefined') {
-            headerStreak.textContent = `${Utils.toPersianDigits(user.streak || 5)} روز`;
+            headerStreak.textContent = `${Utils.toPersianDigits(user.streak || 0)} روز`;
         }
 
         if (typeof Gamification !== 'undefined') {

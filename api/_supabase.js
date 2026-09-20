@@ -67,4 +67,11 @@ async function listManagedStudents(actor) {
     const decorated = await Promise.all(rows.filter(Boolean).map(decorateUser));
     return decorated.filter(user => user.accountType === 'student');
 }
-module.exports = { db, hashPassword, verifyPassword, getSession, publicUser, getDataValue, getAccountType, getLinkedStudents, canManageStudent, decorateUser, listManagedStudents, crypto };
+async function findStudentAdvisor(username) {
+    const rows = await db('app_data?key=eq.linked_students&select=username,value');
+    const match = (rows || []).find(row => Array.isArray(row.value) && row.value.includes(username));
+    if (!match) return null;
+    const profile = (await db(`profiles?username=eq.${encodeURIComponent(match.username)}&select=username,name,avatar`))[0];
+    return profile ? { username: profile.username, name: profile.name, avatar: profile.avatar } : null;
+}
+module.exports = { db, hashPassword, verifyPassword, getSession, publicUser, getDataValue, getAccountType, getLinkedStudents, canManageStudent, decorateUser, listManagedStudents, findStudentAdvisor, crypto };

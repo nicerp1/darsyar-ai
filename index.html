@@ -813,7 +813,7 @@
                                 <span class="material-symbols-outlined" style="color: var(--gold);">calendar_month</span>
                                 برنامه مطالعاتی هفتگی هوشمند
                             </h2>
-                            <p style="font-size: 12px; color: var(--text-muted);">تسک‌های هر روز با مدت پیشنهادی مشاور و اتصال مستقیم به تایمر تمرکز</p>
+                            <p style="font-size: 12px; color: var(--text-muted);">با مشاور یا مستقل؛ تسک‌های هر روز را با مدت پیشنهادی و وضعیت انجام مدیریت کنید</p>
                         </div>
                         <button class="btn-gold schedule-print-button" onclick="Schedule.printSchedule()" aria-label="چاپ برنامه هفتگی">
                             <span class="material-symbols-outlined" aria-hidden="true">print</span>
@@ -843,16 +843,12 @@
                     <div id="schedule-printable-area" class="schedule-days-list"><div id="schedule-days-list"></div></div>
 
                     <div class="content-card manual-report-card">
-                        <div class="content-card-title">
-                            <span class="material-symbols-outlined" aria-hidden="true">fact_check</span>
-                            <span>گزارش کار دستی</span>
-                        </div>
-                        <p class="manual-report-help">مطالعه واقعی خود را با ساعت شروع و پایان ثبت کنید. این گزارش برای ادمین هم قابل مشاهده است.</p>
+                        <div class="manual-report-heading"><span class="manual-report-heading-icon material-symbols-outlined" aria-hidden="true">fact_check</span><div><h3>گزارش مطالعه</h3><p>مطالعه واقعی را ثبت کن تا آمار تو دقیق ساخته شود.</p></div><output id="report-duration-preview"><strong>۰</strong><small>دقیقه</small></output></div>
                         <form id="manual-report-form" class="manual-report-form" onsubmit="event.preventDefault(); Schedule.saveManualReport();">
                             <div class="form-group"><label class="form-label" for="report-date">تاریخ</label><input id="report-date" class="form-control" type="date" required></div>
                             <div class="form-group"><label class="form-label" for="report-subject">درس یا فعالیت</label><input id="report-subject" class="form-control" maxlength="100" required placeholder="مثلاً زیست‌شناسی"></div>
-                            <div class="form-group"><label class="form-label" for="report-start">از ساعت</label><input id="report-start" class="form-control" type="time" required></div>
-                            <div class="form-group"><label class="form-label" for="report-end">تا ساعت</label><input id="report-end" class="form-control" type="time" required></div>
+                            <div class="form-group"><label class="form-label" for="report-start">از ساعت</label><input id="report-start" class="form-control" type="time" onchange="Schedule.updateReportDuration()" required></div>
+                            <div class="form-group"><label class="form-label" for="report-end">تا ساعت</label><input id="report-end" class="form-control" type="time" onchange="Schedule.updateReportDuration()" required></div>
                             <div class="form-group"><label class="form-label" for="report-status">وضعیت انجام</label><select id="report-status" class="form-control"><option value="completed">کامل انجام شد</option><option value="partial">بخشی انجام شد</option><option value="missed">انجام نشد</option></select></div>
                             <div class="form-group manual-report-notes"><label class="form-label" for="report-notes">توضیحات</label><textarea id="report-notes" class="form-control" maxlength="500" rows="2" placeholder="مبحث، تعداد تست یا نکته‌ای که باید پیگیری شود"></textarea></div>
                             <button id="manual-report-submit" class="btn-gold" type="submit"><span class="material-symbols-outlined" aria-hidden="true">add_task</span> ثبت گزارش در دیتابیس</button>
@@ -967,28 +963,28 @@
                             <div class="kpi-card">
                                 <div>
                                     <div class="kpi-info-label">مطالعه امروز</div>
-                                    <div class="kpi-value" id="stats-kpi-today">۳.۵ س</div>
+                                    <div class="kpi-value" id="stats-kpi-today">۰ س</div>
                                 </div>
                                 <div class="kpi-icon-wrapper kpi-icon-blue"><span class="material-symbols-outlined">today</span></div>
                             </div>
                             <div class="kpi-card">
                                 <div>
                                     <div class="kpi-info-label">مجموع این هفته</div>
-                                    <div class="kpi-value" id="stats-kpi-week">۲۹.۵ س</div>
+                                    <div class="kpi-value" id="stats-kpi-week">۰ س</div>
                                 </div>
                                 <div class="kpi-icon-wrapper kpi-icon-gold"><span class="material-symbols-outlined">date_range</span></div>
                             </div>
                             <div class="kpi-card">
                                 <div>
                                     <div class="kpi-info-label">مجموع کل دوران</div>
-                                    <div class="kpi-value" id="stats-kpi-total">۱۲۴ س</div>
+                                    <div class="kpi-value" id="stats-kpi-total">۰ س</div>
                                 </div>
                                 <div class="kpi-icon-wrapper kpi-icon-green"><span class="material-symbols-outlined">all_inclusive</span></div>
                             </div>
                             <div class="kpi-card">
                                 <div>
                                     <div class="kpi-info-label">استریک مداومت</div>
-                                    <div class="kpi-value" id="stats-kpi-streak">۵ روز</div>
+                                    <div class="kpi-value" id="stats-kpi-streak">۰ روز</div>
                                 </div>
                                 <div class="kpi-icon-wrapper kpi-icon-gold"><span class="material-symbols-outlined">local_fire_department</span></div>
                             </div>
@@ -1003,31 +999,6 @@
                             <div class="content-card">
                                 <div class="content-card-title" style="margin-bottom: 14px;">📊 تفکیک دروس مطالعه‌شده</div>
                                 <div style="height: 230px;"><canvas id="chart-stats-bar"></canvas></div>
-                            </div>
-                        </div>
-
-                        <div class="content-card" data-feature="exams" style="margin-top: 20px;">
-                            <div class="content-card-title" style="margin-bottom: 14px;">🥧 توزیع زمانی بین دروس مختلف</div>
-                            <div style="height: 240px; max-width: 400px; margin: 0 auto;"><canvas id="chart-stats-doughnut"></canvas></div>
-                        </div>
-
-                        <!-- Exam History Table -->
-                        <div class="content-card" style="margin-top: 20px;">
-                            <div class="content-card-title" style="margin-bottom: 14px;">📝 تاریخچه آزمون‌های ثبت‌شده</div>
-                            <div style="overflow-x: auto;">
-                                <table style="width: 100%; border-collapse: collapse; text-align: right; font-size: 13.5px;">
-                                    <thead>
-                                        <tr style="border-bottom: 2px solid var(--border-subtle); color: var(--gold-light);">
-                                            <th style="padding: 10px;">ردیف</th>
-                                            <th style="padding: 10px;">عنوان آزمون</th>
-                                            <th style="padding: 10px;">درصد نهایی</th>
-                                            <th style="padding: 10px;">درست / غلط</th>
-                                            <th style="padding: 10px;">تاریخ</th>
-                                            <th style="padding: 10px;">وضعیت</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody id="stats-exam-history-tbody"></tbody>
-                                </table>
                             </div>
                         </div>
 

@@ -2,9 +2,11 @@
 (function () {
     const capacitor = window.Capacitor;
     const native = Boolean(capacitor?.isNativePlatform?.());
+    const setTheme = theme => { if (native) capacitor.Plugins?.StatusBar?.setStyle?.({ style: theme === 'light' ? 'DARK' : 'LIGHT' }).catch(() => {}); };
     window.DarsyarPlatform = Object.freeze({
         native,
-        apiOrigin: native ? 'https://darsyar-ai.vercel.app' : ''
+        apiOrigin: native ? 'https://darsyar-ai.vercel.app' : '',
+        setTheme
     });
     function setOffline(offline) {
         document.documentElement.classList.toggle('is-offline', offline);

@@ -5,21 +5,34 @@
 const Stats = (function () {
     let lineChartInstance = null;
     let barChartInstance = null;
-    let doughnutChartInstance = null;
+    const localDate = date => { const value = date || new Date(), offset = value.getTimezoneOffset(); return new Date(value.getTime() - offset * 60000).toISOString().slice(0, 10); };
+
+    function realStudyData() {
+        const byDate = new Map();
+        (Storage.get('study_history', []) || []).forEach(item => { if (item?.date) byDate.set(item.date, (byDate.get(item.date) || 0) + Number(item.hours || 0)); });
+        (Storage.get('manual_reports', []) || []).filter(item => item?.date && item.status !== 'missed').forEach(item => byDate.set(item.date, (byDate.get(item.date) || 0) + Number(item.minutes || 0) / 60));
+        return [...byDate.entries()].sort(([a], [b]) => a.localeCompare(b)).map(([date, hours]) => ({ date, hours }));
+    }
+
+    function calculateStreak(rows) {
+        const active = new Set(rows.filter(item => item.hours > 0).map(item => item.date));
+        let cursor = new Date(), streak = 0;
+        if (!active.has(localDate(cursor))) cursor.setDate(cursor.getDate() - 1);
+        while (active.has(localDate(cursor))) { streak += 1; cursor.setDate(cursor.getDate() - 1); }
+        return streak;
+    }
 
     function init() {
         renderStatsKPIs();
         renderCharts();
-        renderExamHistory();
     }
 
     function renderStatsKPIs() {
-        const history = Storage.get('study_history', []);
-        const user = Storage.getCurrentUser() || { streak: 5 };
-
-        const todayHours = history.length ? history[history.length - 1].hours : 3.5;
-        const weekHours = history.reduce((acc, h) => acc + h.hours, 0);
-        const totalHours = weekHours * 4.2; // All-time simulation
+        const history = realStudyData(), today = localDate(new Date()), cutoff = new Date(); cutoff.setDate(cutoff.getDate() - 6); const weekStart = localDate(cutoff);
+        const todayHours = history.find(item => item.date === today)?.hours || 0;
+        const weekHours = history.filter(item => item.date >= weekStart && item.date <= today).reduce((sum, item) => sum + item.hours, 0);
+        const totalHours = history.reduce((sum, item) => sum + item.hours, 0);
+        const streak = calculateStreak(history);
 
         const elToday = document.getElementById('stats-kpi-today');
         const elWeek = document.getElementById('stats-kpi-week');
@@ -31,13 +44,13 @@ const Stats = (function () {
         if (elToday) elToday.textContent = `${pd(todayHours.toFixed(1))} س`;
         if (elWeek) elWeek.textContent = `${pd(weekHours.toFixed(1))} س`;
         if (elTotal) elTotal.textContent = `${pd(totalHours.toFixed(0))} س`;
-        if (elStreak) elStreak.textContent = `${pd(user.streak || 5)} روز`;
+        if (elStreak) elStreak.textContent = `${pd(streak)} روز`;
     }
 
     function renderCharts() {
         if (typeof Chart === 'undefined') return;
 
-        const history = Storage.get('study_history', []);
+        const history = realStudyData();
         const labels = history.map(h => typeof Utils !== 'undefined' ? Utils.toPersianDigits(h.date.substring(5)) : h.date);
         const hoursData = history.map(h => h.hours);
 
@@ -82,13 +95,16 @@ const Stats = (function () {
         if (barCanvas) {
             if (barChartInstance) barChartInstance.destroy();
             const ctx = barCanvas.getContext('2d');
+            const subjects = new Map();
+            (Storage.get('manual_reports', []) || []).filter(item => item?.subject && item.status !== 'missed').forEach(item => subjects.set(item.subject.trim(), (subjects.get(item.subject.trim()) || 0) + Number(item.minutes || 0) / 60));
+            const subjectRows = [...subjects.entries()].sort((a,b) => b[1] - a[1]).slice(0, 8);
             barChartInstance = new Chart(ctx, {
                 type: 'bar',
                 data: {
-                    labels: ['زیست‌شناسی', 'شیمی', 'فیزیک', 'ریاضیات', 'عمومی و ادبیات'],
+                    labels: subjectRows.length ? subjectRows.map(item => item[0]) : ['هنوز گزارشی ثبت نشده'],
                     datasets: [{
                         label: 'ساعات مطالعه این هفته',
-                        data: [12.5, 9.0, 8.5, 7.0, 5.2],
+                        data: subjectRows.length ? subjectRows.map(item => Number(item[1].toFixed(2))) : [0],
                         backgroundColor: [
                             'rgba(16, 185, 129, 0.75)',
                             'rgba(245, 158, 11, 0.75)',
@@ -113,57 +129,6 @@ const Stats = (function () {
             });
         }
 
-        // 3. Doughnut Chart (Time Distribution)
-        const doughnutCanvas = document.getElementById('chart-stats-doughnut');
-        if (doughnutCanvas) {
-            if (doughnutChartInstance) doughnutChartInstance.destroy();
-            const ctx = doughnutCanvas.getContext('2d');
-            doughnutChartInstance = new Chart(ctx, {
-                type: 'doughnut',
-                data: {
-                    labels: ['زیست‌شناسی', 'شیمی', 'فیزیک', 'ریاضیات', 'عمومی'],
-                    datasets: [{
-                        data: [30, 22, 20, 16, 12],
-                        backgroundColor: ['#10b981', '#f59e0b', '#0ea5e9', '#6366f1', '#c9a03e'],
-                        borderWidth: 2,
-                        borderColor: '#0f172a'
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: { position: 'bottom', labels: { color: '#94a3b8', font: { family: 'Kalameh' } } }
-                    }
-                }
-            });
-        }
-    }
-
-    function renderExamHistory() {
-        const tbody = document.getElementById('stats-exam-history-tbody');
-        if (!tbody) return;
-
-        const results = Storage.get('exam_results', []);
-        if (!results.length) {
-            tbody.innerHTML = `<tr><td colspan="6" style="text-align: center; padding: 20px; color: var(--text-muted);">هنوز آزمونی ثبت نشده است.</td></tr>`;
-            return;
-        }
-
-        const pd = typeof Utils !== 'undefined' ? Utils.toPersianDigits : (v => v);
-
-        tbody.innerHTML = results.map((res, i) => `
-            <tr>
-                <td>${pd(i + 1)}</td>
-                <td style="font-weight: 700;">${res.examTitle}</td>
-                <td><span style="font-weight: 800; color: var(--gold-light);">${pd(res.scorePercentage)}٪</span></td>
-                <td><span style="color: var(--success);">${pd(res.correct)} درست</span> / <span style="color: var(--danger);">${pd(res.wrong)} غلط</span></td>
-                <td>${res.date}</td>
-                <td>
-                    <span style="background: rgba(16, 185, 129, 0.15); color: #10b981; padding: 3px 8px; border-radius: 4px; font-size: 11px;">ثبت‌شده</span>
-                </td>
-            </tr>
-        `).join('');
     }
 
     function exportPDFReport() {

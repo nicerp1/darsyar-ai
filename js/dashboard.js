@@ -60,24 +60,23 @@ const Dashboard = (function () {
     }
 
     function renderKPIs() {
-        const user = Storage.getCurrentUser() || {};
         const history = Storage.get('study_history', []);
         const examResults = Storage.get('exam_results', []);
 
         // Today's study hours
-        const todayJalali = typeof Utils !== 'undefined' ? Utils.getJalaliDateNumeric() : '';
-        const todayLog = history[history.length - 1] || { hours: 3.5 };
+        const now = new Date(), today = new Date(now.getTime() - now.getTimezoneOffset() * 60000).toISOString().slice(0,10);
+        const todayLog = history.find(item => item.date === today) || { hours: 0 };
         const todayHours = todayLog.hours || 0;
 
         // Average score
-        let avgScore = 78;
+        let avgScore = 0;
         if (examResults.length > 0) {
             const sum = examResults.reduce((acc, r) => acc + (r.scorePercentage || 0), 0);
             avgScore = Math.round(sum / examResults.length);
         }
 
         // Streak
-        const streak = user.streak || 5;
+        const streak = history.filter(item => Number(item.hours || 0) > 0).length ? calculateStudyStreak(history) : 0;
 
         const kpiHoursEl = document.getElementById('kpi-today-hours');
         const kpiAvgScoreEl = document.getElementById('kpi-avg-score');
@@ -94,11 +93,20 @@ const Dashboard = (function () {
         }
     }
 
+    function calculateStudyStreak(history) {
+        const dates = new Set(history.filter(item => Number(item.hours || 0) > 0).map(item => item.date));
+        let date = new Date(), count = 0;
+        if (!dates.has(date.toISOString().slice(0,10))) date.setDate(date.getDate()-1);
+        while (dates.has(date.toISOString().slice(0,10))) { count++; date.setDate(date.getDate()-1); }
+        return count;
+    }
+
     function renderDailyGoal() {
         const settings = Storage.getSettings();
         const targetHours = settings.dailyGoalHours || 4;
         const history = Storage.get('study_history', []);
-        const todayHours = history.length ? history[history.length - 1].hours : 3.5;
+        const now = new Date(), today = new Date(now.getTime() - now.getTimezoneOffset() * 60000).toISOString().slice(0,10);
+        const todayHours = history.find(item => item.date === today)?.hours || 0;
 
         const percent = Math.min(100, Math.round((todayHours / targetHours) * 100));
 

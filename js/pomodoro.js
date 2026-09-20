@@ -234,13 +234,12 @@ const Pomodoro = (function () {
         const minutes = seconds / 60;
         const hoursToAdd = minutes / 60;
 
-        const history = Storage.get('study_history', []);
-        if (history.length > 0) {
-            const todayItem = history[history.length - 1];
-            todayItem.hours = parseFloat((todayItem.hours + hoursToAdd).toFixed(2));
-            todayItem.sessions = (todayItem.sessions || 0) + 1;
-            Storage.set('study_history', history);
-        }
+        const now = new Date(), today = new Date(now.getTime() - now.getTimezoneOffset() * 60000).toISOString().slice(0,10), history = Storage.get('study_history', []);
+        let todayItem = history.find(item => item.date === today);
+        if (!todayItem) { todayItem = { date: today, hours: 0, sessions: 0 }; history.push(todayItem); }
+        todayItem.hours = parseFloat((Number(todayItem.hours || 0) + hoursToAdd).toFixed(2));
+        todayItem.sessions = (todayItem.sessions || 0) + 1;
+        Storage.set('study_history', history);
 
         if (typeof Dashboard !== 'undefined') {
             Dashboard.init();
@@ -248,12 +247,11 @@ const Pomodoro = (function () {
     }
 
     function incrementSessionsToday() {
-        const history = Storage.get('study_history', []);
-        if (history.length > 0) {
-            const today = history[history.length - 1];
-            today.sessions = (today.sessions || 0) + 1;
-            Storage.set('study_history', history);
-        }
+        const now = new Date(), date = new Date(now.getTime() - now.getTimezoneOffset() * 60000).toISOString().slice(0,10), history = Storage.get('study_history', []);
+        let today = history.find(item => item.date === date);
+        if (!today) { today = { date, hours: 0, sessions: 0 }; history.push(today); }
+        today.sessions = (today.sessions || 0) + 1;
+        Storage.set('study_history', history);
     }
 
     function updateDisplay() {
@@ -427,9 +425,10 @@ const Pomodoro = (function () {
 
     function renderStats() {
         const history = Storage.get('study_history', []);
-        const todayLog = history[history.length - 1] || { sessions: 0, hours: 0 };
-        const weekHours = history.reduce((acc, h) => acc + h.hours, 0);
-        const user = Storage.getCurrentUser() || { streak: 0 };
+        const now = new Date(), todayKey = new Date(now.getTime() - now.getTimezoneOffset() * 60000).toISOString().slice(0,10), cutoff = new Date(now); cutoff.setDate(cutoff.getDate()-6); const weekKey = new Date(cutoff.getTime() - cutoff.getTimezoneOffset() * 60000).toISOString().slice(0,10);
+        const todayLog = history.find(item => item.date === todayKey) || { sessions: 0, hours: 0 };
+        const weekHours = history.filter(item => item.date >= weekKey && item.date <= todayKey).reduce((acc, h) => acc + Number(h.hours || 0), 0);
+        const active = new Set(history.filter(item => Number(item.hours || 0) > 0).map(item => item.date)); let cursor = new Date(now), streak = 0; if (!active.has(todayKey)) cursor.setDate(cursor.getDate()-1); while (active.has(new Date(cursor.getTime()-cursor.getTimezoneOffset()*60000).toISOString().slice(0,10))) { streak++; cursor.setDate(cursor.getDate()-1); }
 
         const sTodayEl = document.getElementById('pomo-stat-today-sessions');
         const sWeekEl = document.getElementById('pomo-stat-week-hours');
@@ -437,7 +436,7 @@ const Pomodoro = (function () {
 
         if (sTodayEl && typeof Utils !== 'undefined') sTodayEl.textContent = Utils.toPersianDigits(todayLog.sessions || 0);
         if (sWeekEl && typeof Utils !== 'undefined') sWeekEl.textContent = Utils.toPersianDigits(weekHours.toFixed(1));
-        if (sStreakEl && typeof Utils !== 'undefined') sStreakEl.textContent = Utils.toPersianDigits(user.streak || 0);
+        if (sStreakEl && typeof Utils !== 'undefined') sStreakEl.textContent = Utils.toPersianDigits(streak);
     }
 
     return {
