@@ -4,6 +4,8 @@
 
 const Auth = (function () {
     let currentTab = 'login';
+    let registerStep = 1;
+    let registerDraft = { accountType: 'student', name: '', grade: 'دوازدهم تجربی' };
 
     function init() {
         renderAuthUI();
@@ -36,8 +38,8 @@ const Auth = (function () {
                     <h1 class="auth-title">درسیار</h1>
                     <p class="auth-subtitle">همراه هوشمند مسیر مطالعه و موفقیت</p>
                     <div class="auth-welcome-copy">
-                        <h2>${currentTab === 'login' ? 'خوش آمدید!' : 'شروع مسیر پیشرفت'}</h2>
-                        <p>${currentTab === 'login' ? 'با تمرکز بیشتر، به نسخه بهتر خودت نزدیک‌تر شو.' : 'حساب مناسب خودت را بساز و هوشمندانه‌تر درس بخوان.'}</p>
+                        <h2>${currentTab === 'login' ? 'خوش آمدید!' : (registerStep === 1 ? 'حساب مناسب خودت را بساز' : 'اطلاعات ورود')}</h2>
+                        <p>${currentTab === 'login' ? 'با تمرکز بیشتر، به نسخه بهتر خودت نزدیک‌تر شو.' : (registerStep === 1 ? 'فقط چند قدم کوتاه تا شروع مسیر پیشرفت.' : 'یک نام کاربری و رمز امن انتخاب کن.')}</p>
                     </div>
 
                     <div class="auth-tabs">
@@ -45,16 +47,17 @@ const Auth = (function () {
                         <button class="auth-tab-btn ${currentTab === 'register' ? 'active' : ''}" onclick="Auth.switchTab('register')">ثبت‌نام جدید</button>
                     </div>
 
-                    <form id="auth-form" onsubmit="event.preventDefault(); Auth.handleAuthSubmit();">
-                        ${currentTab === 'register' ? `
+                    ${currentTab === 'register' ? `<div class="auth-step-indicator"><span class="active"></span><span class="${registerStep === 2 ? 'active' : ''}"></span><small>مرحله ${registerStep} از ۲</small></div>` : ''}
+                    <form id="auth-form" onsubmit="event.preventDefault(); ${currentTab === 'register' && registerStep === 1 ? 'Auth.goToRegisterStep(2)' : 'Auth.handleAuthSubmit()'};">
+                        ${currentTab === 'register' && registerStep === 1 ? `
                             <fieldset class="auth-role-picker">
                                 <legend>نوع حساب کاربری</legend>
-                                <label class="auth-role-option active"><input type="radio" name="auth-account-type" value="student" checked onchange="Auth.updateRoleFields()"><span class="material-symbols-outlined" aria-hidden="true">school</span><span><strong>دانش‌آموز</strong><small>برنامه، تمرکز و گزارش مطالعه</small></span></label>
-                                <label class="auth-role-option"><input type="radio" name="auth-account-type" value="advisor" onchange="Auth.updateRoleFields()"><span class="material-symbols-outlined" aria-hidden="true">supervisor_account</span><span><strong>مشاور</strong><small>مدیریت دانش‌آموز و برنامه اختصاصی</small></span></label>
+                                <label class="auth-role-option ${registerDraft.accountType === 'student' ? 'active' : ''}"><input type="radio" name="auth-account-type" value="student" ${registerDraft.accountType === 'student' ? 'checked' : ''} onchange="Auth.updateRoleFields()"><span class="material-symbols-outlined" aria-hidden="true">school</span><span><strong>دانش‌آموز</strong><small>برنامه و گزارش مطالعه</small></span></label>
+                                <label class="auth-role-option ${registerDraft.accountType === 'advisor' ? 'active' : ''}"><input type="radio" name="auth-account-type" value="advisor" ${registerDraft.accountType === 'advisor' ? 'checked' : ''} onchange="Auth.updateRoleFields()"><span class="material-symbols-outlined" aria-hidden="true">supervisor_account</span><span><strong>مشاور</strong><small>مدیریت دانش‌آموزان</small></span></label>
                             </fieldset>
                             <div class="form-group" style="text-align: right;">
                                 <label class="form-label">نام و نام خانوادگی</label>
-                                <input type="text" id="auth-name" class="form-control" placeholder="مثال: علی رضایی" required>
+                                <input type="text" id="auth-name" class="form-control" value="${escapeHtml(registerDraft.name)}" placeholder="مثال: علی رضایی" required>
                             </div>
                             <div id="auth-grade-group" class="form-group" style="text-align: right;">
                                 <label id="auth-grade-label" class="form-label">رشته و مقطع تحصیلی</label>
@@ -67,8 +70,10 @@ const Auth = (function () {
                                     <option value="سایر مقاطع">سایر مقاطع</option>
                                 </select>
                             </div>
+                            <button type="submit" class="btn-gold auth-next-button"><span>ادامه</span><span class="material-symbols-outlined">arrow_back</span></button>
                         ` : ''}
 
+                        ${currentTab === 'login' || registerStep === 2 ? `
                         <div class="form-group auth-field" style="text-align: right;">
                             <label class="form-label">نام کاربری</label>
                             <div class="auth-input-wrap"><span class="material-symbols-outlined" aria-hidden="true">person</span><input type="text" id="auth-username" class="form-control" placeholder="نام کاربری خود را وارد کنید" required autocomplete="username"></div>
@@ -78,13 +83,17 @@ const Auth = (function () {
                             <label class="form-label">رمز عبور</label>
                             <div class="auth-input-wrap"><span class="material-symbols-outlined" aria-hidden="true">lock</span><input type="password" id="auth-password" class="form-control" placeholder="رمز عبور خود را وارد کنید" required autocomplete="${currentTab === 'login' ? 'current-password' : 'new-password'}"><button type="button" onclick="Auth.togglePassword()" aria-label="نمایش یا پنهان کردن رمز عبور"><span class="material-symbols-outlined" id="auth-password-icon" aria-hidden="true">visibility</span></button></div>
                         </div>
+                        ` : ''}
 
                         ${currentTab === 'login' ? '<button class="auth-forgot" type="button" onclick="Utils.showToast(\'برای بازیابی رمز با پشتیبانی درسیار تماس بگیرید.\', \'info\')">رمز عبور را فراموش کرده‌اید؟</button>' : ''}
 
+                        ${currentTab === 'login' || registerStep === 2 ? `<div class="auth-submit-row">
+                        ${currentTab === 'register' ? '<button type="button" class="auth-back-button" onclick="Auth.goToRegisterStep(1)" aria-label="بازگشت"><span class="material-symbols-outlined">arrow_forward</span></button>' : ''}
                         <button type="submit" id="btn-auth-submit" class="btn-gold" style="width: 100%; margin-top: 10px;">
                             <span class="material-symbols-outlined">${currentTab === 'login' ? 'login' : 'person_add'}</span>
                             ${currentTab === 'login' ? 'ورود به درسیار' : 'ایجاد حساب کاربری'}
                         </button>
+                        </div>` : ''}
                     </form>
 
                 </div>
@@ -94,6 +103,28 @@ const Auth = (function () {
 
     function switchTab(tab) {
         currentTab = tab;
+        registerStep = 1;
+        renderAuthUI();
+    }
+
+    function escapeHtml(value) {
+        return String(value || '').replace(/[&<>"']/g, char => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[char]));
+    }
+
+    function goToRegisterStep(step) {
+        if (step === 2) {
+            const name = document.getElementById('auth-name')?.value.trim();
+            if (!name) {
+                if (typeof Utils !== 'undefined') Utils.showToast('نام و نام خانوادگی را وارد کنید.', 'warning');
+                return;
+            }
+            registerDraft = {
+                accountType: document.querySelector('input[name="auth-account-type"]:checked')?.value || 'student',
+                name,
+                grade: document.getElementById('auth-grade')?.value || 'سایر مقاطع'
+            };
+        }
+        registerStep = step;
         renderAuthUI();
     }
 
@@ -149,11 +180,9 @@ const Auth = (function () {
                 const user = await Storage.login(username, password);
                 if (typeof Utils !== 'undefined') Utils.showToast(`خوش آمدید، ${user.name}!`, 'success');
             } else {
-            const nameInput = document.getElementById('auth-name');
-            const gradeInput = document.getElementById('auth-grade');
-            const accountType = document.querySelector('input[name="auth-account-type"]:checked')?.value || 'student';
-            const name = nameInput ? nameInput.value.trim() : username;
-            const grade = gradeInput ? gradeInput.value : 'دوازدهم تجربی';
+            const accountType = registerDraft.accountType;
+            const name = registerDraft.name || username;
+            const grade = registerDraft.grade;
                 await Storage.register({ username, password, name: name || username, grade, accountType });
                 if (typeof Utils !== 'undefined') {
                 Utils.showToast(`ثبت‌نام شما با موفقیت انجام شد، خوش آمدید ${name}!`, 'success');
@@ -183,6 +212,7 @@ const Auth = (function () {
         init,
         switchTab,
         updateRoleFields,
+        goToRegisterStep,
         togglePassword,
         fillDemo,
         handleAuthSubmit,

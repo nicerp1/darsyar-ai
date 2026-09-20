@@ -67,7 +67,7 @@ jobs:
       - name: Upload signed APK
         uses: actions/upload-artifact@v4
         with:
-          name: darsyar-1.0.3-myket-release
+          name: darsyar-1.0.4-myket-release
           path: android/app/build/outputs/apk/release/app-release.apk
           if-no-files-found: error
           retention-days: 30

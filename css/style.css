@@ -2800,3 +2800,48 @@ a {
 
 .capacitor-app .auth-card { display:flex; flex-direction:column; justify-content:center; }.capacitor-app .auth-brand { margin-bottom:6px!important; }.capacitor-app .auth-welcome-copy { margin:10px 0 2px; }.capacitor-app .auth-welcome-copy h2 { margin:0; color:#fff; font-size:25px; }.capacitor-app .auth-welcome-copy p { margin-top:4px; color:#b9c8e3; font-size:11px; line-height:1.7; }.capacitor-app .auth-input-wrap { position:relative; display:flex; align-items:center; }.capacitor-app .auth-input-wrap>.material-symbols-outlined { position:absolute; z-index:2; right:14px; color:#8fa7d1; font-size:20px; pointer-events:none; }.capacitor-app .auth-input-wrap .form-control { padding-right:44px; padding-left:48px; }.capacitor-app .auth-input-wrap>button { position:absolute; z-index:2; left:4px; width:44px; height:44px; display:grid; place-items:center; color:#9eb2d8; background:transparent; border:0; border-radius:12px; }.capacitor-app .auth-forgot { min-height:40px; display:block; margin:-3px 0 3px auto; padding:0; color:#62d9ff; background:transparent; border:0; font:600 11px Kalameh,sans-serif; }.capacitor-app .auth-tab-btn { min-height:48px; }.capacitor-app .auth-card form { text-align:right; }
 @media(max-height:740px){.capacitor-app .auth-brand .brand-icon{width:62px;height:62px;border-radius:19px}.capacitor-app .auth-welcome-copy{margin:5px 0 0}.capacitor-app .auth-welcome-copy h2{font-size:21px}.capacitor-app .auth-welcome-copy p{display:none}.capacitor-app .auth-tabs{margin:9px 0}.capacitor-app .auth-card{padding-top:14px;padding-bottom:14px}}
+
+/* Native mobile reflow: compact header, fixed auth card and phone-first tool pages */
+.capacitor-app .top-header{height:calc(60px + var(--android-safe-top))!important;min-height:calc(60px + var(--android-safe-top))!important;padding:var(--android-safe-top) 12px 0!important;flex-wrap:nowrap!important;direction:rtl!important}
+.capacitor-app .content-body{padding-top:calc(72px + var(--android-safe-top))!important}
+.capacitor-app .android-brand-title{order:0;direction:ltr!important;flex-direction:row!important;gap:8px!important;flex:0 1 auto!important}
+.capacitor-app .android-brand-title span{direction:rtl;text-align:right}
+.capacitor-app .android-brand-title img{width:38px!important;height:38px!important;flex-basis:38px!important;border-radius:11px!important}
+.capacitor-app .android-header-actions{order:1;direction:ltr!important;gap:3px!important}
+.capacitor-app .android-header-actions .icon-btn,.capacitor-app .android-profile-button{width:38px!important;height:38px!important;border-radius:12px!important}
+.capacitor-app .android-header-actions .material-symbols-outlined{font-size:21px!important}
+
+.capacitor-app .auth-wrapper{height:100dvh!important;min-height:100dvh!important;overflow:hidden!important;padding:calc(var(--android-safe-top) + 10px) 14px calc(var(--android-safe-bottom) + 10px)!important}
+.capacitor-app .auth-card{width:min(100%,420px)!important;max-height:calc(100dvh - var(--android-safe-top) - var(--android-safe-bottom) - 20px)!important;overflow:hidden!important;padding:16px!important;border-radius:26px!important;justify-content:center!important}
+.capacitor-app .auth-brand .brand-icon{width:58px!important;height:58px!important;border-radius:17px!important}
+.capacitor-app .auth-title{margin:5px 0 0!important;font-size:25px!important;line-height:1.2!important}
+.capacitor-app .auth-subtitle{margin:3px 0 0!important;font-size:10px!important}
+.capacitor-app .auth-welcome-copy{margin:8px 0 0!important}
+.capacitor-app .auth-welcome-copy h2{font-size:20px!important}
+.capacitor-app .auth-welcome-copy p{margin:2px 0!important;font-size:10px!important}
+.capacitor-app .auth-tabs{margin:8px 0!important;padding:4px!important}
+.capacitor-app .auth-tab-btn{min-height:42px!important;font-size:12px!important}
+.capacitor-app .auth-step-indicator{display:grid;grid-template-columns:1fr 1fr auto;align-items:center;gap:6px;margin:0 2px 8px;color:#9eb2d8;font-size:9px}
+.capacitor-app .auth-step-indicator span{height:3px;background:rgba(143,167,209,.22);border-radius:99px}.capacitor-app .auth-step-indicator span.active{background:linear-gradient(90deg,#347bff,#49d7ff)}
+.capacitor-app .auth-role-picker{grid-template-columns:1fr 1fr!important;gap:8px!important;margin-bottom:10px!important}
+.capacitor-app .auth-role-picker legend{margin-bottom:5px!important}
+.capacitor-app .auth-role-option{min-width:0!important;min-height:66px!important;padding:8px!important;gap:7px!important;border-radius:14px!important}
+.capacitor-app .auth-role-option>.material-symbols-outlined{font-size:23px!important}.capacitor-app .auth-role-option strong{font-size:11px!important}.capacitor-app .auth-role-option small{font-size:8px!important}
+.capacitor-app .auth-card .form-group{margin-bottom:9px!important}.capacitor-app .auth-card .form-label{margin-bottom:4px!important;font-size:10px!important}
+.capacitor-app .auth-card .form-control{min-height:47px!important;height:47px!important;font-size:12px!important}
+.capacitor-app .auth-next-button{width:100%;margin-top:3px!important}.capacitor-app .auth-submit-row{display:flex;align-items:flex-end;gap:8px}.capacitor-app .auth-back-button{width:52px;height:54px;flex:0 0 52px;display:grid;place-items:center;color:#dbeafe;background:rgba(16,45,98,.7);border:1px solid var(--app-line);border-radius:14px}.capacitor-app .auth-submit-row .btn-gold{flex:1}
+
+.capacitor-app .view-section{min-width:0;max-width:100%}.capacitor-app .view-section *{min-width:0}.capacitor-app .section-heading-bar{gap:8px!important}.capacitor-app .section-heading-title{font-size:19px!important;line-height:1.45!important}.capacitor-app .section-heading-bar p{font-size:11px!important}.capacitor-app .content-card{padding:14px!important;overflow:hidden}
+.capacitor-app #view-stats .kpi-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:8px!important}
+.capacitor-app #view-stats .kpi-card{min-height:96px!important;padding:11px!important;gap:7px!important;border-radius:18px!important}
+.capacitor-app #view-stats .kpi-value{font-size:clamp(22px,7vw,29px)!important;line-height:1.15!important}.capacitor-app #view-stats .kpi-label{font-size:9px!important}.capacitor-app #view-stats .kpi-icon-wrapper{width:39px!important;height:39px!important;flex:0 0 39px!important;border-radius:12px!important}.capacitor-app #view-stats .kpi-icon-wrapper .material-symbols-outlined{font-size:21px!important}
+.capacitor-app #view-stats .dashboard-split-grid{margin-top:12px!important;gap:10px!important}.capacitor-app #view-stats .content-card-title{font-size:13px!important}.capacitor-app #view-stats .content-card div[style*="height"]{height:190px!important;max-height:190px!important}
+
+.capacitor-app #view-flashcards>.section-heading-bar{flex-direction:column!important;align-items:stretch!important}.capacitor-app #view-flashcards>.section-heading-bar>div:last-child{display:grid!important;grid-template-columns:1fr 1fr;gap:8px!important}.capacitor-app #view-flashcards>.section-heading-bar .btn-primary,.capacitor-app #view-flashcards>.section-heading-bar .btn-gold{width:100%!important;padding-inline:8px!important;font-size:11px!important}
+.capacitor-app #view-flashcards .leitner-boxes-bar{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:8px!important}.capacitor-app #view-flashcards .leitner-box-item{min-height:88px!important;padding:10px 7px!important;border-radius:17px!important}.capacitor-app #view-flashcards .leitner-box-title{font-size:11px!important}.capacitor-app #view-flashcards .leitner-box-count{font-size:22px!important}.capacitor-app #view-flashcards .leitner-box-days{font-size:9px!important}
+.capacitor-app #view-flashcards .flashcard-categories-pills{flex-wrap:nowrap!important;overflow-x:auto!important;margin-inline:-14px;padding:4px 14px 8px;scrollbar-width:none}.capacitor-app #view-flashcards .flashcard-categories-pills::-webkit-scrollbar{display:none}.capacitor-app #view-flashcards .flashcard-category-pill{flex:0 0 auto}.capacitor-app #view-flashcards .flip-card-stage{width:100%!important;max-width:100%!important;min-height:300px!important}
+
+.capacitor-app #view-ai-writing>.section-heading-bar,.capacitor-app #view-ai-research>.section-heading-bar{margin-bottom:12px!important}.capacitor-app #view-ai-writing .ai-tool-layout,.capacitor-app #view-ai-research .ai-tool-layout{grid-template-columns:1fr!important;gap:10px!important}.capacitor-app #view-ai-writing .form-group,.capacitor-app #view-ai-research .form-group{margin-bottom:11px!important}.capacitor-app #view-ai-writing textarea,.capacitor-app #view-ai-research textarea{min-height:82px!important}.capacitor-app #view-ai-writing .content-card,.capacitor-app #view-ai-research .content-card{padding:14px!important;border-radius:20px!important}
+
+@media(max-width:380px){.capacitor-app .android-brand-title small{display:none!important}.capacitor-app .android-brand-title strong{font-size:14px!important}.capacitor-app .android-header-actions{gap:1px!important}.capacitor-app .android-header-actions .icon-btn,.capacitor-app .android-profile-button{width:35px!important;height:35px!important}.capacitor-app .auth-card{padding:13px!important}.capacitor-app #view-stats .kpi-card{padding:9px!important}}
+@media(max-height:690px){.capacitor-app .auth-brand{display:none!important}.capacitor-app .auth-welcome-copy p{display:none!important}.capacitor-app .auth-card{justify-content:flex-start!important}.capacitor-app .auth-role-option{min-height:58px!important}.capacitor-app .auth-role-option small{display:none!important}}

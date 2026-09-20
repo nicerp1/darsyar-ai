@@ -54,7 +54,7 @@
     function decorateHeader() {
         const header = document.querySelector('.top-header');
         if (!header || header.querySelector('.android-brand-title')) return;
-        header.innerHTML = `<button class="android-brand-title" type="button" onclick="App.navigate('dashboard')" aria-label="رفتن به صفحه امروز"><img src="icons/icon-64.png" alt="نشان درسیار"><span><strong>درسیار</strong><small>همراه هوشمند مطالعه</small></span></button>
+        header.innerHTML = `<button class="android-brand-title" type="button" onclick="App.navigate('dashboard')" aria-label="رفتن به صفحه امروز"><span><strong>درسیار</strong><small>همراه هوشمند مطالعه</small></span><img src="icons/icon-64.png" alt="نشان درسیار"></button>
             <div class="android-header-actions">
                 <button class="icon-btn" type="button" onclick="App.toggleTheme()" aria-label="تغییر حالت نمایش"><span class="material-symbols-outlined" id="theme-toggle-icon" aria-hidden="true">light_mode</span></button>
                 <button class="icon-btn" type="button" onclick="Communications.open('notes')" aria-label="یادداشت‌ها"><span class="material-symbols-outlined" aria-hidden="true">sticky_note_2</span></button>
