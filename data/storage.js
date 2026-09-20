@@ -96,6 +96,7 @@ const Storage = (function () {
         const xp = (currentUser.xp || 0) + amount;
         const level = xp >= 2500 ? 5 : xp >= 1200 ? 4 : xp >= 600 ? 3 : xp >= 200 ? 2 : 1;
         updateUser({ ...currentUser, xp, level });
+        saveChain = saveChain.then(() => request('/api/social', { method: 'POST', body: JSON.stringify({ action: 'activity', points: amount }) })).catch(console.error);
         return { xp, level, gained: amount };
     }
 

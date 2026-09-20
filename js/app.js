@@ -4,7 +4,7 @@
 
 const App = (function () {
     let currentView = 'dashboard';
-    const features = Object.freeze({ exams: false, gamification: false, subscription: false });
+    const features = Object.freeze({ exams: false, gamification: true, subscription: false });
 
     async function init() {
         try {

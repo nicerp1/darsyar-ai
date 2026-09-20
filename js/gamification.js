@@ -1,168 +1,62 @@
-/**
- * StudyMate Pro - Gamification, XP, Badges & Hall of Fame
- */
-
+/** Real, opt-in student league and friendships. */
 const Gamification = (function () {
-    const levels = [
-        { level: 1, title: 'دانش‌آموز تازه‌کار 🌱', minXP: 0, maxXP: 200 },
-        { level: 2, title: 'پوینده کوشا 📚', minXP: 200, maxXP: 600 },
-        { level: 3, title: 'پژوهشگر پرتلاش 🔬', minXP: 600, maxXP: 1200 },
-        { level: 4, title: 'نخبه علمی 🎯', minXP: 1200, maxXP: 2500 },
-        { level: 5, title: 'استاد بزرگ درسیار 👑', minXP: 2500, maxXP: 5000 }
-    ];
-
-    function init() {
-        renderLevelProgress();
-        renderBadges();
-        renderChallenges();
-        renderLeaderboard();
+    let model = null;
+    const esc = value => String(value ?? '').replace(/[&<>'"]/g, char => ({ '&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;' }[char]));
+    const pd = value => typeof Utils !== 'undefined' ? Utils.toPersianDigits(value) : value;
+    async function request(options = {}) {
+        const response = await fetch('/api/social', { credentials:'same-origin', headers:{ 'Content-Type':'application/json' }, ...options });
+        const payload = await response.json().catch(() => ({}));
+        if (!response.ok) throw new Error(payload.error || 'خطا در ارتباط با لیگ');
+        return payload;
     }
-
+    function levelTitle(level) { return ['تازه‌کار','پوینده','پرتلاش','نخبه','استاد'][Math.max(1, Math.min(5, Number(level)||1))-1]; }
     function renderLevelProgress() {
-        const user = Storage.getCurrentUser() || { xp: 350, level: 2 };
-        const userXP = user.xp || 0;
-
-        let currentLvl = levels[0];
-        for (let l of levels) {
-            if (userXP >= l.minXP) {
-                currentLvl = l;
-            }
-        }
-
-        const nextLvl = levels.find(l => l.level === currentLvl.level + 1) || currentLvl;
-        const xpInCurrentLevel = userXP - currentLvl.minXP;
-        const levelRange = Math.max(1, nextLvl.maxXP - currentLvl.minXP);
-        const percent = Math.min(100, Math.round((xpInCurrentLevel / levelRange) * 100));
-
-        const titleEl = document.getElementById('game-level-title');
-        const xpTextEl = document.getElementById('game-level-xp-text');
-        const fillEl = document.getElementById('game-level-progress-fill');
-        const sideLevelBadge = document.getElementById('sidebar-user-level');
-        const sideXPBar = document.getElementById('sidebar-xp-bar');
-
-        const pd = typeof Utils !== 'undefined' ? Utils.toPersianDigits : (v => v);
-
-        if (titleEl) titleEl.textContent = `سطح ${pd(currentLvl.level)}: ${currentLvl.title}`;
-        if (xpTextEl) xpTextEl.textContent = `${pd(userXP)} / ${pd(nextLvl.maxXP)} XP (${pd(percent)}٪)`;
-        if (fillEl) fillEl.style.width = `${percent}%`;
-
-        if (sideLevelBadge) sideLevelBadge.textContent = `سطح ${pd(currentLvl.level)}`;
-        if (sideXPBar) sideXPBar.style.width = `${percent}%`;
+        const user = Storage.getCurrentUser(); if (!user) return;
+        const thresholds = [0,200,600,1200,2500,5000], level = Math.max(1, Number(user.level)||1), min = thresholds[level-1], max = thresholds[level] || thresholds.at(-1);
+        const percent = Math.min(100, Math.max(0, Math.round(((Number(user.xp)||0)-min) / Math.max(1,max-min) * 100)));
+        const title = document.getElementById('game-level-title'); if (title) title.textContent = `سطح ${pd(level)}: ${levelTitle(level)}`;
+        const xp = document.getElementById('game-level-xp-text'); if (xp) xp.textContent = `${pd(user.xp||0)} از ${pd(max)} امتیاز`;
+        const fill = document.getElementById('game-level-progress-fill'); if (fill) fill.style.width = `${percent}%`;
+        const side = document.getElementById('sidebar-user-level'); if (side) side.textContent = `سطح ${pd(level)}`;
+        const sideBar = document.getElementById('sidebar-xp-bar'); if (sideBar) sideBar.style.width = `${percent}%`;
     }
-
-    function renderBadges() {
-        const grid = document.getElementById('game-badges-grid');
-        if (!grid) return;
-
-        const badges = Storage.get('badges', []);
-        const pd = typeof Utils !== 'undefined' ? Utils.toPersianDigits : (v => v);
-
-        grid.innerHTML = badges.map(b => `
-            <div class="badge-item-card ${b.unlocked ? 'unlocked' : 'locked'}">
-                <div class="badge-icon-wrap">
-                    ${b.icon}
-                </div>
-                <div>
-                    <div class="badge-card-title">${b.title} ${b.unlocked ? '✅' : '🔒'}</div>
-                    <div class="badge-card-desc">${b.description}</div>
-                    <div style="font-size: 11px; color: var(--gold-light); font-weight: 700; margin-top: 4px;">
-                        پاداش: +${pd(b.xpReward)} XP
-                    </div>
-                </div>
-            </div>
-        `).join('');
+    function personCard(person, actions = '') {
+        return `<article class="social-person-card"><span class="social-avatar">${esc(person.avatar || '👩‍🎓')}</span><div><strong>${esc(person.name)}</strong><small>@${esc(person.username)}${person.grade ? ` · ${esc(person.grade)}` : ''}</small><em>${pd(person.xp)} امتیاز · ${esc(levelTitle(person.level))}</em></div>${actions}</article>`;
     }
-
-    function renderChallenges() {
-        const container = document.getElementById('game-challenges-list');
-        if (!container) return;
-
-        const challenges = Storage.get('daily_challenges', [
-            { id: 'c1', title: 'تکمیل ۳ جلسه پومودورو امروز', xp: 50, progress: 2, total: 3, claimed: false },
-            { id: 'c2', title: 'مرور ۱۰ فلش‌کارت در جعبه لایتنر', xp: 40, progress: 10, total: 10, claimed: true },
-            { id: 'c3', title: 'شرکت در یک آزمون آنلاین و کسب درصد بالای ۷۰', xp: 80, progress: 1, total: 1, claimed: false }
-        ]);
-
-        const pd = typeof Utils !== 'undefined' ? Utils.toPersianDigits : (v => v);
-
-        container.innerHTML = challenges.map(c => {
-            const isCompleted = c.progress >= c.total;
-            return `
-                <div style="display: flex; align-items: center; justify-content: space-between; padding: 14px 18px; background: var(--bg-surface); border: 1px solid var(--border-subtle); border-radius: var(--radius-md); margin-bottom: 10px;">
-                    <div>
-                        <div style="font-weight: 700; font-size: 14px; margin-bottom: 4px;">${c.title}</div>
-                        <div style="font-size: 12px; color: var(--text-muted);">
-                            پیشرفت: ${pd(c.progress)} از ${pd(c.total)} | پاداش: <strong style="color: var(--gold-light);">+${pd(c.xp)} XP</strong>
-                        </div>
-                    </div>
-                    <div>
-                        ${c.claimed ? `
-                            <span style="font-size: 12px; color: var(--text-dim); background: rgba(255,255,255,0.05); padding: 4px 10px; border-radius: var(--radius-full);">دریافت شده</span>
-                        ` : isCompleted ? `
-                            <button class="btn-gold" style="padding: 6px 14px; font-size: 12px;" onclick="Gamification.claimChallenge('${c.id}')">دریافت پاداش 🎉</button>
-                        ` : `
-                            <span style="font-size: 12px; color: var(--text-dim);">در حال انجام</span>
-                        `}
-                    </div>
-                </div>
-            `;
-        }).join('');
+    function render() {
+        renderLevelProgress();
+        const settings = model.settings || {};
+        const toggle = document.getElementById('league-visible'); if (toggle) toggle.checked = settings.leagueVisible;
+        const grade = document.getElementById('league-show-grade'); if (grade) grade.checked = settings.showGrade;
+        const bio = document.getElementById('league-bio'); if (bio) bio.value = settings.bio || '';
+        const board = document.getElementById('game-leaderboard');
+        if (board) board.innerHTML = model.leaderboard.length ? model.leaderboard.map(item => `<article class="league-row ${item.isMe ? 'is-me' : ''}"><strong class="league-rank">${item.rank <= 3 ? `<span class="material-symbols-outlined" aria-hidden="true">${item.rank === 1 ? 'trophy' : 'military_tech'}</span><small>${pd(item.rank)}</small>` : pd(item.rank)}</strong><span class="social-avatar">${esc(item.avatar)}</span><div><strong>${esc(item.name)}${item.isMe ? ' (شما)' : ''}</strong><small>${esc(levelTitle(item.level))}${item.isFriend ? ' · دوست شما' : ''}</small></div><b>${pd(item.seasonPoints || 0)}<small> امتیاز فصل</small></b></article>`).join('') : '<div class="social-empty"><span class="material-symbols-outlined" aria-hidden="true">groups</span><p>هنوز کسی با رضایت خودش وارد لیگ نشده است.</p></div>';
+        const friends = document.getElementById('friends-list'); if (friends) friends.innerHTML = model.friends.length ? model.friends.map(item => personCard(item, `<button type="button" class="social-icon-button danger" onclick="Gamification.friendAction('remove','${esc(item.username)}')" aria-label="حذف ${esc(item.name)} از دوستان"><span class="material-symbols-outlined" aria-hidden="true">person_remove</span></button>`)).join('') : '<div class="social-empty"><p>هنوز دوستی اضافه نکرده‌اید.</p></div>';
+        const requests = document.getElementById('friend-requests');
+        if (requests) { requests.classList.toggle('hidden', !model.requests.length); requests.innerHTML = model.requests.map(item => personCard(item, `<div class="social-actions"><button type="button" onclick="Gamification.friendAction('accept','${esc(item.username)}')">پذیرش</button><button type="button" class="secondary" onclick="Gamification.friendAction('reject','${esc(item.username)}')">رد</button></div>`)).join(''); }
     }
-
-    function claimChallenge(id) {
-        const challenges = Storage.get('daily_challenges', []);
-        const ch = challenges.find(c => c.id === id);
-        if (ch && !ch.claimed) {
-            ch.claimed = true;
-            Storage.set('daily_challenges', challenges);
-            Storage.addXP(ch.xp);
-
-            renderLevelProgress();
-            renderChallenges();
-
-            if (typeof Utils !== 'undefined') {
-                Utils.showToast(`🎉 تبریک! پاداش +${Utils.toPersianDigits(ch.xp)} امتیاز دریافت شد!`, 'success');
-                Utils.launchConfetti();
-            }
-        }
+    async function init() {
+        renderLevelProgress();
+        const user = Storage.getCurrentUser(), shell = document.getElementById('game-social-shell');
+        if (user?.accountType !== 'student') { if (shell) shell.innerHTML = '<div class="social-empty"><span class="material-symbols-outlined">school</span><p>لیگ و دوستان برای حساب دانش‌آموز فعال است.</p></div>'; return; }
+        if (shell) shell.classList.add('is-loading');
+        try { model = await request(); render(); } catch (error) { Utils.showToast(error.message, 'error'); }
+        finally { if (shell) shell.classList.remove('is-loading'); }
     }
-
-    function renderLeaderboard() {
-        const tbody = document.getElementById('game-leaderboard-tbody');
-        if (!tbody) return;
-
-        const board = [
-            { rank: 1, name: 'مهندس رضوانی', avatar: '👨‍🏫', xp: 2850, level: 'استاد بزرگ', badge: '🥇' },
-            { rank: 2, name: 'سارا محمدی', avatar: '👩‍🎓', xp: 1950, level: 'نخبه علمی', badge: '🥈' },
-            { rank: 3, name: 'آرش کیانی', avatar: '🧑‍💻', xp: 1420, level: 'نخبه علمی', badge: '🥉' },
-            { rank: 4, name: 'مریم صالحی', avatar: '👩‍⚕️', xp: 1100, level: 'پژوهشگر', badge: '۴' },
-            { rank: 5, name: 'امیرحسین دهقان', avatar: '👨‍💼', xp: 870, level: 'پژوهشگر', badge: '۵' }
-        ];
-
-        const pd = typeof Utils !== 'undefined' ? Utils.toPersianDigits : (v => v);
-
-        tbody.innerHTML = board.map(item => `
-            <tr>
-                <td style="font-size: 18px; font-weight: 800; text-align: center;">${item.badge}</td>
-                <td>
-                    <div style="display: flex; align-items: center; gap: 8px;">
-                        <span style="font-size: 20px;">${item.avatar}</span>
-                        <span style="font-weight: 700;">${item.name}</span>
-                    </div>
-                </td>
-                <td><span class="brand-badge">${item.level}</span></td>
-                <td><strong style="color: var(--gold-light);">${pd(item.xp)} XP</strong></td>
-            </tr>
-        `).join('');
+    async function saveSettings() {
+        const button = document.getElementById('league-save'); if (button) button.disabled = true;
+        try { await request({ method:'POST', body:JSON.stringify({ action:'settings', leagueVisible:document.getElementById('league-visible')?.checked, showGrade:document.getElementById('league-show-grade')?.checked, bio:document.getElementById('league-bio')?.value }) }); Utils.showToast('تنظیمات پروفایل لیگ ذخیره شد.', 'success'); await init(); }
+        catch (error) { Utils.showToast(error.message, 'error'); } finally { if (button) button.disabled = false; }
     }
-
-    return {
-        init,
-        renderLevelProgress,
-        claimChallenge
-    };
+    async function sendRequest() {
+        const input = document.getElementById('friend-username'), username = input?.value.trim().toLowerCase(); if (!username) return;
+        try { await request({ method:'POST', body:JSON.stringify({ action:'request', username }) }); if (input) input.value=''; Utils.showToast('درخواست دوستی ارسال شد.', 'success'); }
+        catch (error) { Utils.showToast(error.message, 'error'); }
+    }
+    async function friendAction(action, username) {
+        try { await request({ method:'POST', body:JSON.stringify({ action, username }) }); await init(); Utils.showToast(action === 'accept' ? 'دوست جدید اضافه شد.' : 'فهرست دوستان به‌روزرسانی شد.', 'success'); }
+        catch (error) { Utils.showToast(error.message, 'error'); }
+    }
+    return { init, renderLevelProgress, saveSettings, sendRequest, friendAction };
 })();
-
-if (typeof window !== 'undefined') {
-    window.Gamification = Gamification;
-}
+window.Gamification = Gamification;

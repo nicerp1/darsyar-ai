@@ -15,7 +15,7 @@
 
     function currentView() { return document.querySelector('.view-section.active')?.id?.replace('view-', '') || 'dashboard'; }
     function syncActiveNavigation(view = currentView()) {
-        const toolViews = ['ai-assistant','flashcards','ai-writing','ai-research','admin'];
+        const toolViews = ['ai-assistant','flashcards','ai-writing','ai-research','gamification','admin'];
         const direct = destinations.some(item => item.view === view) ? view : (toolViews.includes(view) ? 'mobile-tools' : 'dashboard');
         document.querySelectorAll('.android-nav-item').forEach(button => {
             const selected = button.dataset.mobileView === direct;
@@ -68,6 +68,7 @@
         const section = document.createElement('section'); section.id = 'view-mobile-tools'; section.className = 'view-section android-tools-hub';
         section.innerHTML = `<header><small>جعبه‌ابزار هوشمند</small><h1>برای هر مرحله، یک ابزار آماده است</h1><p>یادگیری، مرور و نگارش را از همین‌جا شروع کن.</p></header><div class="android-tools-grid">
             <button id="android-counselor-tool" class="hidden" type="button" onclick="App.navigate('admin')"><span class="material-symbols-outlined" aria-hidden="true">manage_accounts</span><span><strong>پنل مدیریت مشاور</strong><small>دانش‌آموزان، برنامه‌ها و گزارش‌ها</small></span><i class="material-symbols-outlined" aria-hidden="true">chevron_left</i></button>
+            <button id="android-league-tool" type="button" onclick="App.navigate('gamification')"><span class="material-symbols-outlined" aria-hidden="true">leaderboard</span><span><strong>لیگ و دوستان</strong><small>رقابت اختیاری و پروفایل دانش‌آموزی</small></span><i class="material-symbols-outlined" aria-hidden="true">chevron_left</i></button>
             <button type="button" onclick="App.navigate('ai-assistant')"><span class="material-symbols-outlined" aria-hidden="true">smart_toy</span><span><strong>دستیار هوشمند</strong><small>پرسش درسی و حل مسئله</small></span><i class="material-symbols-outlined" aria-hidden="true">chevron_left</i></button>
             <button type="button" onclick="App.navigate('flashcards')"><span class="material-symbols-outlined" aria-hidden="true">style</span><span><strong>فلش‌کارت هوشمند</strong><small>مرور نکات و سوال حرفه‌ای</small></span><i class="material-symbols-outlined" aria-hidden="true">chevron_left</i></button>
             <button type="button" onclick="App.navigate('ai-writing')"><span class="material-symbols-outlined" aria-hidden="true">edit_note</span><span><strong>انشانویس</strong><small>نگارش خلاقانه و ساختاریافته</small></span><i class="material-symbols-outlined" aria-hidden="true">chevron_left</i></button>
@@ -80,6 +81,7 @@
     function updateRoleAccess() {
         const manager = Boolean(window.Storage?.isManager?.());
         document.getElementById('android-counselor-tool')?.classList.toggle('hidden', !manager);
+        document.getElementById('android-league-tool')?.classList.toggle('hidden', manager);
     }
 
     function decorateAiChat() {

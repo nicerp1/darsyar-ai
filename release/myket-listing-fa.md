@@ -7,7 +7,7 @@
 - راه پشتیبانی: https://t.me/DarsyarStu
 - نشانی حریم خصوصی: https://darsyar-ai.vercel.app/privacy.html
 - شناسه برنامه: `ir.darsyar.app`
-- نسخه: `1.0.6` (`versionCode 7`)
+- نسخه: `1.0.7` (`versionCode 8`)
 
 ## توضیح کوتاه
 

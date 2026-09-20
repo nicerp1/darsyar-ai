@@ -1013,59 +1013,48 @@
                     <div class="dashboard-header-banner" style="background: linear-gradient(135deg, #05319e 0%, #03143f 100%);">
                         <div class="banner-content">
                             <div>
-                                <span class="brand-badge" style="font-size: 12px;">سیستم سطح‌بندی دانش‌پژوهان</span>
-                                <h2 style="font-size: 24px; font-weight: 800; margin: 8px 0;" id="game-level-title">سطح ۲: پوینده کوشا 📚</h2>
-                                <p style="font-size: 13px; color: rgba(255,255,255,0.8);">با انجام فعالیت‌های درسی، پومودورو و مرور فلش‌کارت امتیاز XP کسب کنید.</p>
+                                <span class="brand-badge" style="font-size: 12px;">لیگ واقعی دانش‌آموزان</span>
+                                <h2 style="font-size: 24px; font-weight: 800; margin: 8px 0;" id="game-level-title">سطح ۱: تازه‌کار</h2>
+                                <p style="font-size: 13px; color: rgba(255,255,255,0.8);">با مطالعه واقعی امتیاز بگیر و فقط در صورت تمایل با دوستانت رقابت کن.</p>
                             </div>
                             <div style="min-width: 220px;">
                                 <div style="display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 6px;">
                                     <span>پیشرفت تا سطح بعدی</span>
-                                    <span id="game-level-xp-text" style="color: var(--gold-light); font-weight: 700;">۴۵۰ / ۶۰۰ XP</span>
+                                    <span id="game-level-xp-text" style="color: var(--gold-light); font-weight: 700;">۰ از ۲۰۰ امتیاز</span>
                                 </div>
                                 <div class="goal-progress-track" style="height: 10px;">
-                                    <div class="goal-progress-fill" id="game-level-progress-fill" style="width: 45%;"></div>
+                                    <div class="goal-progress-fill" id="game-level-progress-fill" style="width: 0;"></div>
                                 </div>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Daily Challenges & Quests -->
-                    <div class="content-card" style="margin-bottom: 24px;">
-                        <div class="content-card-title" style="margin-bottom: 16px;">
-                            <span class="material-symbols-outlined" style="color: var(--gold);">task_alt</span>
-                            <span>چالش‌های روزانه و هفتگی</span>
+                    <div id="game-social-shell" class="social-layout">
+                        <div class="social-main">
+                            <section class="league-prize-card">
+                                <span class="material-symbols-outlined" aria-hidden="true">workspace_premium</span>
+                                <div><small>جایزه فصل جاری</small><h3>یک ماه اشتراک ویژه برای ۳ نفر اول</h3><p>نتیجه پس از بررسی فعالیت‌های واقعی نهایی می‌شود.</p></div>
+                            </section>
+                            <section class="content-card social-card">
+                                <header><div><span class="material-symbols-outlined" aria-hidden="true">leaderboard</span><div><h3>لیگ ماهانه مطالعه</h3><p>رتبه‌بندی بر اساس امتیاز فعالیت‌های ثبت‌شده</p></div></div><span class="privacy-pill"><span class="material-symbols-outlined" aria-hidden="true">verified_user</span>اختیاری</span></header>
+                                <div id="game-leaderboard" class="league-list" aria-live="polite"></div>
+                            </section>
                         </div>
-                        <div id="game-challenges-list"></div>
-                    </div>
-
-                    <!-- 8 Badges Grid -->
-                    <div class="section-heading-bar">
-                        <h3 class="section-heading-title">
-                            <span class="material-symbols-outlined" style="color: var(--gold);">military_tech</span>
-                            نشان‌های افتخار و مدال‌ها (۸ نشان)
-                        </h3>
-                    </div>
-                    <div class="badges-grid" id="game-badges-grid"></div>
-
-                    <!-- Hall of Fame / Leaderboard -->
-                    <div class="content-card" style="margin-top: 30px;">
-                        <div class="content-card-title" style="margin-bottom: 16px;">
-                            <span class="material-symbols-outlined" style="color: var(--gold);">leaderboard</span>
-                            <span>تالار افتخارات و جدول برترین‌های درسیار</span>
-                        </div>
-                        <div style="overflow-x: auto;">
-                            <table style="width: 100%; border-collapse: collapse; text-align: right; font-size: 14px;">
-                                <thead>
-                                    <tr style="border-bottom: 2px solid var(--border-subtle); color: var(--gold-light);">
-                                        <th style="padding: 10px; text-align: center; width: 60px;">رتبه</th>
-                                        <th style="padding: 10px;">دانش‌آموز</th>
-                                        <th style="padding: 10px;">عنوان افتخاری</th>
-                                        <th style="padding: 10px;">مجموع امتیاز XP</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="game-leaderboard-tbody"></tbody>
-                            </table>
-                        </div>
+                        <aside class="social-side">
+                            <section class="content-card social-card">
+                                <header><div><span class="material-symbols-outlined" aria-hidden="true">person_add</span><div><h3>دوستان من</h3><p>با نام کاربری درخواست بفرست</p></div></div></header>
+                                <form class="friend-add-form" onsubmit="event.preventDefault(); Gamification.sendRequest();"><label class="sr-only" for="friend-username">نام کاربری دوست</label><input id="friend-username" class="form-control" inputmode="text" autocomplete="off" placeholder="نام کاربری دوست"><button class="btn-primary" type="submit">افزودن</button></form>
+                                <div id="friend-requests" class="friend-requests hidden" aria-live="polite"></div>
+                                <div id="friends-list" class="friends-list"></div>
+                            </section>
+                            <section class="content-card social-card privacy-card">
+                                <header><div><span class="material-symbols-outlined" aria-hidden="true">manage_accounts</span><div><h3>پروفایل لیگ</h3><p>کنترل نمایش اطلاعات با شماست</p></div></div></header>
+                                <label class="social-switch"><span><strong>حضور در لیگ</strong><small>نام نمایشی و امتیاز دیده می‌شود</small></span><input id="league-visible" type="checkbox"><i aria-hidden="true"></i></label>
+                                <label class="social-switch"><span><strong>نمایش پایه تحصیلی</strong><small>شماره تماس و ایمیل هرگز نمایش داده نمی‌شود</small></span><input id="league-show-grade" type="checkbox" checked><i aria-hidden="true"></i></label>
+                                <label class="form-label" for="league-bio">معرفی کوتاه</label><textarea id="league-bio" class="form-control" maxlength="120" rows="2" placeholder="مثلاً: دانش‌آموز تجربی و علاقه‌مند به زیست"></textarea>
+                                <button id="league-save" class="btn-primary" type="button" onclick="Gamification.saveSettings()">ذخیره تنظیمات</button>
+                            </section>
+                        </aside>
                     </div>
 
                 </section>
