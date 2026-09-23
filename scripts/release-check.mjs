@@ -6,10 +6,10 @@ const [pkg, gradle, workflow, app, auth, dataApi, chatApi, socialApi, game, inde
   read('package.json').then(JSON.parse), read('android/app/build.gradle'), read('.github/workflows/android.yml'), read('js/app.js'), read('api/auth.js'), read('api/data.js'), read('api/chat.js'), read('api/social.js'), read('js/gamification.js'), read('index.html'), read('privacy.html'), read('scripts/sync-mobile.mjs'), read('capacitor.config.json').then(JSON.parse), read('android/app/src/main/AndroidManifest.xml'), read('js/stats.js'), read('js/mobile.js')
 ]);
 
-assert.equal(pkg.version, '1.0.7');
-assert.match(gradle, /versionCode 8/);
-assert.match(gradle, /versionName "1\.0\.7"/);
-assert.match(workflow, /darsyar-1\.0\.7-myket-release/);
+assert.equal(pkg.version, '1.0.8');
+assert.match(gradle, /versionCode 9/);
+assert.match(gradle, /versionName "1\.0\.8"/);
+assert.match(workflow, /darsyar-1\.0\.8-myket-release/);
 assert.equal(capacitor.appId, 'ir.darsyar.app');
 assert.match(app, /exams: false, gamification: true, subscription: false/);
 assert.match(auth, /parentalConsent/);
@@ -32,5 +32,9 @@ assert.doesNotMatch(index, /stats-exam-history|تاریخچه آزمون‌ها�
 assert.doesNotMatch(stats, /3\.5|12\.5, 9\.0|weekHours \* 4\.2/);
 assert.match(mobile, /پنل مدیریت مشاور/);
 assert.match(mobile, /برنامه خودت را بساز/);
+assert.match(index, /رقابت اجتماعی/);
+assert.match(index, /id="view-gamification"/);
+assert.doesNotMatch(stats, /league|leaderboard|لیگ/);
+assert.match(app, /toggleDesktopSidebar/);
 assert.match(manifest, /android\.permission\.INTERNET/);
-console.log('Release checks passed for Darsyar 1.0.7 (versionCode 8).');
+console.log('Release checks passed for Darsyar 1.0.8 (versionCode 9).');

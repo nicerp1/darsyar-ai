@@ -61,19 +61,18 @@ const Dashboard = (function () {
 
     function renderKPIs() {
         const history = Storage.get('study_history', []);
-        const examResults = Storage.get('exam_results', []);
 
         // Today's study hours
         const now = new Date(), today = new Date(now.getTime() - now.getTimezoneOffset() * 60000).toISOString().slice(0,10);
         const todayLog = history.find(item => item.date === today) || { hours: 0 };
         const todayHours = todayLog.hours || 0;
 
-        // Average score
-        let avgScore = 0;
-        if (examResults.length > 0) {
-            const sum = examResults.reduce((acc, r) => acc + (r.scorePercentage || 0), 0);
-            avgScore = Math.round(sum / examResults.length);
-        }
+        // Real study total for the last seven days
+        const weekStart = new Date(now); weekStart.setHours(0, 0, 0, 0); weekStart.setDate(weekStart.getDate() - 6);
+        const weekHours = history.reduce((sum, item) => {
+            const date = new Date(`${item.date}T00:00:00`);
+            return date >= weekStart && date <= now ? sum + Number(item.hours || 0) : sum;
+        }, 0);
 
         // Streak
         const streak = history.filter(item => Number(item.hours || 0) > 0).length ? calculateStudyStreak(history) : 0;
@@ -86,7 +85,7 @@ const Dashboard = (function () {
             kpiHoursEl.textContent = Utils.toPersianDigits(todayHours.toFixed(1));
         }
         if (kpiAvgScoreEl && typeof Utils !== 'undefined') {
-            kpiAvgScoreEl.textContent = Utils.toPersianDigits(avgScore);
+            kpiAvgScoreEl.textContent = Utils.toPersianDigits(weekHours.toFixed(1));
         }
         if (kpiStreakEl && typeof Utils !== 'undefined') {
             kpiStreakEl.textContent = Utils.toPersianDigits(streak);
