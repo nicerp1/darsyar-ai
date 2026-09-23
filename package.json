@@ -1,6 +1,6 @@
 {
   "name": "darsyar-android",
-  "version": "1.0.8",
+  "version": "1.0.7",
   "private": true,
   "scripts": {
     "mobile:prepare": "node scripts/sync-mobile.mjs",

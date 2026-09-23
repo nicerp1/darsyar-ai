@@ -206,15 +206,6 @@ const App = (function () {
         }
     }
 
-    function toggleDesktopSidebar() {
-        if (document.documentElement.classList.contains('capacitor-app')) return;
-        const layout = document.getElementById('app-main-layout');
-        const button = document.querySelector('.sidebar-collapse-button');
-        const collapsed = layout?.classList.toggle('sidebar-collapsed') || false;
-        button?.setAttribute('aria-expanded', String(!collapsed));
-        button?.setAttribute('aria-label', collapsed ? 'بازکردن منوی کناری' : 'جمع‌کردن منوی کناری');
-    }
-
     function closeMobileSidebar() {
         const sidebar = document.getElementById('sidebar');
         const overlay = document.getElementById('sidebar-overlay');
@@ -248,7 +239,6 @@ const App = (function () {
         toggleTheme,
         navigate,
         toggleMobileSidebar,
-        toggleDesktopSidebar,
         closeMobileSidebar,
         renderUserHeader,
         isFeatureEnabled,
