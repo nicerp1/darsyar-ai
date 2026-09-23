@@ -8,6 +8,7 @@ const Dashboard = (function () {
     let isEditMode = false;
 
     function init() {
+        renderWebDashboard();
         renderGreeting();
         renderQuote();
         renderKPIs();
@@ -16,6 +17,37 @@ const Dashboard = (function () {
         renderTrendChart();
         renderExamReminders();
         startCountdownTicker();
+    }
+
+    function escapeHTML(value) {
+        return String(value ?? '').replace(/[&<>'"]/g, char => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[char]));
+    }
+
+    function localDate() {
+        const now = new Date(); return new Date(now.getTime() - now.getTimezoneOffset() * 60000).toISOString().slice(0, 10);
+    }
+
+    function renderWebDashboard() {
+        if (document.documentElement.classList.contains('capacitor-app')) return;
+        const view = document.getElementById('view-dashboard'), user = Storage.getCurrentUser();
+        if (!view || !user) return;
+        let shell = view.querySelector('.web-dashboard-shell');
+        if (!shell) { shell = document.createElement('div'); shell.className = 'web-dashboard-shell'; view.prepend(shell); }
+        view.classList.add('web-dashboard-ready');
+        const history = Storage.get('study_history', []) || [], reports = Storage.get('manual_reports', []) || [], schedule = Storage.get('schedule', []) || [];
+        const now = new Date(), today = localDate(), start = new Date(now); start.setHours(0, 0, 0, 0); start.setDate(start.getDate() - 6);
+        const todayHours = history.find(item => item.date === today)?.hours || 0;
+        const weekHours = history.reduce((sum, item) => new Date(`${item.date}T00:00:00`) >= start ? sum + Number(item.hours || 0) : sum, 0);
+        const streak = calculateStudyStreak(history), todayIndex = (now.getDay() + 1) % 7;
+        const tasks = schedule[todayIndex]?.tasks || schedule[todayIndex]?.slots?.filter(item => item?.subject) || [];
+        const completed = tasks.filter(task => task.status === 'completed').length, progress = tasks.length ? Math.round(completed / tasks.length * 100) : 0;
+        const taskMarkup = tasks.slice(0, 5).map((task, index) => `<article class="web-today-task"><label><input type="checkbox" ${task.status === 'completed' ? 'checked' : ''} disabled><i></i></label><div><strong>${escapeHTML(task.subject)}</strong><small>${escapeHTML(task.note || 'تسک برنامه‌ریزی‌شده')}</small></div><span>${Utils.toPersianDigits(task.durationMinutes || 60)} دقیقه</span><b>${Utils.toPersianDigits(index + 1)}</b></article>`).join('');
+        const reportMarkup = reports.slice(0, 3).map(item => `<li><span class="material-symbols-outlined" aria-hidden="true">menu_book</span><div><strong>${escapeHTML(item.subject || 'مطالعه')}</strong><small>${escapeHTML(item.date || '')}</small></div><b>${Utils.toPersianDigits(item.minutes || 0)} دقیقه</b></li>`).join('');
+        const manager = Storage.isManager(), advisor = user.advisor;
+        const relation = manager ? `<button type="button" onclick="App.navigate('admin')"><span class="material-symbols-outlined">manage_accounts</span><div><small>فضای مشاور</small><strong>مدیریت دانش‌آموزان</strong></div><i class="material-symbols-outlined">arrow_back</i></button>` : advisor ? `<button type="button" onclick="Communications.open('chat')"><span class="material-symbols-outlined">support_agent</span><div><small>مشاور شما</small><strong>${escapeHTML(advisor.name || advisor.username)}</strong></div><i class="material-symbols-outlined">arrow_back</i></button>` : `<button type="button" onclick="App.navigate('schedule')"><span class="material-symbols-outlined">edit_calendar</span><div><small>مطالعه مستقل</small><strong>برنامه خودت را بساز</strong></div><i class="material-symbols-outlined">arrow_back</i></button>`;
+        shell.innerHTML = `<header class="web-page-heading"><div><small>امروز، ${escapeHTML(Utils.getPersianDayName())}</small><h1>داشبورد امروز</h1><p>${escapeHTML(user.name || user.username)}، برای یک قدم رو به جلو آماده‌ای؟</p></div><button type="button" onclick="App.navigate('schedule')"><span class="material-symbols-outlined">add</span>افزودن تسک</button></header>
+            <section class="web-dashboard-kpis"><article><span class="material-symbols-outlined blue">schedule</span><div><small>مطالعه امروز</small><strong>${Utils.toPersianDigits(Number(todayHours).toFixed(1))} <em>ساعت</em></strong></div></article><article><span class="material-symbols-outlined green">trending_up</span><div><small>مجموع این هفته</small><strong>${Utils.toPersianDigits(weekHours.toFixed(1))} <em>ساعت</em></strong></div></article><article><span class="material-symbols-outlined gold">local_fire_department</span><div><small>استریک مطالعه</small><strong>${Utils.toPersianDigits(streak)} <em>روز</em></strong></div></article><article><span class="material-symbols-outlined violet">task_alt</span><div><small>پیشرفت امروز</small><strong>${Utils.toPersianDigits(progress)}<em>٪</em></strong></div></article></section>
+            <div class="web-dashboard-columns"><main><section class="web-panel web-today-panel"><header><div><span class="material-symbols-outlined">calendar_today</span><h2>برنامه امروز</h2></div><small>${Utils.toPersianDigits(tasks.length)} تسک</small></header><div class="web-today-list">${taskMarkup || '<div class="web-empty"><span class="material-symbols-outlined">event_available</span><p>برنامه امروز هنوز خالی است.</p><button onclick="App.navigate(\'schedule\')">ساخت برنامه</button></div>'}</div><button class="web-primary-action" onclick="App.navigate('pomodoro')"><span class="material-symbols-outlined">play_arrow</span>شروع جلسه تمرکز</button></section><section class="web-panel web-progress-panel"><header><div><span class="material-symbols-outlined">monitoring</span><h2>پیشرفت هفتگی</h2></div><button onclick="App.navigate('stats')">مشاهده گزارش</button></header><div class="web-week-bars">${history.slice(-7).map((item,index) => `<div><i style="height:${Math.min(100,Number(item.hours||0)/8*100)}%"></i><span>${['ش','ی','د','س','چ','پ','ج'][index] || ''}</span></div>`).join('') || '<p>هنوز داده‌ای ثبت نشده است.</p>'}</div></section></main><aside><section class="web-relation-card">${relation}</section><section class="web-panel web-report-panel"><header><div><span class="material-symbols-outlined">history</span><h2>آخرین گزارش‌ها</h2></div><button onclick="App.navigate('schedule')">ثبت مطالعه</button></header><ul>${reportMarkup || '<li class="web-empty-row">هنوز گزارشی ثبت نشده است.</li>'}</ul></section><section class="web-motivation"><span class="material-symbols-outlined">auto_awesome</span><div><small>یادآوری امروز</small><strong>پیشرفت از تکرار قدم‌های کوچک ساخته می‌شود.</strong></div></section></aside></div>`;
     }
 
     function renderGreeting() {
