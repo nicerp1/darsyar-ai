@@ -3068,6 +3068,90 @@ html:not(.capacitor-app) .auth-card .form-control:focus{
     border-color:rgba(139,92,246,.72);
     box-shadow:0 0 0 3px rgba(139,92,246,.13);
 }
+html:not(.capacitor-app) .auth-card form{text-align:right}
+html:not(.capacitor-app) .auth-input-wrap{
+    position:relative;
+    display:flex;
+    align-items:center;
+}
+html:not(.capacitor-app) .auth-input-wrap>.material-symbols-outlined{
+    position:absolute;
+    z-index:2;
+    right:14px;
+    display:grid;
+    place-items:center;
+    color:#a7abc0;
+    font-size:20px;
+    line-height:1;
+    pointer-events:none;
+}
+html:not(.capacitor-app) .auth-input-wrap .form-control{
+    width:100%;
+    min-height:48px;
+    padding-right:44px;
+    padding-left:52px;
+}
+html:not(.capacitor-app) .auth-input-wrap>button{
+    position:absolute;
+    z-index:3;
+    left:5px;
+    width:42px;
+    height:42px;
+    display:grid;
+    place-items:center;
+    padding:0;
+    color:#b5b8ca;
+    background:transparent;
+    border:0;
+    border-radius:11px;
+    cursor:pointer;
+}
+html:not(.capacitor-app) .auth-input-wrap>button:hover{
+    color:#fff;
+    background:rgba(139,92,246,.14);
+}
+html:not(.capacitor-app) .auth-input-wrap>button .material-symbols-outlined{
+    display:block;
+    font-size:21px;
+    line-height:1;
+}
+html:not(.capacitor-app) .auth-forgot{
+    min-height:40px;
+    display:block;
+    margin:-4px 0 4px auto;
+    padding:0 2px;
+    color:#b7a2ff;
+    background:transparent;
+    border:0;
+    font:700 11px var(--font-family);
+    cursor:pointer;
+}
+html:not(.capacitor-app) .auth-forgot:hover{color:#d2c7ff}
+html:not(.capacitor-app) .auth-submit-row{
+    display:block;
+    width:100%;
+}
+html:not(.capacitor-app) .auth-submit-row:has(.auth-back-button){display:grid;grid-template-columns:48px minmax(0,1fr);gap:9px;align-items:center}
+html:not(.capacitor-app) .auth-submit-row:has(.auth-back-button) .btn-gold{margin-top:0!important}
+html:not(.capacitor-app) .auth-back-button{
+    width:48px;
+    height:48px;
+    display:grid;
+    place-items:center;
+    padding:0;
+    color:#d8d9e5;
+    background:rgba(255,255,255,.07);
+    border:1px solid rgba(220,219,239,.14);
+    border-radius:13px;
+    cursor:pointer;
+}
+html:not(.capacitor-app) .auth-check input{
+    appearance:auto;
+    width:20px;
+    height:20px;
+    flex:0 0 20px;
+    accent-color:var(--web-violet);
+}
 html:not(.capacitor-app) .auth-card .btn-gold{
     color:#fff;
     background:linear-gradient(135deg,var(--web-coral),#de627f);
