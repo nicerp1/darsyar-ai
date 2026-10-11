@@ -8,6 +8,7 @@ const Dashboard = (function () {
     let isEditMode = false;
 
     function init() {
+        if (window.WebStudio?.enabled()) { WebStudio.dashboard(); return; }
         renderWebDashboard();
         renderGreeting();
         renderQuote();

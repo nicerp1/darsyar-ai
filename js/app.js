@@ -17,6 +17,7 @@ const App = (function () {
         // Apply Saved Theme
         applyTheme();
         applyFeatureVisibility();
+        window.WebStudio?.init();
 
         // Check Auth and Render Layout
         checkAuthAndRender();
@@ -120,13 +121,17 @@ const App = (function () {
     }
 
     function navigate(viewName) {
+        const previousView = currentView;
+        if (viewName === 'chat' && !window.WebStudio?.enabled()) { Communications.open('chat'); return; }
         if (!isFeatureEnabled(viewName)) viewName = 'dashboard';
         if (viewName === 'admin' && !Storage.isManager()) {
             currentView = 'dashboard';
             if (typeof Utils !== 'undefined') Utils.showToast('دسترسی به این بخش فقط برای مدیر اصلی مجاز است.', 'error');
             viewName = 'dashboard';
         }
+        if (window.WebStudio?.enabled()) WebStudio.beforeLeave(viewName, previousView);
         currentView = viewName;
+        if (window.WebStudio?.enabled()) Communications.close();
 
         // Hide all views
         document.querySelectorAll('.view-section').forEach(section => {
@@ -192,9 +197,14 @@ const App = (function () {
             case 'profile':
                 if (typeof Profile !== 'undefined') Profile.init();
                 break;
+            case 'chat':
+                if (typeof Communications !== 'undefined') Communications.showPage();
+                break;
         }
 
-        window.scrollTo({ top: 0, behavior: 'smooth' });
+        if (window.WebStudio?.enabled()) WebStudio.enter(viewName, previousView);
+        window.scrollTo({ top: 0, behavior: 'instant' });
+        if (window.WebStudio?.enabled()) document.body.scrollTo({ top: 0, behavior: 'instant' });
     }
 
     function toggleMobileSidebar() {

@@ -16,11 +16,13 @@ const Pomodoro = (function () {
     const NOTIFICATION_ID = 25025;
 
     function init() {
+        window.WebStudio?.preparePomodoro();
         loadSettings();
         renderSettings();
         renderTasks();
         renderStats();
         updateDisplay();
+        updateControlButtons();
         setupScheduleTaskOptions();
         if (!visibilityListenerReady) {
             document.addEventListener('visibilitychange', reconcileTimer);
@@ -238,7 +240,6 @@ const Pomodoro = (function () {
         let todayItem = history.find(item => item.date === today);
         if (!todayItem) { todayItem = { date: today, hours: 0, sessions: 0 }; history.push(todayItem); }
         todayItem.hours = parseFloat((Number(todayItem.hours || 0) + hoursToAdd).toFixed(2));
-        todayItem.sessions = (todayItem.sessions || 0) + 1;
         Storage.set('study_history', history);
 
         if (typeof Dashboard !== 'undefined') {
@@ -275,6 +276,7 @@ const Pomodoro = (function () {
 
         // Title update for tab awareness
         document.title = timerState === 'running' ? `(${formatted}) درسیار - تایمر پومودورو` : 'درسیار | StudyMate Pro';
+        window.WebStudio?.timerState(timerState, currentMode);
     }
 
     function updateControlButtons() {
@@ -288,6 +290,7 @@ const Pomodoro = (function () {
 
         if (mainBtn) mainBtn.innerHTML = label;
         if (fsMainBtn) fsMainBtn.innerHTML = label;
+        window.WebStudio?.timerState(timerState, currentMode);
     }
 
     function toggleTimer() {
@@ -325,17 +328,20 @@ const Pomodoro = (function () {
 
         const schedule = Storage.get('schedule', []);
         const todayDayIndex = (new Date().getDay() + 1) % 7; // Saturday = 0 in Iranian calendar
-        const todaySchedule = schedule[todayDayIndex] || schedule[0];
+        const todaySchedule = schedule[todayDayIndex];
 
-        let optionsHtml = `<option value="مطالعه آزاد و یادگیری">📌 مطالعه و تمرکز آزاد</option>`;
+        const esc = value => String(value ?? '').replace(/[&<>"']/g, c => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c]));
+        let optionsHtml = `<option value="مطالعه و تمرکز آزاد">مطالعه و تمرکز آزاد</option>`;
         const tasks = todaySchedule?.tasks || todaySchedule?.slots || [];
         if (tasks.length) {
             tasks.filter(task => task.subject).forEach(task => {
-                optionsHtml += `<option value="${task.subject}">${task.subject} · ${task.durationMinutes || 60} دقیقه</option>`;
+                optionsHtml += `<option value="${esc(task.subject)}">${esc(task.subject)} · ${Utils.toPersianDigits(task.durationMinutes || 60)} دقیقه</option>`;
             });
         }
 
         select.innerHTML = optionsHtml;
+        if (![...select.options].some(option => option.value === currentTaskName)) select.add(new Option(currentTaskName, currentTaskName));
+        select.value = currentTaskName;
         select.onchange = function () {
             currentTaskName = this.value;
             const labelEl = document.getElementById('pomo-active-task-label');
@@ -344,13 +350,17 @@ const Pomodoro = (function () {
     }
 
     function setTaskFromExternal(taskName, suggestedMinutes) {
+        if (timerState === 'running' && !confirm('جلسه فعلی متوقف شود و تمرکز روی تسک جدید آغاز شود؟')) return;
+        if (timerState === 'running') pauseTimer();
         currentTaskName = taskName;
         const labelEl = document.getElementById('pomo-active-task-label');
         if (labelEl) labelEl.textContent = taskName;
         if (suggestedMinutes) {
             const settings = Storage.getSettings(); settings.pomodoroWork = Math.min(180, Math.max(1, Number(suggestedMinutes))); Storage.saveSettings(settings);
-            currentMode = 'work'; timerState = 'idle'; loadSettings(); timeLeft = totalDuration; renderSettings(); updateDisplay();
+            currentMode = 'work'; timerState = 'idle'; loadSettings(); timeLeft = totalDuration; renderSettings(); updateDisplay(); updateControlButtons();
+            document.querySelectorAll('.pomo-tab-btn').forEach(button => button.classList.toggle('active', button.id === 'pomo-tab-work'));
         }
+        setupScheduleTaskOptions();
         if (typeof Utils !== 'undefined') {
             Utils.showToast(`تسک «${taskName}» به تایمر پومودورو متصل شد.`, 'info');
         }
@@ -368,13 +378,14 @@ const Pomodoro = (function () {
             return;
         }
 
+        const esc = value => String(value ?? '').replace(/[&<>"']/g, c => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c]));
         container.innerHTML = tasks.map(t => `
             <div style="display: flex; align-items: center; justify-content: space-between; padding: 10px 14px; background: var(--bg-surface); border-radius: var(--radius-md); margin-bottom: 8px; border: 1px solid var(--border-subtle);">
                 <label style="display: flex; align-items: center; gap: 10px; cursor: pointer; text-decoration: ${t.done ? 'line-through' : 'none'}; color: ${t.done ? 'var(--text-dim)' : 'var(--text-main)'};">
                     <input type="checkbox" ${t.done ? 'checked' : ''} onchange="Pomodoro.toggleTaskDone('${t.id}')">
-                    <span>${t.title}</span>
+                    <span>${esc(t.title)}</span>
                 </label>
-                <button style="background: transparent; border: none; color: var(--danger); cursor: pointer;" onclick="Pomodoro.deleteTask('${t.id}')">
+                <button type="button" aria-label="حذف تسک" style="background: transparent; border: none; color: var(--danger); cursor: pointer;" onclick="Pomodoro.deleteTask('${t.id}')">
                     <span class="material-symbols-outlined" style="font-size: 18px;">delete</span>
                 </button>
             </div>
