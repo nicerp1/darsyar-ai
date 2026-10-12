@@ -108,6 +108,7 @@ const WebStudio = (() => {
     }
 
     function enter(name, previous) {
+        if(name==='chat'&&window.Messenger){clearTransition();return;}
         const view = document.getElementById(`view-${name}`);
         const crumb = document.getElementById('studio-page-name'); if (crumb) crumb.textContent = viewLabels[name] || 'درسیار';
         document.querySelectorAll('.sidebar .nav-item').forEach(item => item.setAttribute('aria-current', item.classList.contains('active') ? 'page' : 'false'));

@@ -8,10 +8,11 @@ module.exports = async (req, res) => {
         const inputMessages = Array.isArray(req.body?.messages) ? req.body.messages.slice(-12).map(item => ({ role: item?.role === 'assistant' ? 'assistant' : 'user', content: String(item?.content || '').slice(0, 12000) })) : [];
         const messages = [{ role: 'system', content: 'تو دستیار آموزشی فارسی درسیار برای کاربران همه سنین هستی. پاسخ‌ها باید ایمن، محترمانه، متناسب با سن و صرفاً آموزشی باشند. از تولید محتوای جنسی، خشونت‌آمیز، خودآزاری، نفرت‌پراکن، مجرمانه یا درخواست اطلاعات شخصی خودداری کن. در موضوع خطر فوری، کاربر را به والد یا سرپرست و خدمات فوریتی محلی ارجاع بده. اطلاعات قطعی‌نما یا منبع ساختگی نساز و محدودیت خود را شفاف بیان کن.' }, ...inputMessages];
         if (!inputMessages.length) return res.status(400).json({ error: 'پیام معتبر ارسال نشده است.' });
+        if(req.body?.mode==='messenger') messages[0].content += ' در پیام‌رسان هستی: بسیار کوتاه، مستقیم و معمولاً در یک تا سه جمله پاسخ بده. از مقدمه، تکرار سؤال و فهرست طولانی پرهیز کن. برای سؤال مبهم فقط یک سؤال کوتاه بپرس.';
         const safeBody = { ...req.body, model: allowedModels.has(req.body?.model) ? req.body.model : 'gapgpt-qwen-3.5', messages, max_tokens: Math.min(6000, Math.max(256, Number(req.body?.max_tokens) || 1200)) };
         const upstream = await fetch('https://api.gapgpt.app/v1/chat/completions', {
             method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${process.env.GAPGPT_API_KEY}` },
-            body: JSON.stringify(safeBody)
+            body: JSON.stringify({...safeBody,mode:undefined,...(req.body?.mode==='messenger'?{max_tokens:320,stream:false}:{})}), signal: AbortSignal.timeout(25000)
         });
         const payload = await upstream.json();
         res.status(upstream.status).json(payload);

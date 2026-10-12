@@ -17,6 +17,7 @@ async function saveValue(username, key, value) {
 }
 
 module.exports = async (req, res) => {
+    if (req.query?.messenger === '1' || req.body?.messenger === true) return require('../lib/messenger')(req,res);
     try {
         const actor = await getSession(req);
         if (!actor) return res.status(401).json({ error: 'ابتدا وارد حساب شوید.' });

@@ -5,6 +5,7 @@ module.exports = async (req, res) => {
         if (!user) return res.status(401).json({ error: 'ابتدا وارد حساب شوید.' });
         const key = String(req.body?.key || '').trim();
         if (!key || key.length > 80) return res.status(400).json({ error: 'کلید داده معتبر نیست.' });
+        if(key.startsWith('im_'))return res.status(403).json({error:'پیام‌ها فقط از مسیر امن پیام‌رسان قابل تغییر هستند.'});
         if (/^(notice_|news_|read_)/.test(key) || key === 'task_completions') return res.status(403).json({error:'این داده فقط از مسیر اختصاصی قابل تغییر است.'});
         if (['advisor_chat', 'admin_note', 'chat_reports', 'chat_blocked', 'legal_consent', 'account_type', 'linked_students', 'social_profile', 'friends', 'friend_requests', 'league_points'].includes(key)) return res.status(403).json({ error: 'این داده فقط از مسیر امن اختصاصی قابل تغییر است.' });
         if (req.method === 'DELETE') await db(`app_data?username=eq.${encodeURIComponent(user.username)}&key=eq.${encodeURIComponent(key)}`, { method: 'DELETE' });

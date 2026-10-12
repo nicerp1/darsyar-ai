@@ -27,7 +27,7 @@ async function getStudent(username) {
 }
 
 async function getData(username) {
-    const rows = await db(`app_data?username=eq.${encodeURIComponent(username)}&select=key,value`);
+    const rows = await db(`app_data?username=eq.${encodeURIComponent(username)}&key=not.like.im_*&select=key,value`);
     return Object.fromEntries((rows || []).map(row => [row.key, row.value]));
 }
 
@@ -70,7 +70,7 @@ module.exports = async (req, res) => {
         const username = String((req.method === 'GET' ? req.query?.username : req.body?.username) || '').trim().toLowerCase();
         if (req.method === 'GET' && !username) {
             const students = await listManagedStudents(actor);
-            const rows = await db('app_data?select=username,key,value,updated_at');
+            const rows = await db('app_data?key=not.like.im_*&select=username,key,value,updated_at');
             return res.status(200).json({ students, accountType, summaries: students.map(student => buildSummary(student, rows.filter(row => row.username === student.username))) });
         }
         if (req.method === 'POST' && req.body?.action === 'linkStudent') {

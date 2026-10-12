@@ -37,7 +37,7 @@ module.exports = async (req, res) => {
         const token = crypto.randomBytes(32).toString('hex');
         await db('sessions', { method: 'POST', body: JSON.stringify({ token, username, expires_at: new Date(Date.now() + 30 * 864e5).toISOString() }) });
         setCookie(res, token);
-        const rows = await db(`app_data?username=eq.${encodeURIComponent(username)}&select=key,value`);
+        const rows = await db(`app_data?username=eq.${encodeURIComponent(username)}&key=not.like.im_*&select=key,value`);
         const data = Object.fromEntries((rows || []).filter(row => row.key !== 'chat_reports').map(row => [row.key, row.value]));
         const user = await decorateUser(profile);
         if (user.accountType === 'student') user.advisor = await findStudentAdvisor(user.username);

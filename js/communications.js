@@ -24,7 +24,11 @@ const Communications = (function () {
     }
 
     function open(tab = 'chat') {
-        if (window.WebStudio?.enabled()) { activeTab = tab === 'notes' ? 'notes' : 'chat'; App.navigate('chat'); return; }
+        if (window.WebStudio?.enabled() && tab !== 'notes') { activeTab='chat'; Messenger.open(selectedStudent || undefined); return; }
+        if(window.WebStudio?.enabled() && tab==='notes'){
+            const drawer=document.getElementById('communications-drawer');document.body.append(drawer);
+            if(!document.getElementById('notes-drawer-close')){const b=document.createElement('button');b.id='notes-drawer-close';b.type='button';b.className='modal-close-btn';b.textContent='×';b.setAttribute('aria-label','بستن یادداشت‌ها');b.onclick=close;drawer.querySelector('.communications-header').append(b);}
+        }
         init();
         if (window.DarsyarPlatform?.native) document.body.classList.add('communications-page-open');
         document.getElementById('communications-overlay')?.classList.add('open');
@@ -34,7 +38,6 @@ const Communications = (function () {
     }
 
     function close() {
-        if (window.WebStudio?.enabled()) return;
         document.body.classList.remove('communications-page-open');
         document.getElementById('communications-overlay')?.classList.remove('open');
         const drawer = document.getElementById('communications-drawer'); drawer?.classList.remove('open'); drawer?.setAttribute('aria-hidden', 'true');
@@ -49,6 +52,7 @@ const Communications = (function () {
     }
 
     async function switchTab(tab) {
+        if(tab==='chat'&&window.WebStudio?.enabled()&&window.Messenger){close();Messenger.open(selectedStudent||undefined);return;}
         activeTab = tab === 'notes' ? 'notes' : 'chat';
         document.getElementById('communications-chat-panel')?.classList.toggle('hidden', activeTab !== 'chat');
         document.getElementById('communications-notes-panel')?.classList.toggle('hidden', activeTab !== 'notes');
@@ -58,6 +62,7 @@ const Communications = (function () {
     }
 
     async function selectStudent(username) {
+        if(window.WebStudio?.enabled() && window.Messenger){selectedStudent=String(username||'').trim().toLowerCase();if(document.body.classList.contains('im-open'))return Messenger.select(selectedStudent);return;}
         if (sending) return;
         selectedStudent = String(username || '').trim().toLowerCase();
         const input = document.getElementById('advisor-chat-input'); if (input) input.value = '';

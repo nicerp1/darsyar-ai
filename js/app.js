@@ -84,6 +84,7 @@ const App = (function () {
     }
 
     function onUserChanged() {
+        window.Messenger?.logout();
         document.getElementById('sf-completion')?.close();
         window.Community?.init();
         checkAuthAndRender();
@@ -125,6 +126,7 @@ const App = (function () {
     }
 
     function navigate(viewName) {
+        if(viewName!=='chat')window.Messenger?.leave();
         const previousView = currentView;
         if (viewName === 'chat' && !window.WebStudio?.enabled()) { Communications.open('chat'); return; }
         if (!isFeatureEnabled(viewName)) viewName = 'dashboard';
@@ -211,7 +213,8 @@ const App = (function () {
                 if (typeof Profile !== 'undefined') Profile.init();
                 break;
             case 'chat':
-                if (typeof Communications !== 'undefined') Communications.showPage();
+                if(window.Messenger && window.WebStudio?.enabled())Messenger.enter();
+                else if (typeof Communications !== 'undefined') Communications.showPage();
                 break;
         }
 
