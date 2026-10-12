@@ -131,6 +131,11 @@ const App = (function () {
         }
         if (window.WebStudio?.enabled()) WebStudio.beforeLeave(viewName, previousView);
         currentView = viewName;
+        if (window.WebStudio?.enabled()) {
+            const fullChat=viewName==='ai-assistant';
+            document.body.classList.toggle('aw-chat-open',fullChat);
+            document.querySelectorAll('#sidebar,.top-header').forEach(element=>{element.inert=fullChat;});
+        }
         if (window.WebStudio?.enabled()) Communications.close();
 
         // Hide all views
@@ -168,12 +173,15 @@ const App = (function () {
                 if (typeof Flashcards !== 'undefined') Flashcards.init();
                 break;
             case 'ai-assistant':
+                if (window.WebStudio?.enabled() && window.AIWorkspace) { AIWorkspace.enter('chat'); break; }
                 if (typeof AIAssistant !== 'undefined') AIAssistant.init();
                 break;
             case 'ai-writing':
+                if (window.WebStudio?.enabled() && window.AIWorkspace) { AIWorkspace.enter('writing'); break; }
                 if (typeof AIWriting !== 'undefined') AIWriting.init();
                 break;
             case 'ai-research':
+                if (window.WebStudio?.enabled() && window.AIWorkspace) { AIWorkspace.enter('research'); break; }
                 if (typeof AIResearch !== 'undefined') AIResearch.init();
                 break;
             case 'schedule':
