@@ -65,7 +65,7 @@ const AIAssistant = (function () {
     function createMessageHtml(role, content) {
         const isUser = role === 'user';
         const user = Storage.getCurrentUser() || { avatar: '👩‍🎓' };
-        const avatar = isUser ? user.avatar : '🤖';
+        const avatar = isUser ? (window.ProfileStudio ? ProfileStudio.avatarHTML(user.avatar) : '👩‍🎓') : '🤖';
         const renderedText = typeof Utils !== 'undefined' ? Utils.renderKaTeXAndMarkdown(content) : content;
 
         return `

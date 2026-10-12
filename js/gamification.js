@@ -21,7 +21,7 @@ const Gamification = (function () {
         const sideBar = document.getElementById('sidebar-xp-bar'); if (sideBar) sideBar.style.width = `${percent}%`;
     }
     function personCard(person, actions = '') {
-        return `<article class="social-person-card"><span class="social-avatar">${esc(person.avatar || '👩‍🎓')}</span><div><strong>${esc(person.name)}</strong><small>@${esc(person.username)}${person.grade ? ` · ${esc(person.grade)}` : ''}</small><em>${pd(person.xp)} امتیاز · ${esc(levelTitle(person.level))}</em></div>${actions}</article>`;
+        return `<article class="social-person-card"><span class="social-avatar">${ProfileStudio.avatarHTML(person.avatar)}</span><div><strong>${esc(person.name)}</strong><small>@${esc(person.username)}${person.grade ? ` · ${esc(person.grade)}` : ''}</small><em>${pd(person.xp)} امتیاز · ${esc(levelTitle(person.level))}</em></div>${actions}</article>`;
     }
     function render() {
         renderLevelProgress();
@@ -32,6 +32,7 @@ const Gamification = (function () {
         const board = document.getElementById('game-leaderboard');
         if (board) board.innerHTML = model.leaderboard.length ? model.leaderboard.map(item => `<article class="league-row ${item.isMe ? 'is-me' : ''}"><strong class="league-rank">${item.rank <= 3 ? `<span class="material-symbols-outlined" aria-hidden="true">${item.rank === 1 ? 'trophy' : 'military_tech'}</span><small>${pd(item.rank)}</small>` : pd(item.rank)}</strong><span class="social-avatar">${esc(item.avatar)}</span><div><strong>${esc(item.name)}${item.isMe ? ' (شما)' : ''}</strong><small>${esc(levelTitle(item.level))}${item.isFriend ? ' · دوست شما' : ''}</small></div><b>${pd(item.seasonPoints || 0)}<small> امتیاز فصل</small></b></article>`).join('') : '<div class="social-empty"><span class="material-symbols-outlined" aria-hidden="true">groups</span><p>هنوز کسی با رضایت خودش وارد لیگ نشده است.</p></div>';
         const friends = document.getElementById('friends-list'); if (friends) friends.innerHTML = model.friends.length ? model.friends.map(item => personCard(item, `<button type="button" class="social-icon-button danger" onclick="Gamification.friendAction('remove','${esc(item.username)}')" aria-label="حذف ${esc(item.name)} از دوستان"><span class="material-symbols-outlined" aria-hidden="true">person_remove</span></button>`)).join('') : '<div class="social-empty"><p>هنوز دوستی اضافه نکرده‌اید.</p></div>';
+        board?.querySelectorAll('.social-avatar').forEach((node, index) => { node.innerHTML = ProfileStudio.avatarHTML(model.leaderboard[index].avatar); });
         const requests = document.getElementById('friend-requests');
         if (requests) { requests.classList.toggle('hidden', !model.requests.length); requests.innerHTML = model.requests.map(item => personCard(item, `<div class="social-actions"><button type="button" onclick="Gamification.friendAction('accept','${esc(item.username)}')">پذیرش</button><button type="button" class="secondary" onclick="Gamification.friendAction('reject','${esc(item.username)}')">رد</button></div>`)).join(''); }
     }

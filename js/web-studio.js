@@ -4,7 +4,7 @@ const WebStudio = (() => {
     const esc = value => String(value ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
     const pd = value => Utils.toPersianDigits(value);
     const localDate = (date = new Date()) => new Date(date.getTime() - date.getTimezoneOffset() * 60000).toISOString().slice(0, 10);
-    const reduced = () => matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const reduced = () => matchMedia('(prefers-reduced-motion: reduce)').matches || Storage.getSettings().motion === 'off';
     const paths = {
         home:'<path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1Z"/>',
         timer:'<circle cx="12" cy="13" r="8"/><path d="M9 2h6m-3 7v5l3 2M18 5l2-2"/>',

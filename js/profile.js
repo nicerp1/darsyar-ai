@@ -6,6 +6,7 @@ const Profile = (function () {
     let selectedAvatar = '👩‍🎓';
 
     function init() {
+        if (window.ProfileStudio && window.WebStudio?.enabled()) return ProfileStudio.init();
         loadProfileData();
         renderAvatarOptions();
     }
@@ -27,7 +28,7 @@ const Profile = (function () {
         if (emailInput) emailInput.value = user.email || `${user.username}@studymate.ir`;
 
         selectedAvatar = user.avatar || '👩‍🎓';
-        if (avatarPreview) avatarPreview.textContent = selectedAvatar;
+        if (avatarPreview) avatarPreview.innerHTML = window.ProfileStudio ? ProfileStudio.avatarHTML(selectedAvatar) : '👩‍🎓';
 
         if (roleBadge) {
             roleBadge.textContent = user.accountType === 'admin' ? 'مدیر ارشد سیستم 👑' : user.accountType === 'advisor' ? 'مشاور تحصیلی 👨‍🏫' : 'دانش‌آموز کوشا 🎓';

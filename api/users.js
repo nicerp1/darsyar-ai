@@ -24,6 +24,11 @@ module.exports = async (req, res) => {
             const target = req.body?.user || {};
             if (target.username !== actor.username && actor.username !== 'kiankaki') return res.status(403).json({ error: 'دسترسی ندارید.' });
             const patch = clean(target);
+            if (patch.avatar !== undefined && (typeof patch.avatar !== 'string' || !(
+                /^avatar:[1-6]$/.test(patch.avatar) ||
+                (patch.avatar.length <= 200000 && /^data:image\/jpeg;base64,\/9j\/[A-Za-z0-9+/]*={0,2}$/.test(patch.avatar)) ||
+                ['👩‍🎓','👨‍🎓','👩‍🏫','👨‍🏫','🔬','💡','🧑‍💻','👩‍⚕️','🚀','🎯','👑','🌟'].includes(patch.avatar)
+            ))) return res.status(400).json({ error: 'تصویر پروفایل معتبر نیست یا حجم آن زیاد است.' });
             if (target.newPassword !== undefined) {
                 if (target.username !== actor.username || !verifyPassword(String(target.currentPassword || ''), actor.password_hash)) return res.status(401).json({ error: 'رمز عبور فعلی صحیح نیست.' });
                 if (String(target.newPassword).length < 8) return res.status(400).json({ error: 'رمز عبور جدید باید حداقل ۸ نویسه باشد.' });

@@ -114,3 +114,6 @@ html:not(.capacitor-app) .sw-focus .studio-focus-stats { padding:24px;border-rad
 @media(prefers-reduced-motion:no-preference){.sw-cards #flashcard-stage.flipped .flip-card-back{animation:sw-reveal .25s ease-out}@keyframes sw-reveal{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}}
 @media(prefers-reduced-motion:reduce){.sw-page *{animation:none!important;transition:none!important}}
 @media print{.sw-segments,.sw-time-details summary{display:none}.sw-time-details{display:block}.sw-time-table{max-height:none;overflow:visible}.sw-analysis-grid,.sw-metrics{display:block}.sw-panel,.sw-metrics article{break-inside:avoid;margin-bottom:8mm}.sw-page{color:#111}}
+/* The old dial decoration must not survive the typography-first timer. */
+html:not(.capacitor-app) .sw-focus .pomo-dial-wrap::before { content: none; display: none; }
+html:not(.capacitor-app) .sw-focus .pomo-time-digits { text-shadow: 0 8px 40px color-mix(in srgb, var(--studio-accent) 18%, transparent); }

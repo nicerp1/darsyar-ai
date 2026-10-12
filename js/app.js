@@ -96,7 +96,8 @@ const App = (function () {
         const headerStreak = document.getElementById('header-streak-count');
 
         if (headerName) headerName.textContent = user.name || user.username;
-        if (headerAvatar) headerAvatar.textContent = user.avatar || '👩‍🎓';
+        if (headerAvatar) headerAvatar.innerHTML = window.ProfileStudio ? ProfileStudio.avatarHTML(user.avatar) : '👩‍🎓';
+        window.ProfileStudio?.applyMotion();
         if (headerStreak && typeof Utils !== 'undefined') {
             headerStreak.textContent = `${Utils.toPersianDigits(user.streak || 0)} روز`;
         }

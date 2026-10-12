@@ -91,6 +91,20 @@ const Storage = (function () {
         await request('/api/users', { method: 'PUT', body: JSON.stringify({ user: { username: currentUser.username, currentPassword, newPassword } }) });
     }
 
+    async function saveProfile(user, preferences) {
+        if (!currentUser || user.username !== currentUser.username) throw new Error('ابتدا وارد حساب شوید.');
+        const username = currentUser.username;
+        await request('/api/users', { method: 'PUT', body: JSON.stringify({ user }) });
+        if (currentUser?.username !== username) return;
+        currentUser = { ...currentUser, name: user.name, grade: user.grade, avatar: user.avatar };
+        if (Array.isArray(cache.users)) cache.users = cache.users.map(item => item.username === username ? { ...item, ...currentUser } : item);
+        if (preferences) {
+            const settings = { ...getSettings(), ...preferences };
+            await request('/api/data', { method: 'POST', body: JSON.stringify({ key: 'settings', value: settings }) });
+            if (currentUser?.username === username) cache.settings = settings;
+        }
+    }
+
     function addXP(amount) {
         if (!currentUser) return;
         const xp = (currentUser.xp || 0) + amount;
@@ -106,7 +120,7 @@ const Storage = (function () {
     function isManager() { return ['admin', 'advisor'].includes(currentUser?.accountType); }
     function saveSettings(settings) { return set('settings', settings); }
 
-    return { init, get, set, remove, getCurrentUser, setCurrentUser, login, register, logout, deleteAccount, getUsers, saveUsers, updateUser, changePassword, addXP, getSettings, saveSettings, isManager };
+    return { init, get, set, remove, getCurrentUser, setCurrentUser, login, register, logout, deleteAccount, getUsers, saveUsers, updateUser, saveProfile, changePassword, addXP, getSettings, saveSettings, isManager };
 })();
 
 window.Storage = Storage;
