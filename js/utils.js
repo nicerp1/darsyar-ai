@@ -398,6 +398,16 @@ const Utils = (function () {
                     .print-header h1 { color: #173895; font-size: 17pt; margin: 0; }
                     .print-badge { background: #eef2ff; border: 1px solid #c7d2fe; padding: 2mm 4mm; border-radius: 3mm; font-size: 9pt; }
                     h1,h2,h3,h4 { color: #173895; break-after: avoid; } p { orphans: 3; widows: 3; }
+                    .sw-stats-hero,.sw-metrics article,.sw-panel { padding:4mm;margin-bottom:4mm;border:1px solid #d7deeb;border-radius:3mm; }
+                    .sw-stats-hero strong { display:block;font-size:17pt;margin:3mm 0; }
+                    .sw-stats-hero .sw-kicker,.sw-helper,.sw-stats-note { font-size:9pt; }
+                    .sw-metrics { display:grid;grid-template-columns:repeat(3,1fr);gap:3mm; }
+                    .sw-metrics article span,.sw-metrics article strong { display:block; }
+                    .sw-trend,.sw-segments,.sw-time-details summary { display:none; }
+                    .sw-time-table>div,.sw-subjects article>div:first-child { display:flex;justify-content:space-between;gap:4mm;padding:2mm 0;border-bottom:1px solid #e3e8ef;break-inside:avoid; }
+                    .sw-panel { break-inside:auto; }.sw-streak { font-size:10pt; }.sw-streak>* { margin-left:2mm; }
+                    .sw-stats-note { border-top:1px solid #d7deeb;margin-top:4mm;padding-top:3mm; }
+                    #stats-report-printable-area .studio-icon { width:5mm;height:5mm; }
                     img,svg,canvas { max-width: 100% !important; height: auto !important; }
                     button,.schedule-add-task,.task-focus-button,.admin-icon-button { display: none !important; }
                     .schedule-days-list > #schedule-days-list { display: grid; grid-template-columns: 1fr 1fr; gap: 4mm; }

@@ -17,6 +17,7 @@ const Pomodoro = (function () {
 
     function init() {
         window.WebStudio?.preparePomodoro();
+        if (window.WebStudio?.enabled()) window.StudyWorkspace?.focus();
         loadSettings();
         renderSettings();
         renderTasks();
@@ -239,7 +240,8 @@ const Pomodoro = (function () {
         const now = new Date(), today = new Date(now.getTime() - now.getTimezoneOffset() * 60000).toISOString().slice(0,10), history = Storage.get('study_history', []);
         let todayItem = history.find(item => item.date === today);
         if (!todayItem) { todayItem = { date: today, hours: 0, sessions: 0 }; history.push(todayItem); }
-        todayItem.hours = parseFloat((Number(todayItem.hours || 0) + hoursToAdd).toFixed(2));
+        // Preserve whole seconds across frequent saves instead of rounding hours each time.
+        todayItem.hours = (Math.round(Number(todayItem.hours || 0) * 3600) + Math.round(seconds)) / 3600;
         Storage.set('study_history', history);
 
         if (typeof Dashboard !== 'undefined') {
@@ -446,7 +448,7 @@ const Pomodoro = (function () {
         const sStreakEl = document.getElementById('pomo-stat-streak');
 
         if (sTodayEl && typeof Utils !== 'undefined') sTodayEl.textContent = Utils.toPersianDigits(todayLog.sessions || 0);
-        if (sWeekEl && typeof Utils !== 'undefined') sWeekEl.textContent = Utils.toPersianDigits(weekHours.toFixed(1));
+        if (sWeekEl && typeof Utils !== 'undefined') sWeekEl.textContent = window.WebStudio?.enabled() && window.StudyWorkspace ? StudyWorkspace.duration(weekHours * 3600) : Utils.toPersianDigits(weekHours.toFixed(1));
         if (sStreakEl && typeof Utils !== 'undefined') sStreakEl.textContent = Utils.toPersianDigits(streak);
     }
 

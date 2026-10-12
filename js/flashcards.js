@@ -10,6 +10,7 @@ const Flashcards = (function () {
     let isFlipped = false;
 
     function init() {
+        if (window.WebStudio?.enabled()) window.StudyWorkspace?.flashcards();
         renderLeitnerBoxCounts();
         renderCategoryPills();
         loadReviewQueue();
@@ -89,6 +90,8 @@ const Flashcards = (function () {
         reviewQueue = cards;
         currentCardIndex = 0;
         isFlipped = false;
+
+        if (window.WebStudio?.enabled()) window.StudyWorkspace?.cardState(false);
     }
 
     function renderCurrentCard() {
@@ -101,6 +104,7 @@ const Flashcards = (function () {
 
         stage.classList.remove('flipped');
         isFlipped = false;
+        if (window.WebStudio?.enabled()) window.StudyWorkspace?.cardState(false);
 
         if (reviewQueue.length === 0) {
             stage.style.display = 'none';
@@ -146,6 +150,7 @@ const Flashcards = (function () {
         const stage = document.getElementById('flashcard-stage');
         if (!stage) return;
         isFlipped = !isFlipped;
+        if (window.WebStudio?.enabled()) window.StudyWorkspace?.cardState(isFlipped);
         if (isFlipped) {
             stage.classList.add('flipped');
         } else {
@@ -157,6 +162,7 @@ const Flashcards = (function () {
     }
 
     function rateCard(rating) {
+        if (window.WebStudio?.enabled() && !isFlipped) return;
         if (reviewQueue.length === 0) return;
         const currentCard = reviewQueue[currentCardIndex];
         let allCards = Storage.get('flashcards', []);

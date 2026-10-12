@@ -191,6 +191,7 @@ const App = (function () {
                 if (typeof Exams !== 'undefined') Exams.init();
                 break;
             case 'stats':
+                if (window.WebStudio?.enabled() && window.StudyWorkspace) { StudyWorkspace.stats(); break; }
                 if (typeof Stats !== 'undefined') Stats.init();
                 break;
             case 'gamification':
