@@ -61,6 +61,6 @@ const StudyWorkspace=(()=>{
         if(details)details.open=true;
         try{Utils.printElement('stats-report-printable-area','گزارش زمان مطالعه درسیار');}finally{if(details)details.open=wasOpen;}
     }
-    return {duration,data,stats,flashcards,box,cardState,focus,printStats};
+    return {duration,data,stats:(period)=>{stats(period);window.StudyFlow?.mountReport();},flashcards,box,cardState,focus,printStats};
 })();
 window.StudyWorkspace=StudyWorkspace;

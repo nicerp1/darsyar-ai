@@ -65,6 +65,7 @@ const Communications = (function () {
     }
 
     async function loadChat() {
+        window.Community?.chatPeer(isManager() ? Storage.getUsers().find(u=>u.username===selectedStudent) : Storage.getCurrentUser()?.advisor);
         const requestId = ++chatRequest;
         chatReady = false; chatBlocked = null; syncChatState();
         const status = document.getElementById('advisor-chat-status');
@@ -110,6 +111,12 @@ const Communications = (function () {
         const viewer = isManager() ? 'advisor' : 'student';
         box.innerHTML = messages.map(message => `<article class="advisor-message ${message.sender === viewer ? 'mine' : 'theirs'}"><strong>${esc(message.senderName || (message.sender === 'advisor' ? 'مشاور' : 'دانش‌آموز'))}</strong><p>${esc(message.text)}</p><div class="advisor-message-meta"><time>${new Date(message.createdAt).toLocaleString('fa-IR')}</time>${message.sender !== viewer ? `<button type="button" onclick="Communications.reportMessage('${esc(message.id)}')" aria-label="گزارش پیام"><span class="material-symbols-outlined" aria-hidden="true">flag</span> گزارش</button>` : ''}</div></article>`).join('') || '<div class="communications-empty"><span class="material-symbols-outlined" aria-hidden="true">chat_bubble</span><p>هنوز پیامی ثبت نشده است؛ اولین پیام را ارسال کنید.</p></div>';
         box.scrollTop = box.scrollHeight;
+        box.querySelectorAll('.advisor-message').forEach((node,index)=>{
+            const message=messages[index];
+            const person=message.sender===viewer ? Storage.getCurrentUser() : isManager() ? Storage.getUsers().find(u=>u.username===selectedStudent) : Storage.getCurrentUser()?.advisor;
+            if(!person || (message.senderUsername && message.senderUsername!==person.username))return;
+            const avatar=document.createElement('span');avatar.className='community-mini';node.prepend(avatar);window.Community?.bind(avatar,person);
+        });
     }
 
     async function sendMessage() {

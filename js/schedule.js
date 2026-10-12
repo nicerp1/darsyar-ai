@@ -14,7 +14,7 @@ const Schedule = (function () {
             const legacy = Array.isArray(stored[dayIndex]?.slots) ? stored[dayIndex].slots : [];
             const tasks = Array.isArray(stored[dayIndex]?.tasks) ? stored[dayIndex].tasks : legacy.filter(item => item?.subject);
             return { day, dayIndex, tasks: tasks.filter(Boolean).map((task, index) => ({
-                id: task.id || `task-${dayIndex}-${index}-${Date.now()}`,
+                id: task.id || `task-${dayIndex}-${index}`,
                 subject: String(task.subject || '').slice(0, 100), note: String(task.note || '').slice(0, 300),
                 durationMinutes: Math.min(600, Math.max(5, Number(task.durationMinutes) || 60)),
                 color: /^#[0-9a-f]{6}$/i.test(task.color) ? task.color : '#2856d8',
@@ -25,10 +25,11 @@ const Schedule = (function () {
     const current = () => normalize(adminTarget ? adminSchedule : null);
 
     async function init() {
+        window.StudyFlow?.mountReport();
         const isAdmin = Storage.isManager();
         document.getElementById('schedule-admin-tools')?.classList.toggle('hidden', !isAdmin);
         populateStudents();
-        const date = document.getElementById('report-date'); if (date) { date.max = localDate(); if (!date.value) date.value = date.max; }
+        const date = document.getElementById('report-date'); if (date && date.type === 'date') { date.max = localDate(); if (!date.value) date.value = date.max; }
         if (isAdmin && requestedTarget) { const target = requestedTarget; requestedTarget = null; await selectAdminStudent(target); }
         else { adminTarget = null; adminSchedule = null; updateContext(); renderDays(); renderReports(); }
     }
@@ -72,6 +73,7 @@ const Schedule = (function () {
             </article>`; }).join('') || '<div class="day-empty">هنوز تسکی برای این روز ثبت نشده است.</div>';
             return `<section class="schedule-day-card"><header><div><span class="schedule-day-index">${Utils.toPersianDigits(dayIndex + 1)}</span><h3>${day.day}</h3></div><span>${Utils.toPersianDigits(day.tasks.length)} تسک · ${Utils.toPersianDigits(total)} دقیقه</span></header><div class="schedule-day-tasks">${tasks}</div><button class="schedule-add-task" type="button" onclick="Schedule.openEditTaskModal(${dayIndex},-1)"><span class="material-symbols-outlined" aria-hidden="true">add</span> افزودن تسک برای ${day.day}</button></section>`;
         }).join('');
+        window.StudyFlow?.decorate(current(),adminTarget);
     }
     function openEditTaskModal(dayIndex, taskIndex) {
         editDay = dayIndex; editTask = taskIndex; const task = current()[dayIndex]?.tasks?.[taskIndex] || {};
@@ -107,8 +109,8 @@ const Schedule = (function () {
             renderDays(); Utils.closeModal('modal-edit-schedule-slot'); Utils.showToast('تسک در دیتابیس ذخیره شد.', 'success');
         } catch (error) { Utils.showToast(error.message, 'error'); }
     }
-    function launchPomoForTask(dayIndex, taskIndex) { const task = current()[dayIndex]?.tasks?.[taskIndex]; if (!task) return; Pomodoro?.setTaskFromExternal(task.subject, task.durationMinutes); App?.navigate('pomodoro'); }
-    function minutesBetween(start, end) { const [sh, sm] = start.split(':').map(Number), [eh, em] = end.split(':').map(Number); return eh * 60 + em - sh * 60 - sm; }
+    function launchPomoForTask(dayIndex, taskIndex) { const task = current()[dayIndex]?.tasks?.[taskIndex]; if (!task || adminTarget) return; Pomodoro?.setTaskFromExternal(task.subject, task.durationMinutes, task.id); App?.navigate('pomodoro'); }
+    function minutesBetween(start, end) { const plain=v=>String(v).replace(/[۰-۹]/g,c=>'۰۱۲۳۴۵۶۷۸۹'.indexOf(c)).replace(/[٠-٩]/g,c=>'٠١٢٣٤٥٦٧٨٩'.indexOf(c)); const [sh, sm] = plain(start).split(':').map(Number), [eh, em] = plain(end).split(':').map(Number); const n=eh * 60 + em - sh * 60 - sm; return Number.isFinite(n)?n:0; }
     function updateReportDuration() {
         const start = document.getElementById('report-start')?.value, end = document.getElementById('report-end')?.value, output = document.getElementById('report-duration-preview');
         const minutes = start && end ? Math.max(0, minutesBetween(start, end)) : 0;

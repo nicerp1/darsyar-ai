@@ -12,6 +12,7 @@ const Pomodoro = (function () {
     let timerEndsAt = null;
     let secondsStudiedThisSession = 0;
     let currentTaskName = 'مطالعه و تمرکز آزاد';
+    let currentTaskId = null;
     let visibilityListenerReady = false;
     const NOTIFICATION_ID = 25025;
 
@@ -243,6 +244,11 @@ const Pomodoro = (function () {
         // Preserve whole seconds across frequent saves instead of rounding hours each time.
         todayItem.hours = (Math.round(Number(todayItem.hours || 0) * 3600) + Math.round(seconds)) / 3600;
         Storage.set('study_history', history);
+        if (seconds > 0) {
+            const records = Storage.get('focus_records', []);
+            records.push({ id: crypto.randomUUID(), subject: currentTaskName, taskId: currentTaskId, seconds: Math.round(seconds), endedAt: now.toISOString() });
+            Storage.set('focus_records', records.slice(-1000));
+        }
 
         if (typeof Dashboard !== 'undefined') {
             Dashboard.init();
@@ -345,16 +351,19 @@ const Pomodoro = (function () {
         if (![...select.options].some(option => option.value === currentTaskName)) select.add(new Option(currentTaskName, currentTaskName));
         select.value = currentTaskName;
         select.onchange = function () {
+            if (timerState === 'running') { this.value = currentTaskName; return Utils.showToast('برای تغییر تسک، ابتدا تایمر را متوقف کن.', 'info'); }
             currentTaskName = this.value;
+            currentTaskId = null;
             const labelEl = document.getElementById('pomo-active-task-label');
             if (labelEl) labelEl.textContent = currentTaskName;
         };
     }
 
-    function setTaskFromExternal(taskName, suggestedMinutes) {
+    function setTaskFromExternal(taskName, suggestedMinutes, taskId = null) {
         if (timerState === 'running' && !confirm('جلسه فعلی متوقف شود و تمرکز روی تسک جدید آغاز شود؟')) return;
         if (timerState === 'running') pauseTimer();
         currentTaskName = taskName;
+        currentTaskId = taskId;
         const labelEl = document.getElementById('pomo-active-task-label');
         if (labelEl) labelEl.textContent = taskName;
         if (suggestedMinutes) {

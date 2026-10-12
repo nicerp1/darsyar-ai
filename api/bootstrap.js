@@ -5,7 +5,7 @@ module.exports = async (req, res) => {
         if (!user) return res.status(200).json({ user: null, data: {} });
         const rows = await db(`app_data?username=eq.${encodeURIComponent(user.username)}&select=key,value`);
         const privateKeys = new Set(['chat_reports']);
-        const data = Object.fromEntries((rows || []).filter(row => !privateKeys.has(row.key)).map(row => [row.key, row.value]));
+        const data = Object.fromEntries((rows || []).filter(row => !privateKeys.has(row.key) && !/^(notice_|news_|read_)/.test(row.key)).map(row => [row.key, row.value]));
         const decorated = await decorateUser(user);
         if (decorated.accountType === 'student') decorated.advisor = await findStudentAdvisor(user.username);
         const users = ['admin', 'advisor'].includes(decorated.accountType) ? await listManagedStudents(user) : undefined;

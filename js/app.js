@@ -84,6 +84,8 @@ const App = (function () {
     }
 
     function onUserChanged() {
+        document.getElementById('sf-completion')?.close();
+        window.Community?.init();
         checkAuthAndRender();
     }
 
@@ -106,6 +108,7 @@ const App = (function () {
             Gamification.renderLevelProgress();
         }
         if (typeof Communications !== 'undefined') Communications.init();
+        window.Community?.init();
     }
 
     function renderSidebarRolePermissions() {

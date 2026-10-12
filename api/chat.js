@@ -1,4 +1,5 @@
-const { db, getSession, getAccountType, canManageStudent } = require('./_supabase');
+const { db, getSession, getAccountType, canManageStudent, findStudentAdvisor } = require('./_supabase');
+const {notify} = require('./_notifications');
 const crypto = require('crypto');
 
 async function getMessages(username) {
@@ -53,8 +54,12 @@ module.exports = async (req, res) => {
         const text = String(req.body?.text || '').trim().slice(0, 1000);
         if (!text) return res.status(400).json({ error: 'متن پیام خالی است.' });
         const messages = (await getMessages(username)).slice(-199);
-        messages.push({ id: `${Date.now()}-${crypto.randomBytes(4).toString('hex')}`, sender: isManager ? 'advisor' : 'student', senderName: actor.name || (isManager ? 'مشاور' : actor.username), text, createdAt: new Date().toISOString() });
+        messages.push({ id: `${Date.now()}-${crypto.randomBytes(4).toString('hex')}`, sender: isManager ? 'advisor' : 'student', senderUsername:actor.username, senderName: actor.name || (isManager ? 'مشاور' : actor.username), text, createdAt: new Date().toISOString() });
         await saveValue(username, 'advisor_chat', messages);
+        try {
+            const recipient=isManager?username:(await findStudentAdvisor(username))?.username;
+            if(recipient && recipient!==actor.username)await notify(recipient,'chat',`پیام جدید از ${actor.name || actor.username}`,username);
+        }catch(error){console.error('chat notification failed',error);}
         return res.status(200).json({ ok: true, messages });
     } catch (error) { console.error('api/chat.js failed:', error); return res.status(500).json({ error: 'در حال حاضر ارتباط با سرور برقرار نشد. لطفاً دوباره تلاش کنید.' }); }
 };

@@ -46,6 +46,7 @@ const Admin = (function () {
     function renderStudentList(items) {
         const box = document.getElementById('admin-student-list'); if (!box) return;
         box.innerHTML = items.map(student => { const attention = summaryOf(student.username).status === 'attention'; return `<button type="button" class="counselor-student ${selectedUsername === student.username ? 'active' : ''}" onclick="Admin.selectStudent('${esc(student.username)}')"><span class="counselor-list-avatar">${esc((student.name || student.username).slice(0, 1))}</span><span class="counselor-list-copy"><strong>${esc(student.name || student.username)}</strong><small>@${esc(student.username)} · ${esc(student.grade || 'بدون مقطع')}</small></span><span class="counselor-state ${attention ? 'attention' : 'active'}" aria-label="${attention ? 'نیازمند پیگیری' : 'فعال'}"></span></button>`; }).join('') || '<div class="counselor-list-empty"><span class="material-symbols-outlined" aria-hidden="true">group_off</span><p>دانش‌آموزی در این فهرست نیست.</p></div>';
+        box.querySelectorAll('.counselor-list-avatar').forEach((node,index)=>{node.innerHTML=ProfileStudio.avatarHTML(items[index].avatar);});
     }
     function renderPriority() {
         const box = document.getElementById('admin-attention-list'); if (!box) return; const items = students.filter(item => summaryOf(item.username).status === 'attention').slice(0, 3);
@@ -63,7 +64,7 @@ const Admin = (function () {
     function renderStudentDetail() {
         if (!selectedPayload) return; const { student, data } = selectedPayload, summary = summaryOf(student.username);
         document.getElementById('admin-student-empty')?.classList.add('hidden'); document.getElementById('admin-student-content')?.classList.remove('hidden');
-        document.getElementById('admin-selected-avatar').textContent = (student.name || student.username).slice(0, 1); document.getElementById('admin-selected-name').textContent = student.name || student.username;
+        window.Community?.bind(document.getElementById('admin-selected-avatar'),student); document.getElementById('admin-selected-name').textContent = student.name || student.username;
         document.getElementById('admin-selected-meta').textContent = `@${student.username} · ${student.grade || 'مقطع ثبت نشده'} · عضویت ${formatDate(student.registered_at)} · آخرین فعالیت ${formatDate(summary.latestActivity)}`;
         document.getElementById('admin-selected-plan').textContent = ({ free: 'رایگان', silver: 'نقره‌ای', gold: 'طلایی' })[student.plan] || 'رایگان';
         const planControl = document.getElementById('admin-plan-control'); if (planControl) planControl.value = student.plan || 'free';

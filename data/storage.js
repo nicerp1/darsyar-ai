@@ -39,6 +39,8 @@ const Storage = (function () {
     function set(key, value) { cache[key] = value; persist(key, value); return true; }
     function remove(key) { delete cache[key]; persist(key, null, true); return true; }
     function getCurrentUser() { return currentUser; }
+    function applyServerData(data) { Object.assign(cache,data); }
+    function flush() { return saveChain; }
     function setCurrentUser(user) { currentUser = user || null; }
 
     async function login(username, password) {
@@ -120,7 +122,7 @@ const Storage = (function () {
     function isManager() { return ['admin', 'advisor'].includes(currentUser?.accountType); }
     function saveSettings(settings) { return set('settings', settings); }
 
-    return { init, get, set, remove, getCurrentUser, setCurrentUser, login, register, logout, deleteAccount, getUsers, saveUsers, updateUser, saveProfile, changePassword, addXP, getSettings, saveSettings, isManager };
+    return { init, get, set, remove, getCurrentUser, setCurrentUser, login, register, logout, deleteAccount, getUsers, saveUsers, updateUser, saveProfile, changePassword, addXP, getSettings, saveSettings, isManager, applyServerData, flush };
 })();
 
 window.Storage = Storage;

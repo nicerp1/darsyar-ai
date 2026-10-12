@@ -1,6 +1,7 @@
 const { db, getSession, decorateUser, getAccountType, getLinkedStudents, canManageStudent, listManagedStudents } = require('./_supabase');
 
 const days = ['شنبه', 'یک‌شنبه', 'دوشنبه', 'سه‌شنبه', 'چهارشنبه', 'پنج‌شنبه', 'جمعه'];
+const {notify} = require('./_notifications');
 const emptySchedule = () => days.map((day, dayIndex) => ({ day, dayIndex, tasks: [] }));
 function normalizeSchedule(value) {
     if (!Array.isArray(value) || value.length !== 7) return emptySchedule();
@@ -137,6 +138,7 @@ module.exports = async (req, res) => {
         } else return res.status(405).json({ error: 'Method not allowed' });
 
         await saveSchedule(username, schedule);
+        await notify(username,'schedule','مشاور برنامهٔ مطالعاتی شما را به‌روزرسانی کرد.').catch(error=>console.error('schedule notification failed',error));
         return res.status(200).json({ ok: true, schedule });
     } catch (error) { console.error('api/admin-students.js failed:', error); return res.status(500).json({ error: 'در حال حاضر ارتباط با سرور برقرار نشد. لطفاً دوباره تلاش کنید.' }); }
 };
