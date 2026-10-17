@@ -1,6 +1,30 @@
 @font-face {
     font-family: 'Kalameh';
-    src: url('Kalameh-Regular.ttf') format('truetype');
+    src: url('KalamehWeb-Thin.woff2') format('woff2');
+    font-weight: 100;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Kalameh';
+    src: url('KalamehWeb-ExtraLight.woff2') format('woff2');
+    font-weight: 200;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Kalameh';
+    src: url('KalamehWeb-Light.woff2') format('woff2');
+    font-weight: 300;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Kalameh';
+    src: url('KalamehWeb-Regular.woff2') format('woff2');
     font-weight: 400;
     font-style: normal;
     font-display: swap;
@@ -8,23 +32,7 @@
 
 @font-face {
     font-family: 'Kalameh';
-    src: url('Kalameh-Bold.ttf') format('truetype');
-    font-weight: 700;
-    font-style: normal;
-    font-display: swap;
-}
-
-@font-face {
-    font-family: 'Kalameh';
-    src: url('Kalameh-Bold.ttf') format('truetype');
-    font-weight: 800;
-    font-style: normal;
-    font-display: swap;
-}
-
-@font-face {
-    font-family: 'Kalameh';
-    src: url('Kalameh-Regular.ttf') format('truetype');
+    src: url('KalamehWeb-Medium.woff2') format('woff2');
     font-weight: 500;
     font-style: normal;
     font-display: swap;
@@ -32,8 +40,32 @@
 
 @font-face {
     font-family: 'Kalameh';
-    src: url('Kalameh-Bold.ttf') format('truetype');
+    src: url('KalamehWeb-SemiBold.woff2') format('woff2');
     font-weight: 600;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Kalameh';
+    src: url('KalamehWeb-Bold.woff2') format('woff2');
+    font-weight: 700;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Kalameh';
+    src: url('KalamehWeb-ExtraBold.woff2') format('woff2');
+    font-weight: 800;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Kalameh';
+    src: url('KalamehWeb-Black.woff2') format('woff2');
+    font-weight: 900;
     font-style: normal;
     font-display: swap;
 }
