@@ -33,6 +33,12 @@ const WebStudio = (() => {
     let ready = false;
     let outgoing = null;
     let routeAnimations = [];
+    const dashboardBanners = [
+        { tone:'lilac', quote:'توانا بُوَد هر که دانا بُوَد', second:'ز دانش، دل پیر، بُرنا بود', author:'فردوسی', source:'https://ganjoor.net/ferdousi/shahname/aghaz/sh1' },
+        { tone:'sage', quote:'به راه بادیه رفتن به از نشستن باطل', second:'وگر مراد نیابم به قدر وسع بکوشم', author:'سعدی', source:'https://ganjoor.net/saadi/divan/ghazals/sh405' },
+        { tone:'peach', quote:'نابرده رنج گنج میسر نمی‌شود', second:'مزد آن گرفت جان برادر که کار کرد', author:'سعدی', source:'https://ganjoor.net/saadi/mavaez/ghasides/sh12' }
+    ];
+    let dashboardBannerIndex = Math.floor(Math.random() * dashboardBanners.length);
     const viewLabels = { dashboard:'امروزِ تو', pomodoro:'اتاق تمرکز', chat:'گفت‌وگو', schedule:'برنامه من', stats:'آمار و پیشرفت', 'ai-assistant':'دستیار هوشمند', flashcards:'فلش‌کارت', 'ai-writing':'کارگاه نوشتن', 'ai-research':'پژوهش', gamification:'لیگ و دوستان', admin:'پنل مشاوره', profile:'پروفایل', legal:'قوانین و حریم خصوصی' };
 
     function init() {
@@ -162,12 +168,12 @@ const WebStudio = (() => {
         while (data.get(localDate(cursor)) > 0) { streak++; cursor.setDate(cursor.getDate()-1); }
         const reports = (Storage.get('manual_reports', []) || []).slice().sort((a,b) => String(b.createdAt || b.date).localeCompare(String(a.createdAt || a.date))).slice(0,3);
         const dateLabel = new Intl.DateTimeFormat('fa-IR',{weekday:'long',day:'numeric',month:'long'}).format(new Date());
-        const hour = new Date().getHours(), greeting = hour < 12 ? 'صبح بخیر' : hour < 18 ? 'روزت بخیر' : 'عصرت بخیر';
+        const banner = dashboardBanners[dashboardBannerIndex];
         const completion = tasks.length ? Math.round(done/tasks.length*100) : 0;
         shell.innerHTML = `
-            <header class="studio-page-heading studio-dashboard-heading" data-reveal><div class="studio-dashboard-heading-copy"><span class="studio-dashboard-heading-kicker">فضای مطالعهٔ من <i aria-hidden="true"></i> ${greeting}</span><h1>${esc(user.name || user.username)}<span class="studio-greeting-dot">،</span> امروز از همین‌جا شروع می‌شود.</h1><p>قدم بعدی‌ات را ببین و با ریتم خودت پیش برو.</p></div><div class="studio-dashboard-heading-aside"><div class="studio-dashboard-date">${icon('calendar')}<span><small>امروز</small><strong>${esc(dateLabel)}</strong></span></div><button class="studio-button secondary" type="button" onclick="WebStudio.report()">${icon('plus')}ثبت گزارش مطالعه</button></div></header>
+            <header class="studio-page-heading studio-dashboard-heading" data-reveal><div class="studio-dashboard-heading-copy"><span class="studio-dashboard-heading-kicker">داشبورد مطالعه</span><h1>${esc(user.name || user.username)}</h1><p>برنامه و پیشرفت تو در یک نگاه</p></div><div class="studio-dashboard-heading-aside"><div class="studio-dashboard-date">${icon('calendar')}<span><small>امروز</small><strong>${esc(dateLabel)}</strong></span></div><button class="studio-button secondary" type="button" onclick="WebStudio.report()">${icon('plus')}ثبت گزارش مطالعه</button></div></header>
             <div class="studio-dashboard-top">
-                <section class="studio-hero" data-reveal><div class="studio-hero-copy"><span class="studio-eyebrow">کوچک شروع کن، پیوسته ادامه بده</span><h2>حواست به <em>امروز</em> باشد.<br>فردا از همین‌جا شروع می‌شود.</h2><p>${next ? `قدم بعدی تو: <strong>${esc(next.subject)}</strong> · ${pd(next.durationMinutes || 60)} دقیقه` : tasks.length ? 'برنامه امروزت کامل شده؛ وقت یک نفس تازه است.' : 'یک تسک کوچک انتخاب کن و اولین جلسه تمرکزت را بساز.'}</p><button class="studio-button primary" type="button" onclick="WebStudio.focusNext()">${icon('play')}ورود به اتاق تمرکز${icon('arrow')}</button></div><div class="studio-hero-art" aria-label="${pd(done)} از ${pd(tasks.length)} تسک انجام شده"><div class="studio-orbit orbit-one"></div><div class="studio-orbit orbit-two"></div><span class="studio-orbit-chip chip-one">${icon('book')}</span><span class="studio-orbit-chip chip-two">${icon('check')}</span><div class="studio-progress-orb" style="--progress:${completion}%"><div>${icon('target')}<strong>${pd(done)}<small> / ${pd(tasks.length)}</small></strong><span>قدم‌های امروز</span></div></div><span class="studio-art-caption">هر قدم، حساب می‌شود</span></div></section>
+                <section class="studio-hero studio-hero-${banner.tone}" data-reveal><div class="studio-hero-copy"><span class="studio-eyebrow">نقل‌قولی برای امروز</span><blockquote><h2>«${esc(banner.quote)}<br>${esc(banner.second)}»</h2><cite>— <a href="${banner.source}" target="_blank" rel="noopener noreferrer" aria-label="منبع شعر ${banner.author} در گنجور">${banner.author}</a></cite></blockquote><p>${next ? `تسک بعدی: <strong>${esc(next.subject)}</strong> · ${pd(next.durationMinutes || 60)} دقیقه` : tasks.length ? 'همهٔ تسک‌های امروز انجام شده‌اند.' : 'هنوز تسکی برای امروز ثبت نشده است.'}</p><div class="studio-hero-actions"><button class="studio-button primary" type="button" onclick="WebStudio.focusNext()">${icon('play')}شروع تمرکز${icon('arrow')}</button><button class="studio-banner-next" type="button" onclick="WebStudio.nextBanner()" aria-label="نمایش بنر بعدی">${icon('arrow')}بنر بعدی</button></div></div><div class="studio-hero-art" aria-label="${pd(done)} از ${pd(tasks.length)} تسک انجام شده"><div class="studio-orbit orbit-one"></div><div class="studio-orbit orbit-two"></div><span class="studio-orbit-chip chip-one">${icon('book')}</span><span class="studio-orbit-chip chip-two">${icon('check')}</span><div class="studio-progress-orb" style="--progress:${completion}%"><div>${icon('target')}<strong>${pd(done)}<small> / ${pd(tasks.length)}</small></strong><span>قدم‌های امروز</span></div></div><span class="studio-art-caption">${pd(dashboardBannerIndex+1)} / ${pd(dashboardBanners.length)}</span></div></section>
                 <section class="studio-day-metrics" aria-label="خلاصه مطالعه" data-reveal>${metric('timer','مطالعه امروز',studyDuration(data.get(today)||0),'','violet')}${metric('chart','۷ روز گذشته',studyDuration(week),'','mint')}${metric('flame','روزهای پیوسته',pd(streak),'روز','coral')}</section>
             </div>
             <div class="studio-dashboard-grid">
@@ -180,6 +186,7 @@ const WebStudio = (() => {
     }
 
     function studyDuration(hours) { const seconds=Math.round(Math.max(0,Number(hours)||0)*3600); return `${pd(Math.floor(seconds/3600))} ساعت و ${pd(Math.floor(seconds%3600/60))} دقیقه`; }
+    function nextBanner() { dashboardBannerIndex=(dashboardBannerIndex+1)%dashboardBanners.length; dashboard(); }
     function metric(glyph,label,value,unit,tone) { return `<article class="studio-metric ${tone}"><span class="studio-metric-icon">${icon(glyph)}</span><div><small>${label}</small><strong>${value}<em>${unit}</em></strong></div>${icon('arrow','studio-metric-arrow')}</article>`; }
     function editTask(index) { const {day} = todayTasks(); App.navigate('schedule'); Schedule.openEditTaskModal(day,index); }
     function report() { App.navigate('stats'); requestAnimationFrame(()=>{ document.querySelector('.manual-report-card')?.scrollIntoView({behavior:reduced()?'instant':'smooth',block:'center'}); document.getElementById('report-subject')?.focus({preventScroll:true}); }); }
@@ -222,6 +229,6 @@ const WebStudio = (() => {
         const label = view.querySelector('.pomo-status-label');
         if (label) label.textContent = state==='running' ? (mode==='work'?'در حال تمرکز':'نوبت استراحت توست') : state==='paused'?'هر وقت آماده‌ای، ادامه بده':'آماده یک شروع تازه';
     }
-    return { enabled, init, icon, dashboard, beforeLeave, enter, chatContext, editTask, report, focusNext, preparePomodoro, timerState };
+    return { enabled, init, icon, dashboard, nextBanner, beforeLeave, enter, chatContext, editTask, report, focusNext, preparePomodoro, timerState };
 })();
 window.WebStudio = WebStudio;
