@@ -28,15 +28,27 @@ const Storage = (function () {
 
     function persist(key, value, remove = false) {
         if (!currentUser) return;
-        saveChain = saveChain.then(() => request('/api/data', {
-            method: remove ? 'DELETE' : 'POST', body: JSON.stringify({ key, value })
-        })).catch(error => {
+        const expectedUser=currentUser.username,body=JSON.stringify({key,value,expectedUser});
+        saveChain = saveChain.then(() => currentUser?.username===expectedUser ? request('/api/data', {
+            method: remove ? 'DELETE' : 'POST', body
+        }) : undefined).catch(error => {
             console.error('Database sync failed:', error);
             if (typeof Utils !== 'undefined') Utils.showToast('ذخیره در دیتابیس انجام نشد.', 'error');
         });
     }
 
     function set(key, value) { cache[key] = value; persist(key, value); return true; }
+    function saveConfirmed(key,value) {
+        if(!currentUser)return Promise.reject(new Error('ابتدا وارد حساب شوید.'));
+        const expectedUser=currentUser.username,body=JSON.stringify({key,value,expectedUser});
+        const job=saveChain.then(async()=>{
+            if(currentUser?.username!==expectedUser)throw new Error('حساب کاربری تغییر کرده است.');
+            await request('/api/data',{method:'POST',body});
+            if(currentUser?.username!==expectedUser)throw new Error('حساب کاربری تغییر کرده است.');
+            cache[key]=JSON.parse(body).value;
+        });
+        saveChain=job.catch(()=>{});return job;
+    }
     function remove(key) { delete cache[key]; persist(key, null, true); return true; }
     function getCurrentUser() { return currentUser; }
     function applyServerData(data) { Object.assign(cache,data); }
@@ -122,7 +134,7 @@ const Storage = (function () {
     function isManager() { return ['admin', 'advisor'].includes(currentUser?.accountType); }
     function saveSettings(settings) { return set('settings', settings); }
 
-    return { init, get, set, remove, getCurrentUser, setCurrentUser, login, register, logout, deleteAccount, getUsers, saveUsers, updateUser, saveProfile, changePassword, addXP, getSettings, saveSettings, isManager, applyServerData, flush };
+    return { init, get, set, saveConfirmed, remove, getCurrentUser, setCurrentUser, login, register, logout, deleteAccount, getUsers, saveUsers, updateUser, saveProfile, changePassword, addXP, getSettings, saveSettings, isManager, applyServerData, flush };
 })();
 
 window.Storage = Storage;

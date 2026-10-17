@@ -3,6 +3,7 @@ module.exports = async (req, res) => {
     try {
         const user = await getSession(req);
         if (!user) return res.status(401).json({ error: 'ابتدا وارد حساب شوید.' });
+        if(req.body?.expectedUser&&req.body.expectedUser!==user.username)return res.status(409).json({error:'حساب کاربری تغییر کرده است؛ دوباره وارد صفحه شوید.'});
         const key = String(req.body?.key || '').trim();
         if (!key || key.length > 80) return res.status(400).json({ error: 'کلید داده معتبر نیست.' });
         if(key.startsWith('im_'))return res.status(403).json({error:'پیام‌ها فقط از مسیر امن پیام‌رسان قابل تغییر هستند.'});

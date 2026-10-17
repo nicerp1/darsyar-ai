@@ -90,7 +90,7 @@ const Schedule = (function () {
             if (adminTarget) {
                 const response = await fetch('/api/admin-students', { method:'DELETE', credentials:'same-origin', headers:{'Content-Type':'application/json'}, body:JSON.stringify({ username:adminTarget.username, dayIndex:editDay, taskIndex:editTask }) });
                 const payload = await response.json(); if (!response.ok) throw new Error(payload.error || 'حذف انجام نشد.'); adminSchedule = normalize(payload.schedule);
-            } else { const schedule = current(); schedule[editDay].tasks.splice(editTask,1); Storage.set('schedule',schedule); }
+            } else { const schedule = structuredClone(current()); schedule[editDay].tasks.splice(editTask,1); await Storage.saveConfirmed('schedule',schedule); }
             renderDays(); Utils.closeModal('modal-edit-schedule-slot'); Utils.showToast('تسک حذف شد.','info');
         } catch (error) { Utils.showToast(error.message,'error'); }
     }
@@ -102,9 +102,9 @@ const Schedule = (function () {
                 const response = await fetch('/api/admin-students', { method: 'POST', credentials: 'same-origin', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ username: adminTarget.username, dayIndex: editDay, taskIndex: editTask, ...values }) });
                 const payload = await response.json(); if (!response.ok) throw new Error(payload.error || 'ذخیره انجام نشد.'); adminSchedule = normalize(payload.schedule);
             } else {
-                const schedule = current(), tasks = schedule[editDay].tasks;
+                const schedule = structuredClone(current()), tasks = schedule[editDay].tasks;
                 const task = { id: tasks[editTask]?.id || `task-${Date.now()}`, ...values, status: document.getElementById('input-slot-status')?.value || 'pending' };
-                if (editTask < 0) tasks.push(task); else tasks[editTask] = { ...tasks[editTask], ...task }; Storage.set('schedule', schedule);
+                if (editTask < 0) tasks.push(task); else tasks[editTask] = { ...tasks[editTask], ...task }; await Storage.saveConfirmed('schedule', schedule);
             }
             renderDays(); Utils.closeModal('modal-edit-schedule-slot'); Utils.showToast('تسک در دیتابیس ذخیره شد.', 'success');
         } catch (error) { Utils.showToast(error.message, 'error'); }
@@ -128,7 +128,7 @@ const Schedule = (function () {
         const box = document.getElementById('manual-report-list'); if (!box || adminTarget) return; const reports = Storage.get('manual_reports', []) || [];
         box.innerHTML = reports.slice().reverse().map(report => { const status = statuses[report.status] || statuses.completed; return `<article class="manual-report-item"><span class="manual-report-subject-icon material-symbols-outlined" aria-hidden="true">menu_book</span><div class="manual-report-copy"><div><strong>${esc(report.subject)}</strong><span class="schedule-status ${status[1]}">${status[0]}</span></div><span><span class="material-symbols-outlined" aria-hidden="true">calendar_today</span>${esc(report.date)}<span class="material-symbols-outlined" aria-hidden="true">schedule</span>${esc(report.start)} تا ${esc(report.end)}</span><small>${esc(report.notes || 'بدون توضیح')}</small></div><div class="manual-report-duration"><strong>${Utils.toPersianDigits(Math.round(Number(report.minutes)||0))}</strong><small>دقیقه</small><button class="admin-icon-button" type="button" aria-label="حذف گزارش" onclick="Schedule.removeManualReport('${esc(report.id)}')"><span class="material-symbols-outlined" aria-hidden="true">delete</span></button></div></article>`; }).join('') || '<div class="admin-list-empty">هنوز گزارشی ثبت نشده است؛ اولین مطالعه واقعی خود را ثبت کنید.</div>';
     }
-    function removeManualReport(id) { if (!confirm('این گزارش حذف شود؟')) return; Storage.set('manual_reports', (Storage.get('manual_reports',[])||[]).filter(item => item.id !== id)); renderReports(); }
+    async function removeManualReport(id) { if (!confirm('این گزارش حذف شود؟')) return; try { await Storage.saveConfirmed('manual_reports', (Storage.get('manual_reports',[])||[]).filter(item => item.id !== id)); renderReports(); } catch(error) { Utils.showToast(error.message,'error'); } }
     function openForStudent(username) { requestedTarget = username; App.navigate('schedule'); toggleAdminDrawer(true); }
     function printSchedule() { Utils?.printElement('schedule-printable-area', adminTarget ? `برنامه ${adminTarget.name || adminTarget.username}` : 'برنامه مطالعاتی هفتگی درسیار'); }
     return { init, toggleAdminDrawer, selectAdminStudent, openEditTaskModal, saveTaskSubmit, deleteCurrentTask, launchPomoForTask, updateReportDuration, saveManualReport, removeManualReport, openForStudent, printSchedule };

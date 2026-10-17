@@ -126,6 +126,7 @@ const App = (function () {
     }
 
     function navigate(viewName) {
+        if(['ai-writing','ai-research'].includes(viewName))viewName='ai-assistant';
         if(viewName!=='chat')window.Messenger?.leave();
         const previousView = currentView;
         if (viewName === 'chat' && !window.WebStudio?.enabled()) { Communications.open('chat'); return; }

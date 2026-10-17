@@ -9,21 +9,21 @@
     <meta property="og:description" content="برنامه‌ریزی، تمرکز و مشاوره هوشمند تحصیلی">
     <meta property="og:image" content="https://darsyar-ai.vercel.app/icons/icon-512.png">
     <title>درسیار | StudyMate Pro - دستیار تحصیلی هوشمند</title>
-    
+
     <!-- Local Kalameh Font & Stylesheet -->
     <link rel="stylesheet" href="fonts/kalameh.css">
-    
+
     <!-- Material Symbols Google Icons -->
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0&display=swap">
-    
+
     <!-- KaTeX CDN -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
     <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
-    
+
     <!-- Chart.js CDN -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
-    
+
     <!-- Custom CSS -->
     <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="css/web-studio.css">
@@ -44,7 +44,7 @@
 
     <!-- App Main Layout -->
     <div id="app-main-layout" class="app-layout" style="display: none;">
-        
+
         <!-- Mobile Backdrop Overlay -->
         <div id="sidebar-overlay" class="sidebar-overlay" onclick="App.closeMobileSidebar()"></div>
 
@@ -83,14 +83,6 @@
                 <div class="nav-item" id="nav-ai-assistant" onclick="App.navigate('ai-assistant')">
                     <span class="material-symbols-outlined">smart_toy</span>
                     <span>دستیار درسیار (چت‌بات)</span>
-                </div>
-                <div class="nav-item" id="nav-ai-writing" onclick="App.navigate('ai-writing')">
-                    <span class="material-symbols-outlined">edit_note</span>
-                    <span>انشانویسی هوشمند</span>
-                </div>
-                <div class="nav-item" id="nav-ai-research" onclick="App.navigate('ai-research')">
-                    <span class="material-symbols-outlined">science</span>
-                    <span>تحقیق و مقاله علمی</span>
                 </div>
 
                 <div class="nav-section-title">برنامه‌ریزی و ارزیابی</div>
@@ -150,7 +142,7 @@
 
         <!-- Main Wrapper -->
         <div class="main-wrapper">
-            
+
             <!-- Top Sticky Header -->
             <header class="top-header">
                 <div class="header-right">
@@ -191,10 +183,10 @@
 
             <!-- Main Content Container -->
             <main class="content-body">
-                
+
                 <!-- 1. DASHBOARD VIEW -->
                 <section id="view-dashboard" class="view-section active">
-                    
+
                     <!-- Welcome & Quote Banner -->
                     <div class="dashboard-header-banner">
                         <div class="banner-sparkle"></div>
@@ -289,7 +281,7 @@
 
                     <!-- 2 Column Split Grid: Chart + Reminders & Continue -->
                     <div class="dashboard-split-grid">
-                        
+
                         <!-- 7-Day Trend Chart -->
                         <div class="content-card">
                             <div class="content-card-header">
@@ -306,7 +298,7 @@
 
                         <!-- Right Column: Exam Countdown & Continue Learning -->
                         <div style="display: flex; flex-direction: column; gap: 20px;">
-                            
+
                             <!-- Exam Countdown -->
                             <div class="content-card">
                                 <div class="content-card-header">
@@ -351,7 +343,7 @@
                                 <span class="material-symbols-outlined" aria-hidden="true">settings</span>
                             </button>
                         </div>
-                        
+
                         <div class="pomodoro-modes-nav">
                             <button class="pomo-tab-btn active" id="pomo-tab-work" onclick="Pomodoro.switchMode('work')">تمرکز</button>
                             <button class="pomo-tab-btn" id="pomo-tab-shortBreak" onclick="Pomodoro.switchMode('shortBreak')">استراحت کوتاه</button>
@@ -400,7 +392,7 @@
 
                         <!-- Task Selector & Checklist Grid -->
                         <div class="dashboard-split-grid" style="text-align: right; margin-top: 30px;">
-                            
+
                             <!-- Task Checklist -->
                             <div class="content-card">
                                 <div class="content-card-header">
@@ -453,7 +445,7 @@
 
                 <!-- 3. FLASHCARDS & LEITNER VIEW -->
                 <section id="view-flashcards" class="view-section">
-                    
+
                     <div class="section-heading-bar">
                         <div>
                             <h2 class="section-heading-title">
@@ -517,7 +509,7 @@
 
                     <div id="flashcard-stage" class="flip-card-stage" onclick="Flashcards.flipCard()">
                         <div class="flip-card-inner">
-                            
+
                             <!-- Front Side (Question) -->
                             <div class="flip-card-front">
                                 <div class="card-top-tag">
@@ -577,7 +569,7 @@
                 <!-- 4. AI STUDY ASSISTANT (CHATBOT) VIEW -->
                 <section id="view-ai-assistant" class="view-section">
                     <div class="ai-chat-container">
-                        
+
                         <div class="ai-chat-header">
                             <div class="ai-chat-persona">
                                 <div class="ai-avatar">🤖</div>
@@ -621,100 +613,6 @@
                 </section>
 
                 <!-- 5. AI ESSAY WRITING VIEW -->
-                <section id="view-ai-writing" class="view-section">
-                    <div class="section-heading-bar">
-                        <div>
-                            <h2 class="section-heading-title">
-                                <span class="material-symbols-outlined" style="color: var(--gold);">edit_note</span>
-                                انشانویسی و نگارش خلاقانه هوشمند
-                            </h2>
-                            <p style="font-size: 12px; color: var(--text-muted);">تولید ساختاریافته مقدمه، بدنه ادبی و نتیجه‌گیری با آرایه‌های سخن</p>
-                        </div>
-                    </div>
-
-                    <div class="generator-layout-grid">
-                        
-                        <!-- Configuration Form -->
-                        <div class="content-card">
-                            <div class="form-group">
-                                <label class="form-label">موضوع یا عنوان انشا</label>
-                                <input type="text" id="input-essay-topic" class="form-control" placeholder="مثال: گذر زمان، ارزش دانایی، سفر به اعماق فضا...">
-                            </div>
-
-                            <div class="form-group">
-                                <label class="form-label">طول انشا</label>
-                                <select id="input-essay-length" class="form-control">
-                                    <option value="کوتاه (حدود ۲۰۰ کلمه)">کوتاه (حدود ۲۰۰ کلمه)</option>
-                                    <option value="متوسط (حدود ۴۰۰ کلمه)" selected>متوسط (حدود ۴۰۰ کلمه)</option>
-                                    <option value="بلند و تشریحی (۷۰۰ کلمه)">بلند و مفصل (۷۰۰ کلمه)</option>
-                                    <option value="بسیار بلند (حدود ۱۲۰۰ کلمه)">بسیار بلند (حدود ۱۲۰۰ کلمه)</option>
-                                </select>
-                            </div>
-
-                            <div class="form-group">
-                                <label class="form-label">مقطع تحصیلی</label>
-                                <select id="input-essay-grade" class="form-control">
-                                    <option value="دوره ابتدایی (پایه‌های بالا)">دوره ابتدایی (پایه‌های بالا)</option>
-                                    <option value="متوسطه اول (هفتم تا نهم)">متوسطه اول (هفتم تا نهم)</option>
-                                    <option value="متوسطه دوم (دهم تا دوازدهم)" selected>متوسطه دوم (دهم تا دوازدهم)</option>
-                                    <option value="دانشجویی و عمومی">دانشجویی و عمومی</option>
-                                </select>
-                            </div>
-
-                            <div class="form-group">
-                                <label class="form-label">لحن و سبک نگارش</label>
-                                <select id="input-essay-tone" class="form-control">
-                                    <option value="ادبی و توصیفی" selected>ادبی، شاعرانه و توصیفی</option>
-                                    <option value="احساسی و عاطفی">احساسی و عاطفی</option>
-                                    <option value="علمی و تحلیلی">علمی و استدلالی</option>
-                                    <option value="طنزآمیز و شیرین">طنزآمیز و شیرین</option>
-                                </select>
-                            </div>
-
-                            <button class="btn-gold" id="btn-generate-essay" style="width: 100%; margin-top: 10px;" onclick="AIWriting.generateEssaySubmit()">
-                                <span class="material-symbols-outlined">auto_fix_high</span>
-                                نگارش خودکار انشا
-                            </button>
-
-                            <div style="margin-top: 24px; border-top: 1px solid var(--border-subtle); padding-top: 16px;">
-                                <h4 style="font-size: 13px; font-weight: 700; margin-bottom: 10px; color: var(--gold-light);">📜 تاریخچه انشاهای اخیر</h4>
-                                <div id="essay-history-list"></div>
-                            </div>
-                        </div>
-
-                        <!-- Output Paper Area -->
-                        <div class="output-paper-card">
-                            <div class="output-paper-header">
-                                <div style="font-weight: 700; color: var(--gold-light); display: flex; align-items: center; gap: 8px;">
-                                    <span class="material-symbols-outlined">menu_book</span>
-                                    <span>متن آماده انشا</span>
-                                </div>
-                                <div style="display: flex; gap: 8px;">
-                                    <button class="btn-edit-goal" onclick="AIWriting.copyEssay()">
-                                        <span class="material-symbols-outlined" style="font-size: 16px;">content_copy</span>
-                                        کپی متن
-                                    </button>
-                                    <button class="btn-edit-goal" onclick="AIWriting.printEssay()">
-                                        <span class="material-symbols-outlined" style="font-size: 16px;">print</span>
-                                        چاپ / PDF
-                                    </button>
-                                </div>
-                            </div>
-                            <div class="output-paper-body" id="essay-output-content">
-                                <div style="text-align: center; color: var(--text-muted); padding: 80px 20px;">
-                                    <span class="material-symbols-outlined" style="font-size: 52px; color: var(--border-color);">history_edu</span>
-                                    <p style="margin-top: 12px;">موضوع دلخواه خود را در فرم سمت راست وارد کنید و دکمه نگارش را بزنید.</p>
-                                </div>
-                            </div>
-                        </div>
-
-                    </div>
-                    <div class="content-card account-safety-card">
-                        <div><span class="material-symbols-outlined" aria-hidden="true">verified_user</span><div><strong>حریم خصوصی و مدیریت حساب</strong><p>قوانین استفاده، شیوه نگهداری داده‌ها و راه حذف کامل حساب را مدیریت کنید.</p></div></div>
-                        <div><button type="button" class="btn-primary" onclick="App.navigate('legal')"><span class="material-symbols-outlined" aria-hidden="true">policy</span> قوانین و حریم خصوصی</button><a class="btn-primary" href="https://t.me/DarsyarStu" target="_blank" rel="noopener"><span class="material-symbols-outlined" aria-hidden="true">support_agent</span> پشتیبانی</a><button type="button" class="admin-danger-button" onclick="Profile.openDeleteAccount()"><span class="material-symbols-outlined" aria-hidden="true">delete_forever</span> حذف حساب</button></div>
-                    </div>
-                </section>
-
                 <section id="view-legal" class="view-section legal-view">
                     <div class="section-heading-bar"><div><h2 class="section-heading-title"><span class="material-symbols-outlined" aria-hidden="true">policy</span> قوانین و حریم خصوصی</h2><p>نسخه لازم‌الاجرا از ۳۰ شهریور ۱۴۰۵</p></div><button type="button" class="btn-primary" onclick="App.navigate('profile')"><span class="material-symbols-outlined" aria-hidden="true">arrow_forward</span> بازگشت</button></div>
                     <div class="legal-grid">
@@ -728,96 +626,6 @@
                 </section>
 
                 <!-- 6. AI RESEARCH VIEW -->
-                <section id="view-ai-research" class="view-section">
-                    <div class="section-heading-bar">
-                        <div>
-                            <h2 class="section-heading-title">
-                                <span class="material-symbols-outlined" style="color: var(--gold);">science</span>
-                                تحقیق علمی و نگارش مقاله پژوهشی
-                            </h2>
-                            <p style="font-size: 12px; color: var(--text-muted);">تدوین مقاله با چکیده، بیان مسئله، بدنه، نتیجه‌گیری و مراجع استاندارد</p>
-                        </div>
-                    </div>
-
-                    <div class="generator-layout-grid">
-                        
-                        <!-- Research Form -->
-                        <div class="content-card">
-                            <div class="form-group">
-                                <label class="form-label">موضوع پژوهش یا تحقیق</label>
-                                <input type="text" id="input-res-topic" class="form-control" placeholder="مثال: تاثیر هوش مصنوعی بر یادگیری دانش‌آموزان...">
-                            </div>
-
-                            <div class="form-group">
-                                <label class="form-label">سطح علمی مخاطب</label>
-                                <select id="input-res-level" class="form-control">
-                                    <option value="دانش‌آموزی (متوسطه)">دانش‌آموزی (متوسطه)</option>
-                                    <option value="دانشگاهی (کارشناسی)" selected>دانشگاهی (کارشناسی)</option>
-                                    <option value="تحصیلات تکمیلی (ارشد و دکتری)">تحصیلات تکمیلی (ارشد و دکتری)</option>
-                                </select>
-                            </div>
-
-                            <div class="form-group">
-                                <label class="form-label">تعداد بخش‌های محتوایی</label>
-                                <select id="input-res-count" class="form-control">
-                                    <option value="۳ بخش">۳ بخش (خلاصه)</option>
-                                    <option value="۵ بخش" selected>۵ بخش (استاندارد)</option>
-                                    <option value="۷ بخش">۷ بخش (جامع و کامل)</option>
-                                    <option value="۹ بخش">۹ بخش (پروژه مفصل)</option>
-                                </select>
-                            </div>
-
-                            <div class="form-group">
-                                <label class="form-label">سبک استناددهی و رفرنس‌ها</label>
-                                <select id="input-res-style" class="form-control">
-                                    <option value="APA 7th" selected>APA ویرایش هفتم</option>
-                                    <option value="Harvard">Harvard Reference Style</option>
-                                    <option value="Vancouver">Vancouver (علوم پزشکی)</option>
-                                    <option value="IEEE">IEEE (مهندسی)</option>
-                                </select>
-                            </div>
-
-                            <button class="btn-primary" id="btn-generate-research" style="width: 100%; margin-top: 10px;" onclick="AIResearch.generateResearchSubmit()">
-                                <span class="material-symbols-outlined">psychology</span>
-                                تدوین هوشمند پژوهش
-                            </button>
-
-                            <div style="margin-top: 24px; border-top: 1px solid var(--border-subtle); padding-top: 16px;">
-                                <h4 style="font-size: 13px; font-weight: 700; margin-bottom: 10px; color: var(--gold-light);">📚 تاریخچه ۱۰ پژوهش اخیر</h4>
-                                <div id="research-history-list"></div>
-                            </div>
-                        </div>
-
-                        <!-- Paper Output Area -->
-                        <div class="output-paper-card">
-                            <div class="output-paper-header">
-                                <div style="font-weight: 700; color: var(--gold-light); display: flex; align-items: center; gap: 8px;">
-                                    <span class="material-symbols-outlined">menu_book</span>
-                                    <span>پیش‌نمایش مقاله علمی</span>
-                                </div>
-                                <div style="display: flex; gap: 8px;">
-                                    <button class="btn-edit-goal" onclick="AIResearch.copyPaper()">
-                                        <span class="material-symbols-outlined" style="font-size: 16px;">content_copy</span>
-                                        کپی مقاله
-                                    </button>
-                                    <button class="btn-gold" style="padding: 4px 14px; font-size: 12px;" onclick="AIResearch.printPaper()">
-                                        <span class="material-symbols-outlined" style="font-size: 16px;">download</span>
-                                        دانلود نسخه PDF
-                                    </button>
-                                </div>
-                            </div>
-                            <div class="output-paper-body" id="research-output-content">
-                                <div style="text-align: center; color: var(--text-muted); padding: 80px 20px;">
-                                    <span class="material-symbols-outlined" style="font-size: 52px; color: var(--border-color);">menu_book</span>
-                                    <p style="margin-top: 12px;">اطلاعات پژوهش را تکمیل و دکمه تدوین را فشار دهید.</p>
-                                </div>
-                            </div>
-                        </div>
-
-                    </div>
-                </section>
-
-                <!-- 7. WEEKLY SCHEDULE VIEW -->
                 <section id="view-schedule" class="view-section">
                     <div class="section-heading-bar">
                         <div>
@@ -871,7 +679,7 @@
 
                 <!-- 8. EXAMS & ONLINE TESTING VIEW -->
                 <section id="view-exams" class="view-section" data-feature="exams">
-                    
+
                     <!-- Catalog View -->
                     <div id="exams-catalog-view">
                         <div class="section-heading-bar">
@@ -932,7 +740,7 @@
                             <span class="material-symbols-outlined" style="font-size: 54px; color: var(--gold-light);">workspace_premium</span>
                             <h2 style="font-size: 24px; font-weight: 800; margin: 8px 0;">کارنامه نتایج آزمون</h2>
                             <div style="font-size: 48px; font-weight: 900; color: var(--gold-light); margin: 12px 0;" id="report-score-percent">۷۵٪</div>
-                            
+
                             <div style="display: flex; justify-content: center; gap: 24px; margin: 20px 0;">
                                 <div><strong style="color: var(--success); font-size: 20px;" id="report-correct-count">۳</strong><div style="font-size: 12px; color: var(--text-muted);">پاسخ درست</div></div>
                                 <div><strong style="color: var(--danger); font-size: 20px;" id="report-wrong-count">۱</strong><div style="font-size: 12px; color: var(--text-muted);">پاسخ نادرست</div></div>
@@ -952,7 +760,7 @@
 
                 <!-- 9. STATS VIEW -->
                 <section id="view-stats" class="view-section">
-                    
+
                     <div class="section-heading-bar">
                         <div>
                             <h2 class="section-heading-title">
@@ -969,7 +777,7 @@
 
                     <!-- Printable Stats Report Area -->
                     <div id="stats-report-printable-area">
-                        
+
                         <!-- 4 Stat Metric Cards -->
                         <div class="kpi-grid">
                             <div class="kpi-card">
@@ -1020,7 +828,7 @@
 
                 <!-- 10. GAMIFICATION VIEW -->
                 <section id="view-gamification" class="view-section" data-feature="gamification">
-                    
+
                     <!-- Level Status Card -->
                     <div class="dashboard-header-banner" style="background: linear-gradient(135deg, #05319e 0%, #03143f 100%);">
                         <div class="banner-content">
@@ -1080,7 +888,7 @@
                     </div>
 
                     <div class="pricing-grid">
-                        
+
                         <!-- Free Plan -->
                         <div class="pricing-card">
                             <div>
@@ -1195,7 +1003,7 @@
                     </div>
 
                     <div class="generator-layout-grid">
-                        
+
                         <!-- Profile Card -->
                         <div class="content-card" style="text-align: center;">
                             <div style="width: 84px; height: 84px; border-radius: 50%; background: linear-gradient(135deg, var(--primary) 0%, var(--gold) 100%); margin: 0 auto 14px; display: flex; align-items: center; justify-content: center; font-size: 44px; box-shadow: var(--shadow-gold);" id="profile-avatar-preview">
@@ -1573,8 +1381,6 @@
     <script src="js/pomodoro.js"></script>
     <script src="js/flashcards.js"></script>
     <script src="js/ai-assistant.js"></script>
-    <script src="js/ai-writing.js"></script>
-    <script src="js/ai-research.js"></script>
     <script src="js/stats.js"></script>
     <script src="js/gamification.js"></script>
     <script src="js/schedule.js"></script>

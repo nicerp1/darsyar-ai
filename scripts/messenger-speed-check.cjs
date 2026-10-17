@@ -1,0 +1,40 @@
+const assert=require('node:assert/strict');
+const fs=require('node:fs');
+const vm=require('node:vm');
+const {EventEmitter}=require('node:events');
+const path=require('node:path');
+const root=path.join(__dirname,'..');
+async function main(){
+    let now=0,calls=0;const output=[];
+    const res=new EventEmitter();Object.assign(res,{setHeader(){},flushHeaders(){},write(s){output.push(s);},end(){this.ended=true;}});
+    const scope={module:{exports:{}},require,Date:{now:()=>now},setTimeout(fn,delay){now+=delay;fn();}};
+    vm.runInNewContext(fs.readFileSync(path.join(root,'lib/messenger-events.js'),'utf8'),scope);
+    await scope.module.exports({headers:{}},res,{username:'alice'},async query=>{assert(query.includes('username=eq.alice'));assert(!query.includes('select=value'));calls++;return[{key:'private-thread',updated_at:calls<3?'a':'b'}];});
+    assert.equal(output.filter(s=>s.includes('event: changed')).length,2);
+    assert(!output.join('').includes('private-thread'));
+    assert(res.ended);assert(calls<=8);assert.equal(res.listenerCount('close'),0);
+    const lastId=output.filter(s=>s.startsWith('id:')).at(-1).split('\n')[0].slice(4);
+    now=0;output.length=0;
+    await scope.module.exports({headers:{'last-event-id':lastId}},res,{username:'alice'},async()=>[{key:'private-thread',updated_at:'b'}]);
+    assert(!output.some(s=>s.includes('event: changed')),'reconnect must not resend unchanged snapshots');
+    let query='';const ctx={module:{exports:{}},require:()=>({db:async q=>{query=q;return[{key:'study_history',value:[{date:'2026-01-01',hours:1.025}]},{key:'manual_reports',value:[{date:'2026-01-01',minutes:10,status:'completed',subject:'math'},{date:'2026-01-01',minutes:50,status:'missed'}]},{key:'schedule',value:[]}];}}),Date,Intl,Map,Number,String,Array,Object,Math,encodeURIComponent};
+    vm.runInNewContext(fs.readFileSync(path.join(root,'lib/study-context.js'),'utf8'),ctx);
+    const stats=await ctx.module.exports('alice');assert(query.includes('username=eq.alice'));
+    assert.equal(stats.totalStudy.hours,1);assert.equal(stats.totalStudy.minutes,11);assert.equal(stats.totalStudy.seconds,30);
+    assert.equal(stats.manualSubjectTotals[0].minutes,10);
+    let failSave=true,lastBody;
+    const storeScope={window:{},console,fetch:async(url,options)=>{
+        if(url==='/api/bootstrap')return {ok:true,json:async()=>({user:{username:'alice'},data:{schedule:['old']}})};
+        lastBody=JSON.parse(options.body);return {ok:!failSave,json:async()=>failSave?{error:'offline'}:{ok:true}};
+    }};
+    vm.runInNewContext(fs.readFileSync(path.join(root,'data/storage.js'),'utf8'),storeScope);
+    const storage=storeScope.window.Storage;await storage.init();
+    await assert.rejects(storage.saveConfirmed('schedule',['new']),/offline/);
+    assert.equal(storage.get('schedule')[0],'old','failed save must not look successful');
+    failSave=false;await storage.saveConfirmed('schedule',['new']);
+    assert.equal(storage.get('schedule')[0],'new');assert.equal(lastBody.expectedUser,'alice');
+    const queued=storage.saveConfirmed('schedule',['private']);storage.setCurrentUser({username:'bob'});
+    await assert.rejects(queued,/حساب/);
+    console.log('PASS: authenticated-owner event scope, bounded streaming, change-only delivery, reconnect resume, exact private study context');
+}
+main().catch(error=>{console.error(error);process.exitCode=1;});

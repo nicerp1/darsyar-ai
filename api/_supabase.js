@@ -28,12 +28,12 @@ function parseCookies(req) {
         const index = part.indexOf('='); return [part.slice(0, index).trim(), decodeURIComponent(part.slice(index + 1))];
     }));
 }
-async function getSession(req) {
+async function getSession(req, fields='*') {
     const token = parseCookies(req).studymate_session;
     if (!token) return null;
     const sessions = await db(`sessions?token=eq.${encodeURIComponent(token)}&expires_at=gt.${encodeURIComponent(new Date().toISOString())}&select=username`);
     if (!sessions?.[0]) return null;
-    return (await db(`profiles?username=eq.${encodeURIComponent(sessions[0].username)}&select=*`))?.[0] || null;
+    return (await db(`profiles?username=eq.${encodeURIComponent(sessions[0].username)}&select=${fields}`))?.[0] || null;
 }
 function publicUser(row) { if (!row) return null; const { password_hash, ...user } = row; return user; }
 async function getDataValue(username, key, fallback = null) {
