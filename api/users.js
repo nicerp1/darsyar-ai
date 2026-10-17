@@ -12,6 +12,12 @@ module.exports = async (req, res) => {
             const password = String(req.body?.password || '');
             if (confirmation !== actor.username) return res.status(400).json({ error: 'نام کاربری تأییدشده صحیح نیست.' });
             if (!verifyPassword(password, actor.password_hash)) return res.status(401).json({ error: 'رمز عبور صحیح نیست.' });
+            // Remove this verified account's new private attachments before cascading its metadata.
+            for(let offset=0;;offset+=500){
+                const files=await db(`app_data?username=eq.${encodeURIComponent(actor.username)}&key=like.im_file_*&value->>storagePath=not.is.null&select=storagePath:value->>storagePath&order=key.asc&limit=500&offset=${offset}`);
+                if(files?.length)await require('../lib/chat-files').remove(actor.username,files.map(f=>f.storagePath));
+                if(!files||files.length<500)break;
+            }
             const advisors = await db('app_data?key=eq.linked_students&select=username,value');
             for (const row of advisors || []) {
                 const linked = Array.isArray(row.value) ? row.value.filter(item => item !== actor.username) : [];
