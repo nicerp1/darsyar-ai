@@ -59,6 +59,21 @@ html:not(.capacitor-app) .studio-page-heading h1 { font-size:clamp(25px,2.5vw,35
 html:not(.capacitor-app) .studio-page-heading p { color:var(--studio-muted);font-size:13px;line-height:1.9;margin-top:3px; }
 html:not(.capacitor-app) .studio-eyebrow { display:block;color:var(--studio-muted);font-size:11px;margin-bottom:5px; }
 html:not(.capacitor-app) .studio-greeting-dot { color:var(--studio-accent); }
+html:not(.capacitor-app) .studio-dashboard-heading { position:relative;isolation:isolate;overflow:hidden;align-items:center;min-height:164px;padding:26px clamp(24px,3vw,38px);border:1px solid var(--studio-line);border-radius:24px;background:linear-gradient(115deg,color-mix(in srgb,var(--studio-surface) 93%,var(--studio-accent) 7%),var(--studio-surface));box-shadow:var(--studio-shadow); }
+html:not(.capacitor-app) .studio-dashboard-heading::before { content:'';position:absolute;inset:0 0 auto auto;width:45%;height:100%;z-index:-1;pointer-events:none;background:radial-gradient(ellipse at 10% 25%,color-mix(in srgb,var(--studio-accent) 14%,transparent),transparent 70%); }
+html:not(.capacitor-app) .studio-dashboard-heading-copy { min-width:0; }
+html:not(.capacitor-app) .studio-dashboard-heading-kicker { display:inline-flex;align-items:center;gap:10px;margin-bottom:9px;color:var(--studio-accent);font-size:12px;font-weight:700; }
+html:not(.capacitor-app) .studio-dashboard-heading-kicker i { width:4px;height:4px;border-radius:50%;background:var(--studio-muted); }
+html:not(.capacitor-app) .studio-dashboard-heading h1 { margin:0;font-size:clamp(23px,2.2vw,33px);line-height:1.5;font-weight:700;letter-spacing:-.35px;text-wrap:balance; }
+html:not(.capacitor-app) .studio-dashboard-heading h1 .studio-greeting-dot { margin-inline:1px; }
+html:not(.capacitor-app) .studio-dashboard-heading p { margin-top:7px;font-size:13px; }
+html:not(.capacitor-app) .studio-dashboard-heading-aside { display:flex;flex:0 0 auto;align-items:flex-end;flex-direction:column;gap:12px; }
+html:not(.capacitor-app) .studio-dashboard-date { display:flex;align-items:center;gap:11px;min-width:185px;padding:11px 14px;border:1px solid var(--studio-line);border-radius:13px;background:var(--studio-raised); }
+html:not(.capacitor-app) .studio-dashboard-date>.studio-icon { width:22px;height:22px;color:var(--studio-accent); }
+html:not(.capacitor-app) .studio-dashboard-date span { display:grid;gap:2px; }
+html:not(.capacitor-app) .studio-dashboard-date small { color:var(--studio-muted);font-size:10px; }
+html:not(.capacitor-app) .studio-dashboard-date strong { color:var(--studio-ink);font-size:13px;font-weight:600;white-space:nowrap; }
+@media (max-width:1050px) { html:not(.capacitor-app) .studio-dashboard-heading { flex-wrap:wrap; } html:not(.capacitor-app) .studio-dashboard-heading-aside { flex-direction:row;align-items:center;flex-wrap:wrap; } }
 html:not(.capacitor-app) .studio-heading-icon { width:54px;height:54px;color:var(--studio-accent); }
 html:not(.capacitor-app) .studio-button { display:inline-flex;align-items:center;justify-content:center;gap:9px;min-height:46px;padding:10px 18px;border:1px solid transparent;border-radius:13px;font-size:13px;font-weight:700;transition:transform .25s cubic-bezier(.2,.8,.2,1),box-shadow .25s,background .2s; }
 html:not(.capacitor-app) .studio-button.primary { background:var(--studio-accent-fill);color:var(--studio-on-accent); }
@@ -281,6 +296,11 @@ html:not(.capacitor-app) #view-ai-assistant .prompt-chip { background:var(--stud
     html:not(.capacitor-app) .studio-page-heading { align-items:flex-start;flex-wrap:wrap;gap:12px; }
     html:not(.capacitor-app) .studio-page-heading h1 { font-size:25px; }
     html:not(.capacitor-app) .studio-page-heading>.studio-button { min-height:42px;padding:8px 12px;font-size:11px; }
+    html:not(.capacitor-app) .studio-dashboard-heading { padding:22px;gap:18px; }
+    html:not(.capacitor-app) .studio-dashboard-heading h1 { font-size:24px; }
+    html:not(.capacitor-app) .studio-dashboard-heading-aside { width:100%;align-items:center;flex-direction:row;flex-wrap:wrap;justify-content:space-between; }
+    html:not(.capacitor-app) .studio-dashboard-date { min-width:0;flex:1; }
+    html:not(.capacitor-app) .studio-dashboard-heading-aside .studio-button { min-height:44px; }
     html:not(.capacitor-app) .studio-dashboard-top { grid-template-columns:1fr; }
     html:not(.capacitor-app) .studio-hero { min-height:270px;grid-template-columns:minmax(0,1.4fr) minmax(112px,.65fr);padding:24px 20px; }
     html:not(.capacitor-app) .studio-hero h2 { font-size:22px; }
