@@ -193,7 +193,7 @@ const WebStudio = (() => {
         let shell = view.querySelector('.studio-dashboard');
         if (!shell) { shell = document.createElement('div'); shell.className = 'studio-dashboard'; view.prepend(shell); }
         view.classList.add('studio-dashboard-ready');
-        const {tasks} = todayTasks(), done = tasks.filter(task => task.status === 'completed').length;
+        const {tasks} = todayTasks(), done = tasks.filter(task => task.status === 'completed').length, completion = tasks.length ? Math.round(done / tasks.length * 100) : 0;
         const data = studyData(), today = localDate();
         const goal = dailyGoal(data.get(today) || 0);
         const week = Array.from({length:7}, (_, i) => { const date = new Date(); date.setDate(date.getDate()-6+i); return data.get(localDate(date)) || 0; }).reduce((sum, hours) => sum + hours, 0);
