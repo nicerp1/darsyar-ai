@@ -18,7 +18,6 @@ const Pomodoro = (function () {
 
     function init() {
         window.WebStudio?.preparePomodoro();
-        if (window.WebStudio?.enabled()) window.StudyWorkspace?.focus();
         loadSettings();
         renderSettings();
         renderTasks();
@@ -28,6 +27,9 @@ const Pomodoro = (function () {
         setupScheduleTaskOptions();
         if (!visibilityListenerReady) {
             document.addEventListener('visibilitychange', reconcileTimer);
+            document.addEventListener('fullscreenchange', () => {
+                if (!document.fullscreenElement) document.getElementById('focus-fullscreen-overlay')?.classList.remove('active');
+            });
             visibilityListenerReady = true;
         }
     }
@@ -292,12 +294,12 @@ const Pomodoro = (function () {
         const fsMainBtn = document.getElementById('fs-btn-pomo-play');
 
         const isRunning = timerState === 'running';
-        const label = isRunning
-            ? '<span class="material-symbols-outlined">pause</span> توقف موقت'
-            : '<span class="material-symbols-outlined">play_arrow</span> شروع تمرکز';
+        const label = window.WebStudio?.enabled()
+            ? `${WebStudio.icon(isRunning?'pause':'play')} ${isRunning?'توقف موقت':'شروع تمرکز'}`
+            : isRunning ? '<span class="material-symbols-outlined">pause</span> توقف موقت' : '<span class="material-symbols-outlined">play_arrow</span> شروع تمرکز';
 
-        if (mainBtn) mainBtn.innerHTML = label;
-        if (fsMainBtn) fsMainBtn.innerHTML = label;
+        if (mainBtn) { mainBtn.innerHTML = label; mainBtn.setAttribute('aria-label',isRunning?'توقف موقت تایمر':'شروع یا ادامهٔ تمرکز'); }
+        if (fsMainBtn) { fsMainBtn.innerHTML = label; fsMainBtn.setAttribute('aria-label',isRunning?'توقف موقت تایمر':'شروع یا ادامهٔ تمرکز'); }
         window.WebStudio?.timerState(timerState, currentMode);
     }
 
@@ -312,7 +314,7 @@ const Pomodoro = (function () {
     function enterFullscreenFocus() {
         const fs = document.getElementById('focus-fullscreen-overlay');
         if (fs) {
-            const label = document.getElementById('focus-task-name'); if (label) label.textContent = currentTaskName;
+            syncTaskDisplay();
             fs.classList.add('active');
             if (document.documentElement.requestFullscreen) {
                 document.documentElement.requestFullscreen().catch(() => {});
@@ -343,20 +345,44 @@ const Pomodoro = (function () {
         const tasks = todaySchedule?.tasks || todaySchedule?.slots || [];
         if (tasks.length) {
             tasks.filter(task => task.subject).forEach(task => {
-                optionsHtml += `<option value="${esc(task.subject)}">${esc(task.subject)} · ${Utils.toPersianDigits(task.durationMinutes || 60)} دقیقه</option>`;
+                optionsHtml += `<option value="${esc(task.subject)}" data-task-id="${esc(task.id || '')}">${esc(task.subject)} · ${Utils.toPersianDigits(task.durationMinutes || 60)} دقیقه</option>`;
             });
         }
+        (Storage.get('pomo_tasks', []) || []).filter(task=>task.title && !task.done).forEach(task=>{
+            optionsHtml += `<option value="${esc(task.title)}" data-task-id="${esc(task.id || '')}">${esc(task.title)}</option>`;
+        });
 
-        select.innerHTML = optionsHtml;
-        if (![...select.options].some(option => option.value === currentTaskName)) select.add(new Option(currentTaskName, currentTaskName));
-        select.value = currentTaskName;
-        select.onchange = function () {
-            if (timerState === 'running') { this.value = currentTaskName; return Utils.showToast('برای تغییر تسک، ابتدا تایمر را متوقف کن.', 'info'); }
-            currentTaskName = this.value;
-            currentTaskId = null;
-            const labelEl = document.getElementById('pomo-active-task-label');
-            if (labelEl) labelEl.textContent = currentTaskName;
-        };
+        for (const picker of [select,document.getElementById('fs-pomo-task-selector')].filter(Boolean)) {
+            picker.innerHTML = optionsHtml;
+            if (![...picker.options].some(option => option.value === currentTaskName)) picker.add(new Option(currentTaskName, currentTaskName));
+            picker.value = currentTaskName;
+            picker.onchange = function () { selectTask(this.value,this.selectedOptions[0]?.dataset.taskId || null); };
+        }
+        syncTaskDisplay();
+    }
+
+    function syncTaskDisplay() {
+        for (const id of ['pomo-active-task-label','focus-task-name']) {
+            const label=document.getElementById(id);if(label)label.textContent=currentTaskName;
+        }
+        for (const id of ['pomo-task-selector','fs-pomo-task-selector']) {
+            const picker=document.getElementById(id);if(picker)picker.value=currentTaskName;
+        }
+    }
+
+    function selectTask(name,id=null) {
+        if (!name || name === currentTaskName && id === currentTaskId) return;
+        const wasRunning=timerState==='running';
+        if(wasRunning && timerEndsAt) {
+            const remaining=Math.max(0,Math.ceil((timerEndsAt-Date.now())/1000));
+            if(currentMode==='work') secondsStudiedThisSession+=Math.max(0,timeLeft-remaining);
+            timeLeft=remaining;
+            updateDisplay();
+        }
+        if(wasRunning) pauseTimer();
+        currentTaskName=name;currentTaskId=id;
+        syncTaskDisplay();
+        if(wasRunning) startTimer();
     }
 
     function setTaskFromExternal(taskName, suggestedMinutes, taskId = null) {
@@ -364,8 +390,7 @@ const Pomodoro = (function () {
         if (timerState === 'running') pauseTimer();
         currentTaskName = taskName;
         currentTaskId = taskId;
-        const labelEl = document.getElementById('pomo-active-task-label');
-        if (labelEl) labelEl.textContent = taskName;
+        syncTaskDisplay();
         if (suggestedMinutes) {
             const settings = Storage.getSettings(); settings.pomodoroWork = Math.min(180, Math.max(1, Number(suggestedMinutes))); Storage.saveSettings(settings);
             currentMode = 'work'; timerState = 'idle'; loadSettings(); timeLeft = totalDuration; renderSettings(); updateDisplay(); updateControlButtons();
@@ -417,6 +442,7 @@ const Pomodoro = (function () {
         Storage.set('pomo_tasks', tasks);
         input.value = '';
         renderTasks();
+        setupScheduleTaskOptions();
         if (typeof Utils !== 'undefined') {
             Utils.playSound('click');
         }
@@ -435,6 +461,7 @@ const Pomodoro = (function () {
                 }
             }
             renderTasks();
+            setupScheduleTaskOptions();
         }
     }
 
@@ -443,6 +470,7 @@ const Pomodoro = (function () {
         tasks = tasks.filter(t => t.id !== id);
         Storage.set('pomo_tasks', tasks);
         renderTasks();
+        setupScheduleTaskOptions();
     }
 
     function renderStats() {

@@ -21,6 +21,9 @@ const WebStudio = (() => {
         arrow:'<path d="M20 12H4m6-6-6 6 6 6"/>',
         plus:'<path d="M12 5v14M5 12h14"/>',
         play:'<path d="m8 4 13 8-13 8Z"/>',
+        pause:'<rect x="5" y="4" width="5" height="16" rx="1"/><rect x="14" y="4" width="5" height="16" rx="1"/>',
+        reset:'<path d="M4 11a8 8 0 1 1 2 6M4 4v7h7"/>',
+        expand:'<path d="M9 3H3v6m12-6h6v6M3 15v6h6m12-6v6h-6"/>',
         check:'<path d="m5 12 4 4L19 6"/>',
         flame:'<path d="M13 2c1 6 7 8 7 13a8 8 0 0 1-16 0c0-4 2-7 5-9 0 3 1 4 2 4 2-2 2-5 2-8Z"/>',
         leaf:'<path d="M20 3C7 2 3 7 4 14s10 8 14 1c2-3 2-8 2-12ZM4 22l10-12"/>',
@@ -62,6 +65,12 @@ const WebStudio = (() => {
         document.querySelector('.menu-toggle-btn')?.setAttribute('aria-label', 'باز کردن منو');
         document.querySelector('[onclick="App.toggleTheme()"]')?.setAttribute('aria-label', 'تغییر تم روشن و تاریک');
         const header = document.querySelector('.top-header');
+        const mobileBrand = document.createElement('div'); mobileBrand.className = 'studio-mobile-brand';
+        mobileBrand.innerHTML = '<img src="icons/icon-64.png" width="31" height="31" alt=""><span>درسیار</span>';
+        header?.insertBefore(mobileBrand, header.querySelector('.header-left'));
+        const mobileNav = document.createElement('nav'); mobileNav.className = 'studio-mobile-nav'; mobileNav.setAttribute('aria-label','پیمایش اصلی');
+        mobileNav.innerHTML = [['dashboard','home','خانه'],['stats','chart','آمار'],['pomodoro','plus','تمرکز'],['schedule','calendar','برنامه'],['profile','user','پروفایل']].map(([route,glyph,label])=>`<button type="button" data-mobile-route="${route}" aria-label="${label}" onclick="App.navigate('${route}')">${icon(glyph)}<span>${label}</span></button>`).join('');
+        document.body.append(mobileNav);
         const crumb = document.createElement('div'); crumb.className = 'studio-breadcrumb';
         crumb.innerHTML = '<span>فضای یادگیری من</span><b aria-hidden="true">/</b><strong id="studio-page-name">امروزِ تو</strong>';
         header?.insertBefore(crumb, header.querySelector('.header-left'));
@@ -114,6 +123,11 @@ const WebStudio = (() => {
     }
 
     function enter(name, previous) {
+        document.querySelectorAll('.studio-mobile-nav button').forEach(button=>{
+            const active=button.dataset.mobileRoute===name;
+            button.classList.toggle('active',active);
+            if(active)button.setAttribute('aria-current','page');else button.removeAttribute('aria-current');
+        });
         if(name==='chat'&&window.Messenger){clearTransition();return;}
         const view = document.getElementById(`view-${name}`);
         const crumb = document.getElementById('studio-page-name'); if (crumb) crumb.textContent = viewLabels[name] || 'درسیار';
@@ -203,19 +217,20 @@ const WebStudio = (() => {
         const listCard = document.getElementById('pomo-tasks-list').closest('.content-card');
         const selectCard = document.getElementById('pomo-task-selector').closest('.content-card');
         const statsCard = document.getElementById('pomo-stat-today-sessions').closest('.content-card');
-        const heading = document.createElement('header'); heading.className = 'studio-page-heading';
-        heading.innerHTML = `<div><span class="studio-eyebrow">کمی سکوت، کمی پیشرفت</span><h1>اتاق تمرکز</h1><p>همین لحظه، فقط یک کار.</p></div><button class="studio-button secondary" type="button" onclick="Pomodoro.openSettings()">${icon('timer')}تنظیم زمان‌ها</button>`;
-        const grid = document.createElement('div'); grid.className = 'studio-focus-grid';
-        grid.innerHTML = '<section class="studio-focus-stage" data-reveal></section><aside class="studio-focus-sidebar"></aside>';
-        const stage = grid.firstElementChild, aside = grid.lastElementChild;
-        const kicker = document.createElement('span'); kicker.className = 'studio-focus-kicker'; kicker.innerHTML = `${icon('leaf')} زمان برای خودت`;
-        stage.append(kicker,modes,dial,taskPill,controls);
+        const stage = document.createElement('section'); stage.className = 'studio-focus-stage studio-focus-unified'; stage.setAttribute('data-reveal','');
+        const heading = document.createElement('header'); heading.className = 'studio-focus-unified-header';
+        heading.innerHTML = `<span><i aria-hidden="true"></i>تمرکز</span><button type="button" onclick="Pomodoro.openSettings()" aria-label="تنظیم زمان و اعلان">${icon('timer')}<span>تنظیمات</span></button>`;
+        const kicker = document.createElement('span'); kicker.className = 'studio-focus-kicker'; kicker.innerHTML = 'یک کار، یک بازهٔ آرام';
+        stage.append(heading,kicker,modes,dial,taskPill);
         taskPill.className = 'studio-active-task'; taskPill.removeAttribute('style');
-        const tip = document.createElement('p'); tip.className = 'studio-focus-tip'; tip.textContent = 'نفس عمیق. یک کار کوچک. یک شروع تازه.'; stage.append(tip);
+        const changeTask = document.createElement('button'); changeTask.type='button'; changeTask.className='studio-focus-change-task'; changeTask.textContent='تغییر تسک'; changeTask.addEventListener('click',()=>document.getElementById('pomo-task-selector')?.focus()); taskPill.append(changeTask);
         selectCard.classList.add('studio-focus-selection'); listCard.classList.add('studio-focus-checklist'); statsCard.classList.add('studio-focus-stats');
-        const note = document.createElement('div'); note.className = 'studio-focus-note'; note.innerHTML = `${icon('moon')}<div><strong>استراحت، بخشی از پیشرفت است.</strong><p>بعد از هر جلسه، چند دقیقه به چشم‌ها و ذهنت فرصت بده.</p></div>`;
-        aside.append(selectCard,statsCard,note);
-        container.replaceChildren(heading,grid,listCard);
+        const taskDetails=document.createElement('details');taskDetails.className='studio-focus-task-details';taskDetails.innerHTML='<summary>تسک‌های من و افزودن تسک</summary>';taskDetails.append(listCard);
+        const tip = document.createElement('p'); tip.className = 'studio-focus-tip'; tip.textContent = 'گوشی را کنار بگذار؛ پایان جلسه خبرت می‌کنیم.';
+        stage.append(selectCard,controls,tip,taskDetails,statsCard);
+        container.replaceChildren(stage);
+        controls.firstElementChild.innerHTML=icon('reset');
+        controls.lastElementChild.innerHTML=icon('expand');
         document.querySelector('#pomo-tasks-list')?.parentElement.querySelector('input')?.setAttribute('aria-label','عنوان کار جدید');
         document.getElementById('pomo-task-selector')?.setAttribute('aria-label','انتخاب تسک از برنامه امروز');
         controls.querySelectorAll('button[title]').forEach(button => button.setAttribute('aria-label',button.title));

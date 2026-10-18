@@ -35,6 +35,7 @@
     <link rel="stylesheet" href="css/messenger.css">
     <link rel="stylesheet" href="css/messenger-extras.css">
     <link rel="stylesheet" href="css/study-flow.css">
+    <link rel="stylesheet" href="css/mobile-web.css">
     <link rel="manifest" href="manifest.json">
     <link rel="icon" type="image/png" sizes="64x64" href="icons/icon-64.png">
     <link rel="apple-touch-icon" sizes="192x192" href="icons/icon-192.png">
@@ -1357,15 +1358,17 @@
     <!-- Fullscreen Focus Overlay for Pomodoro -->
     <div id="focus-fullscreen-overlay" class="focus-fullscreen-overlay" role="dialog" aria-modal="true" aria-label="حالت تمرکز">
         <button class="btn-exit-focus" onclick="Pomodoro.exitFullscreenFocus()">
-            <span class="material-symbols-outlined">close_fullscreen</span>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true" width="22" height="22"><path d="M9 3v6H3m12-6v6h6M3 15h6v6m12-6h-6v6"/></svg>
             خروج از حالت تمام‌صفحه
         </button>
         <div class="focus-static-card">
+            <div class="focus-static-label"><i aria-hidden="true"></i><span>تمرکز</span><button type="button" onclick="Pomodoro.openSettings()" aria-label="تنظیم زمان تمرکز"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true" width="22" height="22"><circle cx="12" cy="12" r="3"/><path d="M12 2v2m0 16v2M4.9 4.9l1.4 1.4m11.4 11.4 1.4 1.4M2 12h2m16 0h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg></button></div>
             <span class="material-symbols-outlined focus-static-icon" aria-hidden="true">self_improvement</span>
-            <div class="focus-static-label">فقط روی همین تسک تمرکز کن</div>
             <strong id="focus-task-name">مطالعه و تمرکز آزاد</strong>
-            <div id="fs-pomo-time" class="focus-static-time">۲۵:۰۰</div>
+            <div class="focus-static-dial"><small>زمان باقی‌مانده</small><div id="fs-pomo-time" class="focus-static-time">۲۵:۰۰</div><span>این زمان، برای همین یک کار است</span></div>
+            <label class="focus-static-task-picker" for="fs-pomo-task-selector"><span>تسک در حال انجام</span><select id="fs-pomo-task-selector" aria-label="تغییر تسک در حالت تمام‌صفحه"></select></label>
             <div class="focus-static-actions">
+                <button type="button" class="focus-static-reset" onclick="Pomodoro.resetTimer()" aria-label="بازنشانی تایمر"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true" width="22" height="22"><rect x="6" y="6" width="12" height="12" rx="2"/></svg></button>
                 <button class="btn-pomo-main" id="fs-btn-pomo-play" onclick="Pomodoro.toggleTimer()">
                     <span class="material-symbols-outlined">play_arrow</span>
                     شروع تمرکز

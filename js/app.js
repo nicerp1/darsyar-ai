@@ -38,7 +38,8 @@ const App = (function () {
 
     function applyTheme() {
         const settings = Storage.getSettings();
-        const theme = settings.theme || 'dark';
+        const mobileWeb = !window.DarsyarPlatform?.native && matchMedia('(max-width: 720px)').matches;
+        const theme = mobileWeb ? (settings.webMobileTheme || 'light') : (settings.theme || 'dark');
         document.documentElement.setAttribute('data-theme', theme);
         window.DarsyarPlatform?.setTheme?.(theme);
 
@@ -50,10 +51,12 @@ const App = (function () {
 
     function toggleTheme() {
         const settings = Storage.getSettings();
-        const currentTheme = settings.theme || 'dark';
+        const mobileWeb = !window.DarsyarPlatform?.native && matchMedia('(max-width: 720px)').matches;
+        const currentTheme = mobileWeb ? (settings.webMobileTheme || 'light') : (settings.theme || 'dark');
         const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
 
-        settings.theme = newTheme;
+        if (mobileWeb) settings.webMobileTheme = newTheme;
+        else settings.theme = newTheme;
         Storage.saveSettings(settings);
         applyTheme();
 
@@ -243,6 +246,7 @@ const App = (function () {
     }
 
     function setupEventListeners() {
+        matchMedia('(max-width: 720px)').addEventListener('change', applyTheme);
         // Global search input
         const searchInput = document.getElementById('global-search-input');
         if (searchInput) {
