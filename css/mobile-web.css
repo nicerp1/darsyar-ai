@@ -1,4 +1,6 @@
 /* Responsive web surface and unified focus room. Native Android styles are unchanged. */
+html:not(.capacitor-app),html:not(.capacitor-app) * { scrollbar-width:none; }
+html:not(.capacitor-app)::-webkit-scrollbar,html:not(.capacitor-app) *::-webkit-scrollbar { display:none;width:0;height:0; }
 html:not(.capacitor-app) .studio-mobile-brand,
 html:not(.capacitor-app) .studio-mobile-nav { display:none; }
 
@@ -67,7 +69,7 @@ html:not(.capacitor-app) #modal-pomodoro-settings .pomo-settings-modal { border-
 
 @media (max-width:720px) {
   html:not(.capacitor-app) { --studio-bg:#f7f6f1;--studio-surface:#fff;--studio-raised:#f1f3ed;--studio-line:#e6e9df;--studio-ink:#26342c;--studio-muted:#737d73;--studio-accent:#4d9369;--studio-mint:#5d9c73;--studio-coral:#b4765c;--studio-accent-fill:#86b998;--studio-on-accent:#123a24;--web-bg:var(--studio-bg);--web-card:var(--studio-surface);--web-line:var(--studio-line);--web-ink:var(--studio-ink);--web-muted:var(--studio-muted);--bg-body:var(--studio-bg);--bg-card:var(--studio-surface);--bg-input:var(--studio-surface);--bg-surface:var(--studio-raised);--border-color:var(--studio-line);--text-main:var(--studio-ink);--text-muted:var(--studio-muted); }
-  html:not(.capacitor-app)[data-theme="dark"] { --studio-bg:#171f1a;--studio-surface:#233027;--studio-raised:#2b3b30;--studio-line:#3e5444;--studio-ink:#f2f7ef;--studio-muted:#bdcdbd;--studio-accent:#a7d1ae;--studio-mint:#b3dcbb;--studio-accent-fill:#82b791;--studio-on-accent:#132f1c;--web-bg:var(--studio-bg);--web-card:var(--studio-surface);--web-line:var(--studio-line);--web-ink:var(--studio-ink);--web-muted:var(--studio-muted);--bg-body:var(--studio-bg);--bg-card:var(--studio-surface);--bg-input:var(--studio-raised);--bg-surface:var(--studio-raised);--border-color:var(--studio-line);--text-main:var(--studio-ink);--text-muted:var(--studio-muted); }
+  html:not(.capacitor-app)[data-theme="dark"] { --studio-bg:#12151c;--studio-surface:#1b1f29;--studio-raised:#252a37;--studio-line:#303644;--studio-ink:#f5f3ee;--studio-muted:#a8adbc;--studio-accent:#b5a3ff;--studio-mint:#b9e4c9;--studio-coral:#f2b8a3;--studio-accent-fill:#c7b9ff;--studio-on-accent:#241b42;--web-bg:var(--studio-bg);--web-card:var(--studio-surface);--web-line:var(--studio-line);--web-ink:var(--studio-ink);--web-muted:var(--studio-muted);--bg-body:var(--studio-bg);--bg-card:var(--studio-surface);--bg-card-hover:var(--studio-raised);--bg-input:var(--studio-raised);--bg-surface:var(--studio-raised);--border-color:var(--studio-line);--border-subtle:var(--studio-line);--text-main:var(--studio-ink);--text-muted:var(--studio-muted);--primary:#7860cf;--primary-light:#a28cf2;--gold-light:var(--studio-accent); }
   html:not(.capacitor-app) body { background:var(--studio-bg); }
   html:not(.capacitor-app) .main-wrapper { min-width:0;width:100%; }
   html:not(.capacitor-app) body { overflow-x:hidden; }
@@ -145,7 +147,7 @@ html:not(.capacitor-app) #modal-pomodoro-settings .pomo-settings-modal { border-
   html:not(.capacitor-app) #view-schedule .schedule-admin-toggle { border-radius:14px; }
   html:not(.capacitor-app) #view-schedule .schedule-days-list,html:not(.capacitor-app) #view-schedule #schedule-days-list { min-width:0;max-width:100%; }
   html:not(.capacitor-app) #view-stats .sw-stats-hero { padding:20px;border-radius:18px;background:#e2f2e6;color:#254432; }
-  html:not(.capacitor-app)[data-theme="dark"] #view-stats .sw-stats-hero { background:#31513b;color:#eff7ed; }
+  html:not(.capacitor-app)[data-theme="dark"] #view-stats .sw-stats-hero { background:var(--studio-surface);color:var(--studio-ink);border:1px solid var(--studio-line); }
   html:not(.capacitor-app) #view-stats .sw-stats-hero strong { font-size:24px; }
   html:not(.capacitor-app) #view-stats .sw-panel { padding:16px; }
   html:not(.capacitor-app) #view-stats .sw-segments { display:flex;max-width:100%;overflow-x:auto;scrollbar-width:none; }
