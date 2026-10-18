@@ -233,6 +233,7 @@ const App = (function () {
         if (sidebar && overlay) {
             sidebar.classList.toggle('open');
             overlay.classList.toggle('active');
+            syncMobileSidebarPresentation(sidebar.classList.contains('open'));
         }
     }
 
@@ -242,11 +243,31 @@ const App = (function () {
         if (sidebar && overlay) {
             sidebar.classList.remove('open');
             overlay.classList.remove('active');
+            syncMobileSidebarPresentation(false);
         }
+    }
+
+    function syncMobileSidebarPresentation(open) {
+        const html = document.documentElement;
+        const isWebMobile = !html.classList.contains('capacitor-app') && matchMedia('(max-width: 720px)').matches;
+        const menuButton = document.querySelector('.menu-toggle-btn');
+        const sidebar = document.getElementById('sidebar');
+        const closeHadFocus = document.activeElement?.closest('.studio-drawer-close');
+        document.body.classList.toggle('web-mobile-drawer-open', isWebMobile && open);
+        if (menuButton) menuButton.setAttribute('aria-expanded', String(isWebMobile && open));
+        if (sidebar) {
+            sidebar.setAttribute('aria-hidden', String(isWebMobile && !open));
+            sidebar.inert = isWebMobile && !open;
+        }
+        if (isWebMobile && open) document.querySelector('.studio-drawer-close')?.focus({ preventScroll: true });
+        else if (isWebMobile && closeHadFocus) menuButton?.focus({ preventScroll: true });
     }
 
     function setupEventListeners() {
         matchMedia('(max-width: 720px)').addEventListener('change', applyTheme);
+        document.addEventListener('keydown', event => {
+            if (event.key === 'Escape' && document.body.classList.contains('web-mobile-drawer-open')) closeMobileSidebar();
+        });
         // Global search input
         const searchInput = document.getElementById('global-search-input');
         if (searchInput) {

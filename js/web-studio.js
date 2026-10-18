@@ -20,6 +20,7 @@ const WebStudio = (() => {
         people:'<circle cx="9" cy="7" r="4"/><path d="M2 21v-3a7 7 0 0 1 14 0v3ZM17 3a4 4 0 0 1 0 8m2 3a6 6 0 0 1 3 5v2"/>',
         arrow:'<path d="M20 12H4m6-6-6 6 6 6"/>',
         plus:'<path d="M12 5v14M5 12h14"/>',
+        close:'<path d="m6 6 12 12M18 6 6 18"/>',
         play:'<path d="m8 4 13 8-13 8Z"/>',
         pause:'<rect x="5" y="4" width="5" height="16" rx="1"/><rect x="14" y="4" width="5" height="16" rx="1"/>',
         reset:'<path d="M4 11a8 8 0 1 1 2 6M4 4v7h7"/>',
@@ -63,6 +64,19 @@ const WebStudio = (() => {
         const timerLabel = document.querySelector('#nav-pomodoro > span');
         if (timerLabel) timerLabel.textContent = 'اتاق تمرکز';
         document.querySelector('.menu-toggle-btn')?.setAttribute('aria-label', 'باز کردن منو');
+        const sidebar = document.getElementById('sidebar');
+        if (sidebar && !sidebar.querySelector('.studio-drawer-top')) {
+            const top = document.createElement('div'); top.className = 'studio-drawer-top';
+            top.innerHTML = `<span class="studio-drawer-avatar">${icon('user')}</span><button type="button" class="studio-drawer-close" aria-label="بستن منو" onclick="App.closeMobileSidebar()">${icon('close')}</button>`;
+            sidebar.querySelector('.sidebar-header')?.append(top);
+            const mobileWeb = matchMedia('(max-width: 720px)').matches;
+            sidebar.setAttribute('aria-hidden', String(mobileWeb)); sidebar.inert = mobileWeb;
+            matchMedia('(max-width: 720px)').addEventListener('change', event => {
+                if (!event.matches && sidebar.classList.contains('open')) window.App?.closeMobileSidebar();
+                sidebar.inert = event.matches && !sidebar.classList.contains('open');
+                sidebar.setAttribute('aria-hidden', String(event.matches && !sidebar.classList.contains('open')));
+            });
+        }
         document.querySelector('[onclick="App.toggleTheme()"]')?.setAttribute('aria-label', 'تغییر تم روشن و تاریک');
         const header = document.querySelector('.top-header');
         const mobileBrand = document.createElement('div'); mobileBrand.className = 'studio-mobile-brand';
