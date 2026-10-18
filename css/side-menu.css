@@ -1,0 +1,53 @@
+/* Side menu (mobile web, <=720px): green drawer on the right, page shrinks to the left.
+   Driven by --mp (0..1) from js/side-menu.js. Tune: --menu-shift (how far the page moves). */
+@media (max-width:720px) {
+  html:not(.capacitor-app) { --mp:0; --ms:0; --menu-shift:64%; --menu-scale:.34; --menu-radius:34px; }
+  html:not(.capacitor-app) body.web-mobile-drawer-open { overflow:hidden; }
+
+  /* Menu panel stays in place; its content slides in */
+  html:not(.capacitor-app) #sidebar { width:100vw; transform:none!important; background:linear-gradient(180deg,#41a574 0%,#177344 55%,#0b5a30 100%); transition:visibility 0s linear .75s; }
+  html:not(.capacitor-app) #sidebar.open { transition-delay:0s; }
+  html:not(.capacitor-app) #sidebar .sidebar-header { height:auto; min-height:0; padding:calc(26px + env(safe-area-inset-top)) 26px 18px 39vw; }
+  html:not(.capacitor-app) #sidebar .sidebar-header,
+  html:not(.capacitor-app) #sidebar .sidebar-nav,
+  html:not(.capacitor-app) #sidebar .sidebar-footer { transform:translate3d(calc((1 - var(--mp))*48px),0,0); opacity:calc(.2 + var(--mp)*.8); }
+
+  /* Top buttons: close on the right, profile on the left */
+  html:not(.capacitor-app) #sidebar .studio-drawer-top { direction:ltr; flex-direction:row; }
+  html:not(.capacitor-app) #sidebar :is(.studio-drawer-avatar,.studio-drawer-close) { width:54px; height:54px; border:0; background:#ffffff29; transition:transform .25s cubic-bezier(.3,1.6,.5,1),background .2s; }
+  html:not(.capacitor-app) #sidebar .studio-drawer-close:active { transform:scale(.9); background:#ffffff40; }
+  html:not(.capacitor-app) #sidebar .studio-drawer-close .studio-icon { width:22px; height:22px; transform:rotate(calc((1 - var(--mp))*180deg)); }
+
+  /* Items: closer to the right edge */
+  html:not(.capacitor-app) #sidebar .sidebar-nav { padding:4px 14px 20px 39vw; }
+  html:not(.capacitor-app) #sidebar .sidebar-nav .nav-section-title { padding:16px 12px 4px; color:#d6f0dcb0; font-size:10px; }
+  html:not(.capacitor-app) #sidebar .sidebar-nav .nav-item { min-height:52px; margin:0; padding:8px 12px; gap:14px; border-radius:14px; background:transparent; color:#fff; font-size:14.5px; font-weight:500; box-shadow:none; }
+  html:not(.capacitor-app) #sidebar .sidebar-nav .nav-item > span { white-space:nowrap; }
+  html:not(.capacitor-app) #sidebar .sidebar-nav .nav-item-badge { margin-inline-start:auto; padding:2px 6px; font-size:9px; background:#ffffff26; color:#fff; }
+  html:not(.capacitor-app) #sidebar .sidebar-nav .nav-item.active { background:#ffffff1f; border-color:transparent; box-shadow:none; }
+  html:not(.capacitor-app) #sidebar .sidebar-nav .nav-item .studio-icon { width:24px; height:24px; color:#fff; transition:transform .35s cubic-bezier(.3,1.7,.5,1); }
+  html:not(.capacitor-app) #sidebar .sidebar-nav .nav-item:hover .studio-icon { transform:scale(1.18) rotate(6deg); }
+  html:not(.capacitor-app) #sidebar .sidebar-footer { padding:12px 14px max(18px,env(safe-area-inset-bottom)) 39vw; border-color:#ffffff2b; background:transparent; }
+  html:not(.capacitor-app) #sidebar .user-xp-widget { background:#ffffff1f; border-color:#ffffff30; color:#fff; }
+  html:not(.capacitor-app) #sidebar .user-xp-widget :is(span,div) { color:#fff; }
+  html:not(.capacitor-app) #sidebar .user-level-badge { background:#ffffff2e; color:#fff; }
+  html:not(.capacitor-app) #sidebar .btn-sidebar-logout { color:#fff; border-color:#ffffff40; background:transparent; }
+
+  /* Items fly in from the right, top to bottom */
+  html:not(.capacitor-app) #sidebar :is(.sidebar-nav,.sidebar-footer) > * { opacity:0; transform:translate3d(140px,0,0); animation:none!important; transition:opacity .25s ease,transform .25s ease,background .2s; }
+  html:not(.capacitor-app) body.web-mobile-drawer-open #sidebar :is(.sidebar-nav,.sidebar-footer) > * { opacity:1; transform:none; transition:opacity .3s ease calc(var(--i,0)*38ms + 90ms),transform .45s cubic-bezier(.2,1.1,.3,1) calc(var(--i,0)*38ms + 90ms),background .2s; }
+
+  /* Page: shrinks and moves left, no tilt, rounded and clipped to the visible screen */
+  html:not(.capacitor-app).menu-moving body .main-wrapper {
+    position:relative; z-index:110; background:var(--studio-bg); box-shadow:none; transition:none; will-change:transform;
+    border-radius:0;
+    transform-origin:100% calc(var(--ms)*1px + 50dvh);
+    transform:translate3d(calc(var(--mp)*-1*var(--menu-shift)),0,0) scale(calc(1 - var(--mp)*var(--menu-scale)));
+    clip-path:inset(calc(var(--ms)*1px) 0 calc(100% - var(--ms)*1px - 100dvh) 0 round calc(var(--mp)*var(--menu-radius)));
+  }
+  /* Tap the visible strip of the page to close */
+  html:not(.capacitor-app) body.web-mobile-drawer-open #sidebar-overlay { display:block; position:fixed; inset:0 auto 0 0; width:38vw; z-index:130; background:transparent; backdrop-filter:none; }
+}
+@media (prefers-reduced-motion:reduce) {
+  html:not(.capacitor-app) #sidebar :is(.sidebar-nav,.sidebar-footer) > * { transition-duration:.01ms!important; transition-delay:0s!important; }
+}
