@@ -37,6 +37,24 @@ const WebStudio = (() => {
     let ready = false;
     let outgoing = null;
     let routeAnimations = [];
+    const mobileTabForRoute = route => {
+        if (['dashboard','stats','pomodoro','schedule','profile'].includes(route)) return route;
+        if (['chat','admin','legal','subscription'].includes(route)) return 'profile';
+        return 'stats';
+    };
+    function moveMobileNavIndicator(route, instant = false) {
+        const nav = document.querySelector('.studio-mobile-nav');
+        const button = nav?.querySelector(`[data-mobile-route="${route}"]`);
+        const indicator = nav?.querySelector('.studio-nav-indicator');
+        if (!nav || !button || !indicator) return;
+        const x = button.offsetLeft + button.offsetWidth / 2 - indicator.offsetWidth / 2;
+        if (instant) indicator.style.transition = 'none';
+        indicator.style.transform = `translate3d(${x}px,0,0)`;
+        if (instant) {
+            indicator.getBoundingClientRect();
+            indicator.style.removeProperty('transition');
+        }
+    }
     const dashboardBanners = [
         { tone:'lilac', quote:'توانا بُوَد هر که دانا بُوَد', second:'ز دانش، دل پیر، بُرنا بود', author:'فردوسی', source:'https://ganjoor.net/ferdousi/shahname/aghaz/sh1' },
         { tone:'sage', quote:'به راه بادیه رفتن به از نشستن باطل', second:'وگر مراد نیابم به قدر وسع بکوشم', author:'سعدی', source:'https://ganjoor.net/saadi/divan/ghazals/sh405' },
@@ -83,8 +101,16 @@ const WebStudio = (() => {
         mobileBrand.innerHTML = '<img src="icons/icon-64.png" width="31" height="31" alt=""><span>درسیار</span>';
         header?.insertBefore(mobileBrand, header.querySelector('.header-left'));
         const mobileNav = document.createElement('nav'); mobileNav.className = 'studio-mobile-nav'; mobileNav.setAttribute('aria-label','پیمایش اصلی');
-        mobileNav.innerHTML = [['dashboard','home','خانه'],['stats','chart','آمار'],['pomodoro','plus','تمرکز'],['schedule','calendar','برنامه'],['profile','user','پروفایل']].map(([route,glyph,label])=>`<button type="button" data-mobile-route="${route}" aria-label="${label}" onclick="App.navigate('${route}')">${icon(glyph)}<span>${label}</span></button>`).join('');
+        mobileNav.innerHTML = `<span class="studio-nav-indicator" aria-hidden="true"></span>${[['dashboard','home','خانه'],['stats','chart','آمار'],['pomodoro','plus','تمرکز'],['schedule','calendar','برنامه'],['profile','user','پروفایل']].map(([route,glyph,label])=>`<button type="button" data-mobile-route="${route}" aria-label="${label}" onclick="App.navigate('${route}')">${icon(glyph)}<span>${label}</span></button>`).join('')}`;
         document.body.append(mobileNav);
+        const initialMobileRoute = mobileTabForRoute(document.querySelector('.sidebar .nav-item.active')?.id?.replace(/^nav-/, '') || 'dashboard');
+        mobileNav.querySelectorAll('button').forEach(button => {
+            const active = button.dataset.mobileRoute === initialMobileRoute;
+            button.classList.toggle('active', active);
+            if (active) button.setAttribute('aria-current','page');
+        });
+        requestAnimationFrame(() => moveMobileNavIndicator(initialMobileRoute, true));
+        window.addEventListener('resize', () => moveMobileNavIndicator(document.querySelector('.studio-mobile-nav button.active')?.dataset.mobileRoute || initialMobileRoute, true), { passive:true });
         const crumb = document.createElement('div'); crumb.className = 'studio-breadcrumb';
         crumb.innerHTML = '<span>فضای یادگیری من</span><b aria-hidden="true">/</b><strong id="studio-page-name">امروزِ تو</strong>';
         header?.insertBefore(crumb, header.querySelector('.header-left'));
@@ -137,11 +163,13 @@ const WebStudio = (() => {
     }
 
     function enter(name, previous) {
+        const mobileTab = mobileTabForRoute(name);
         document.querySelectorAll('.studio-mobile-nav button').forEach(button=>{
-            const active=button.dataset.mobileRoute===name;
+            const active=button.dataset.mobileRoute===mobileTab;
             button.classList.toggle('active',active);
             if(active)button.setAttribute('aria-current','page');else button.removeAttribute('aria-current');
         });
+        moveMobileNavIndicator(mobileTab);
         if(name==='chat'&&window.Messenger){clearTransition();return;}
         const view = document.getElementById(`view-${name}`);
         const crumb = document.getElementById('studio-page-name'); if (crumb) crumb.textContent = viewLabels[name] || 'درسیار';
