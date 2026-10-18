@@ -71,30 +71,30 @@ html:not(.capacitor-app) #modal-pomodoro-settings .pomo-settings-modal { border-
   html:not(.capacitor-app) body { background:var(--studio-bg); }
   html:not(.capacitor-app) .main-wrapper { min-width:0;width:100%; }
   html:not(.capacitor-app) body { overflow-x:hidden; }
-  html:not(.capacitor-app) .sidebar { position:fixed;top:0;right:0;left:auto;bottom:0;z-index:100;width:min(320px,80vw);padding-top:env(safe-area-inset-top);overflow:hidden;border:0;border-radius:0;background:linear-gradient(202deg,#40a778 0%,#1b8558 52%,#07613e 100%);box-shadow:-18px 0 45px #052d1b30;transform:translate3d(102%,0,0);transition:transform 560ms cubic-bezier(.22,1,.36,1),visibility 560ms;visibility:hidden;will-change:transform; }
+  html:not(.capacitor-app) .sidebar { position:fixed;top:0;right:0;left:auto;bottom:0;z-index:100;width:100vw;padding-top:env(safe-area-inset-top);overflow:hidden;border:0;border-radius:0;background:linear-gradient(202deg,#40a778 0%,#1b8558 52%,#07613e 100%);box-shadow:none;transform:translate3d(102%,0,0);transition:transform 560ms cubic-bezier(.22,1,.36,1),visibility 560ms;visibility:hidden;will-change:transform; }
   html:not(.capacitor-app) .sidebar.open { transform:translate3d(0,0,0);visibility:visible; }
-  html:not(.capacitor-app) .sidebar-header { height:82px;min-height:82px;padding:8px max(18px,env(safe-area-inset-left)) 8px max(18px,env(safe-area-inset-right));border:0; }
+  html:not(.capacitor-app) .sidebar-header { height:82px;min-height:82px;padding:8px max(18px,env(safe-area-inset-left)) 8px max(18px,env(safe-area-inset-right));padding-left:44vw;border:0; }
   html:not(.capacitor-app) .sidebar-header .brand-logo { display:none; }
-  html:not(.capacitor-app) .studio-drawer-top { display:flex;align-items:center;justify-content:space-between;width:100%;direction:ltr; }
+  html:not(.capacitor-app) .studio-drawer-top { display:flex;align-items:center;justify-content:space-between;width:100%;direction:ltr;flex-direction:row-reverse; }
   html:not(.capacitor-app) .studio-drawer-avatar { display:grid;place-items:center;width:42px;height:42px;border:1px solid #ffffff45;border-radius:50%;background:#ffffff20;color:#fff; }
   html:not(.capacitor-app) .studio-drawer-avatar .studio-icon { width:21px;height:21px; }
   html:not(.capacitor-app) .studio-drawer-close { display:grid;place-items:center;width:44px;height:44px;border:1px solid #ffffff38;border-radius:50%;background:#ffffff18;color:white; }
   html:not(.capacitor-app) .studio-drawer-close:active { background:#ffffff32; }
   html:not(.capacitor-app) .studio-drawer-close .studio-icon { width:20px;height:20px; }
-  html:not(.capacitor-app) .sidebar-nav { flex:1;min-height:0;padding:12px 16px 20px;overflow-y:auto;overscroll-behavior:contain;scrollbar-width:none; }
+  html:not(.capacitor-app) .sidebar-nav { flex:1;min-height:0;padding:12px 16px 20px 44vw;overflow-y:auto;overscroll-behavior:contain;scrollbar-width:none; }
   html:not(.capacitor-app) .sidebar-nav::-webkit-scrollbar { display:none; }
   html:not(.capacitor-app) .sidebar-nav .nav-section-title { padding:12px 14px 5px;color:#d6f0dcaa;font-size:10px; }
   html:not(.capacitor-app) .sidebar-nav .nav-item { min-height:48px;margin:2px 0;padding:10px 14px;border:1px solid transparent;border-radius:14px;background:transparent;color:#f4fff6;font-size:13px; }
   html:not(.capacitor-app) .sidebar-nav .nav-item .studio-icon { width:20px;height:20px;color:#e2f5e7; }
   html:not(.capacitor-app) .sidebar-nav .nav-item.active { border-color:#ffffff2c;border-radius:14px;background:#ffffff22;box-shadow:inset 3px 0 #e6fff0; }
   html:not(.capacitor-app) .sidebar-nav .nav-item-badge { border-color:#ffffff35;background:#ffffff20;color:#fff; }
-  html:not(.capacitor-app) .sidebar-footer { padding:12px 16px max(18px,env(safe-area-inset-bottom));border-color:#ffffff2b;background:#004f3422; }
+  html:not(.capacitor-app) .sidebar-footer { padding:12px 16px max(18px,env(safe-area-inset-bottom));padding-left:44vw;border-color:#ffffff2b;background:#004f3422; }
   html:not(.capacitor-app) .sidebar-footer .user-xp-widget { border-color:#ffffff30;background:#ffffff13; }
   html:not(.capacitor-app) .sidebar-footer :is(.btn-sidebar-logout,.user-xp-widget,.user-xp-widget span) { color:#f3fff5; }
-  html:not(.capacitor-app) body.web-mobile-drawer-open .main-wrapper { position:relative;z-index:110;transform:translate3d(calc(0px - min(74vw,296px)),0,0) scale(.86);transform-origin:100% 50%;border-radius:24px;background:var(--studio-bg);box-shadow:18px 0 46px #072d1d28;transition:transform 560ms cubic-bezier(.22,1,.36,1),border-radius 420ms ease,box-shadow 420ms ease;will-change:transform; }
+  html:not(.capacitor-app) body.web-mobile-drawer-open .main-wrapper { position:relative;z-index:110;transform:translate3d(-58vw,calc(50dvh - 50%),0) scale(.86);transform-origin:100% 50%;border-radius:24px;background:var(--studio-bg);box-shadow:18px 0 46px #072d1d28;transition:transform 560ms cubic-bezier(.22,1,.36,1),border-radius 420ms ease,box-shadow 420ms ease;will-change:transform; }
   html:not(.capacitor-app) .main-wrapper { transform-origin:100% 50%;transition:transform 560ms cubic-bezier(.22,1,.36,1),border-radius 420ms ease,box-shadow 420ms ease; }
-  html:not(.capacitor-app) .studio-mobile-nav { transform-origin:100% 100%;transition:transform 560ms cubic-bezier(.22,1,.36,1); }
-  html:not(.capacitor-app) body.web-mobile-drawer-open .studio-mobile-nav { transform:translate3d(calc(0px - min(74vw,296px)),0,0) scale(.86);pointer-events:none; }
+  html:not(.capacitor-app) .studio-mobile-nav { transform-origin:100% 100%;transition:transform 560ms cubic-bezier(.22,1,.36,1),opacity 220ms ease,visibility 220ms ease; }
+  html:not(.capacitor-app) body.web-mobile-drawer-open .studio-mobile-nav { opacity:0;visibility:hidden;pointer-events:none; }
   html:not(.capacitor-app) body.web-mobile-drawer-open .sidebar-overlay { display:block;position:fixed;inset:0;z-index:99;background:transparent;backdrop-filter:none; }
   html:not(.capacitor-app) body.web-mobile-drawer-open .main-wrapper { pointer-events:none; }
   html:not(.capacitor-app) .sidebar.open .sidebar-nav .nav-item { animation:studio-drawer-item-in 420ms both; }
@@ -178,6 +178,6 @@ html:not(.capacitor-app) #modal-pomodoro-settings .pomo-settings-modal { border-
   html:not(.capacitor-app) .studio-hero-actions .studio-button,html:not(.capacitor-app) .studio-banner-next { padding-inline:8px;font-size:11px; }
   html:not(.capacitor-app) .studio-focus-unified .pomo-tab-btn { padding-inline:7px; }
 }
-@keyframes studio-drawer-item-in { from { opacity:.25;transform:translate3d(10px,0,0); } to { opacity:1;transform:none; } }
+@keyframes studio-drawer-item-in { from { opacity:.25;transform:translate3d(-10px,0,0); } to { opacity:1;transform:none; } }
 @media (prefers-reduced-motion:reduce) { html:not(.capacitor-app) .sidebar,html:not(.capacitor-app) .main-wrapper,html:not(.capacitor-app) .studio-mobile-nav,html:not(.capacitor-app) .sidebar.open .sidebar-nav .nav-item { animation:none!important;transition-duration:.01ms!important; } }
 @media print { html:not(.capacitor-app) .studio-mobile-nav { display:none!important; } }
