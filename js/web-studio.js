@@ -42,25 +42,6 @@ const WebStudio = (() => {
         if (['chat','admin','legal','subscription'].includes(route)) return 'profile';
         return 'stats';
     };
-    function moveMobileNavIndicator(route, instant = false) {
-        const nav = document.querySelector('.studio-mobile-nav');
-        const button = nav?.querySelector(`[data-mobile-route="${route}"]`);
-        const indicator = nav?.querySelector('.studio-nav-indicator');
-        if (!nav || !button || !indicator) return;
-        const x = button.offsetLeft + button.offsetWidth / 2 - indicator.offsetWidth / 2;
-        if (instant) indicator.style.transition = 'none';
-        indicator.style.transform = `translate3d(${x}px,0,0)`;
-        if (instant) {
-            indicator.getBoundingClientRect();
-            indicator.style.removeProperty('transition');
-        }
-    }
-    const dashboardBanners = [
-        { tone:'lilac', quote:'توانا بُوَد هر که دانا بُوَد', second:'ز دانش، دل پیر، بُرنا بود', author:'فردوسی', source:'https://ganjoor.net/ferdousi/shahname/aghaz/sh1' },
-        { tone:'sage', quote:'به راه بادیه رفتن به از نشستن باطل', second:'وگر مراد نیابم به قدر وسع بکوشم', author:'سعدی', source:'https://ganjoor.net/saadi/divan/ghazals/sh405' },
-        { tone:'peach', quote:'نابرده رنج گنج میسر نمی‌شود', second:'مزد آن گرفت جان برادر که کار کرد', author:'سعدی', source:'https://ganjoor.net/saadi/mavaez/ghasides/sh12' }
-    ];
-    let dashboardBannerIndex = Math.floor(Math.random() * dashboardBanners.length);
     const viewLabels = { dashboard:'امروزِ تو', pomodoro:'اتاق تمرکز', chat:'گفت‌وگو', schedule:'برنامه من', stats:'آمار و پیشرفت', 'ai-assistant':'دستیار هوشمند', flashcards:'فلش‌کارت', 'ai-writing':'کارگاه نوشتن', 'ai-research':'پژوهش', gamification:'لیگ و دوستان', admin:'پنل مشاوره', profile:'پروفایل', legal:'قوانین و حریم خصوصی' };
 
     function init() {
@@ -101,7 +82,7 @@ const WebStudio = (() => {
         mobileBrand.innerHTML = '<img src="icons/icon-64.png" width="31" height="31" alt=""><span>درسیار</span>';
         header?.insertBefore(mobileBrand, header.querySelector('.header-left'));
         const mobileNav = document.createElement('nav'); mobileNav.className = 'studio-mobile-nav'; mobileNav.setAttribute('aria-label','پیمایش اصلی');
-        mobileNav.innerHTML = `<span class="studio-nav-indicator" aria-hidden="true"></span>${[['dashboard','home','خانه'],['stats','chart','آمار'],['pomodoro','plus','تمرکز'],['schedule','calendar','برنامه'],['profile','user','پروفایل']].map(([route,glyph,label])=>`<button type="button" data-mobile-route="${route}" aria-label="${label}" onclick="App.navigate('${route}')">${icon(glyph)}<span>${label}</span></button>`).join('')}`;
+        mobileNav.innerHTML = [['dashboard','home','خانه'],['stats','chart','آمار'],['pomodoro','timer','تمرکز'],['schedule','calendar','برنامه'],['profile','user','پروفایل']].map(([route,glyph,label])=>`<button type="button" data-mobile-route="${route}" aria-label="${label}" onclick="App.navigate('${route}')">${icon(glyph)}<span>${label}</span></button>`).join('');
         document.body.append(mobileNav);
         const initialMobileRoute = mobileTabForRoute(document.querySelector('.sidebar .nav-item.active')?.id?.replace(/^nav-/, '') || 'dashboard');
         mobileNav.querySelectorAll('button').forEach(button => {
@@ -109,8 +90,6 @@ const WebStudio = (() => {
             button.classList.toggle('active', active);
             if (active) button.setAttribute('aria-current','page');
         });
-        requestAnimationFrame(() => moveMobileNavIndicator(initialMobileRoute, true));
-        window.addEventListener('resize', () => moveMobileNavIndicator(document.querySelector('.studio-mobile-nav button.active')?.dataset.mobileRoute || initialMobileRoute, true), { passive:true });
         const crumb = document.createElement('div'); crumb.className = 'studio-breadcrumb';
         crumb.innerHTML = '<span>فضای یادگیری من</span><b aria-hidden="true">/</b><strong id="studio-page-name">امروزِ تو</strong>';
         header?.insertBefore(crumb, header.querySelector('.header-left'));
@@ -169,7 +148,6 @@ const WebStudio = (() => {
             button.classList.toggle('active',active);
             if(active)button.setAttribute('aria-current','page');else button.removeAttribute('aria-current');
         });
-        moveMobileNavIndicator(mobileTab);
         if(name==='chat'&&window.Messenger){clearTransition();return;}
         const view = document.getElementById(`view-${name}`);
         const crumb = document.getElementById('studio-page-name'); if (crumb) crumb.textContent = viewLabels[name] || 'درسیار';
@@ -216,7 +194,8 @@ const WebStudio = (() => {
         if (!shell) { shell = document.createElement('div'); shell.className = 'studio-dashboard'; view.prepend(shell); }
         view.classList.add('studio-dashboard-ready');
         const {tasks} = todayTasks(), done = tasks.filter(task => task.status === 'completed').length;
-        const next = tasks.find(task => task.status !== 'completed'), data = studyData(), today = localDate();
+        const data = studyData(), today = localDate();
+        const goal = dailyGoal(data.get(today) || 0);
         const days = Array.from({length:7}, (_, i) => { const date = new Date(); date.setDate(date.getDate()-6+i); return {date:localDate(date),label:new Intl.DateTimeFormat('fa-IR',{weekday:'short'}).format(date),hours:data.get(localDate(date)) || 0}; });
         const week = days.reduce((sum, day) => sum + day.hours, 0), max = Math.max(1, ...days.map(day => day.hours));
         let cursor = new Date(), streak = 0;
@@ -224,12 +203,14 @@ const WebStudio = (() => {
         while (data.get(localDate(cursor)) > 0) { streak++; cursor.setDate(cursor.getDate()-1); }
         const reports = (Storage.get('manual_reports', []) || []).slice().sort((a,b) => String(b.createdAt || b.date).localeCompare(String(a.createdAt || a.date))).slice(0,3);
         const dateLabel = new Intl.DateTimeFormat('fa-IR',{weekday:'long',day:'numeric',month:'long'}).format(new Date());
-        const banner = dashboardBanners[dashboardBannerIndex];
-        const completion = tasks.length ? Math.round(done/tasks.length*100) : 0;
         shell.innerHTML = `
             <header class="studio-page-heading studio-dashboard-heading" data-reveal><div class="studio-dashboard-heading-copy"><span class="studio-dashboard-heading-kicker">داشبورد مطالعه</span><h1>${esc(user.name || user.username)}</h1><p>برنامه و پیشرفت تو در یک نگاه</p></div><div class="studio-dashboard-heading-aside"><div class="studio-dashboard-date">${icon('calendar')}<span><small>امروز</small><strong>${esc(dateLabel)}</strong></span></div><button class="studio-button secondary" type="button" onclick="WebStudio.report()">${icon('plus')}ثبت گزارش مطالعه</button></div></header>
             <div class="studio-dashboard-top">
-                <section class="studio-hero studio-hero-${banner.tone}" data-reveal><div class="studio-hero-copy"><span class="studio-eyebrow">نقل‌قولی برای امروز</span><blockquote><h2>«${esc(banner.quote)}<br>${esc(banner.second)}»</h2><cite>— <a href="${banner.source}" target="_blank" rel="noopener noreferrer" aria-label="منبع شعر ${banner.author} در گنجور">${banner.author}</a></cite></blockquote><p>${next ? `تسک بعدی: <strong>${esc(next.subject)}</strong> · ${pd(next.durationMinutes || 60)} دقیقه` : tasks.length ? 'همهٔ تسک‌های امروز انجام شده‌اند.' : 'هنوز تسکی برای امروز ثبت نشده است.'}</p><div class="studio-hero-actions"><button class="studio-button primary" type="button" onclick="WebStudio.focusNext()">${icon('play')}شروع تمرکز${icon('arrow')}</button><button class="studio-banner-next" type="button" onclick="WebStudio.nextBanner()" aria-label="نمایش بنر بعدی">${icon('arrow')}بنر بعدی</button></div></div><div class="studio-hero-art" aria-label="${pd(done)} از ${pd(tasks.length)} تسک انجام شده"><div class="studio-orbit orbit-one"></div><div class="studio-orbit orbit-two"></div><span class="studio-orbit-chip chip-one">${icon('book')}</span><span class="studio-orbit-chip chip-two">${icon('check')}</span><div class="studio-progress-orb" style="--progress:${completion}%"><div>${icon('target')}<strong>${pd(done)}<small> / ${pd(tasks.length)}</small></strong><span>قدم‌های امروز</span></div></div><span class="studio-art-caption">${pd(dashboardBannerIndex+1)} / ${pd(dashboardBanners.length)}</span></div></section>
+                <section class="studio-goal-band" data-reveal aria-label="هدف مطالعه روزانه">
+                    <header><div><span class="studio-eyebrow">قدم امروز</span><h2>هدف مطالعه</h2></div><button type="button" class="studio-goal-edit" onclick="Dashboard.openEditGoalModal()" aria-label="تغییر هدف مطالعه روزانه">${icon('target')}<span>تغییر هدف</span></button></header>
+                    <div class="studio-goal-summary"><div class="studio-goal-percent"><strong id="studio-goal-percent">${pd(goal.percent)}٪</strong><span>از هدف</span></div><div><span>مطالعه امروز</span><strong id="studio-goal-current">${studyDuration(goal.currentHours)}</strong></div><div><span>هدف روزانه</span><strong id="studio-goal-target">${goalLabel(goal.targetHours)}</strong></div></div>
+                    <div class="studio-goal-track" role="progressbar" aria-label="پیشرفت هدف مطالعه امروز" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${goal.percent}"><span id="studio-goal-fill" style="width:${goal.percent}%"></span></div>
+                </section>
                 <section class="studio-day-metrics" aria-label="خلاصه مطالعه" data-reveal>${metric('timer','مطالعه امروز',studyDuration(data.get(today)||0),'','violet')}${metric('chart','۷ روز گذشته',studyDuration(week),'','mint')}${metric('flame','روزهای پیوسته',pd(streak),'روز','coral')}</section>
             </div>
             <div class="studio-dashboard-grid">
@@ -242,7 +223,25 @@ const WebStudio = (() => {
     }
 
     function studyDuration(hours) { const seconds=Math.round(Math.max(0,Number(hours)||0)*3600); return `${pd(Math.floor(seconds/3600))} ساعت و ${pd(Math.floor(seconds%3600/60))} دقیقه`; }
-    function nextBanner() { dashboardBannerIndex=(dashboardBannerIndex+1)%dashboardBanners.length; dashboard(); }
+    function dailyGoal(currentHours) {
+        const storedHours = Number(Storage.getSettings().dailyGoalHours);
+        const targetHours = Number.isFinite(storedHours) && storedHours > 0 ? storedHours : 4;
+        return { currentHours:Math.max(0,Number(currentHours)||0), targetHours, percent:Math.min(100,Math.round((Math.max(0,Number(currentHours)||0)/targetHours)*100)) };
+    }
+    function goalLabel(hours) {
+        const minutes=Math.round(hours*60), h=Math.floor(minutes/60), m=minutes%60;
+        return `${pd(h)} ساعت${m ? ` و ${pd(m)} دقیقه` : ''}`;
+    }
+    function refreshGoal() {
+        const fill=document.getElementById('studio-goal-fill');
+        if(!fill)return;
+        const goal=dailyGoal(studyData().get(localDate())||0);
+        fill.style.width=`${goal.percent}%`;
+        fill.parentElement.setAttribute('aria-valuenow',String(goal.percent));
+        document.getElementById('studio-goal-percent').textContent=`${pd(goal.percent)}٪`;
+        document.getElementById('studio-goal-current').textContent=studyDuration(goal.currentHours);
+        document.getElementById('studio-goal-target').textContent=goalLabel(goal.targetHours);
+    }
     function metric(glyph,label,value,unit,tone) { return `<article class="studio-metric ${tone}"><span class="studio-metric-icon">${icon(glyph)}</span><div><small>${label}</small><strong>${value}<em>${unit}</em></strong></div>${icon('arrow','studio-metric-arrow')}</article>`; }
     function editTask(index) { const {day} = todayTasks(); App.navigate('schedule'); Schedule.openEditTaskModal(day,index); }
     function report() { App.navigate('stats'); requestAnimationFrame(()=>{ document.querySelector('.manual-report-card')?.scrollIntoView({behavior:reduced()?'instant':'smooth',block:'center'}); document.getElementById('report-subject')?.focus({preventScroll:true}); }); }
@@ -286,6 +285,6 @@ const WebStudio = (() => {
         const label = view.querySelector('.pomo-status-label');
         if (label) label.textContent = state==='running' ? (mode==='work'?'در حال تمرکز':'نوبت استراحت توست') : state==='paused'?'هر وقت آماده‌ای، ادامه بده':'آماده یک شروع تازه';
     }
-    return { enabled, init, icon, dashboard, nextBanner, beforeLeave, enter, chatContext, editTask, report, focusNext, preparePomodoro, timerState };
+    return { enabled, init, icon, dashboard, refreshGoal, beforeLeave, enter, chatContext, editTask, report, focusNext, preparePomodoro, timerState };
 })();
 window.WebStudio = WebStudio;

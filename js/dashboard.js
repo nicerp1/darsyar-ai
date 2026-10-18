@@ -178,6 +178,7 @@ const Dashboard = (function () {
         Storage.saveSettings(settings);
 
         renderDailyGoal();
+        if (window.WebStudio?.enabled()) window.WebStudio.refreshGoal();
         if (typeof Utils !== 'undefined') {
             Utils.closeModal('modal-edit-goal');
             Utils.showToast(`هدف روزانه با موفقیت به ${Utils.toPersianDigits(hours)} ساعت تغییر یافت!`, 'success');
