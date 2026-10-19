@@ -6,7 +6,7 @@ const Profile = (function () {
     let selectedAvatar = '👩‍🎓';
 
     function init() {
-        if (window.ProfileStudio && window.WebStudio?.enabled()) return ProfileStudio.init();
+        if (window.ProfileStudio) return ProfileStudio.init();
         loadProfileData();
         renderAvatarOptions();
     }
@@ -21,6 +21,8 @@ const Profile = (function () {
         const avatarPreview = document.getElementById('profile-avatar-preview');
         const roleBadge = document.getElementById('profile-role-badge');
         const planBadge = document.getElementById('profile-plan-badge');
+        const displayName = document.getElementById('profile-display-name');
+        const handle = document.getElementById('profile-handle');
 
         if (nameInput) nameInput.value = user.name || '';
         if (usernameInput) usernameInput.value = user.username || '';
@@ -29,6 +31,9 @@ const Profile = (function () {
 
         selectedAvatar = user.avatar || '👩‍🎓';
         if (avatarPreview) avatarPreview.innerHTML = window.ProfileStudio ? ProfileStudio.avatarHTML(selectedAvatar) : '👩‍🎓';
+
+        if (displayName) displayName.textContent = user.name || user.username || '—';
+        if (handle) handle.textContent = user.username ? `@${user.username}` : '';
 
         if (roleBadge) {
             roleBadge.textContent = user.accountType === 'admin' ? 'مدیر ارشد سیستم 👑' : user.accountType === 'advisor' ? 'مشاور تحصیلی 👨‍🏫' : 'دانش‌آموز کوشا 🎓';
@@ -45,11 +50,7 @@ const Profile = (function () {
 
         const avatars = ['👩‍🎓', '👨‍🎓', '👩‍🏫', '👨‍🏫', '🔬', '💡', '🧑‍💻', '👩‍⚕️', '🚀', '🎯', '👑', '🌟'];
 
-        container.innerHTML = avatars.map(av => `
-            <div style="font-size: 26px; padding: 8px; border-radius: var(--radius-md); background: ${selectedAvatar === av ? 'var(--primary)' : 'var(--bg-surface)'}; border: 1.5px solid ${selectedAvatar === av ? 'var(--gold)' : 'var(--border-subtle)'}; cursor: pointer; text-align: center; transition: 0.2s;" onclick="Profile.selectAvatar('${av}')">
-                ${av}
-            </div>
-        `).join('');
+        container.innerHTML = avatars.map(av => `<button type="button" class="ps-emoji" aria-pressed="${selectedAvatar === av}" aria-label="آواتار ${av}" onclick="Profile.selectAvatar('${av}')">${av}</button>`).join('');
     }
 
     function selectAvatar(avatar) {
@@ -93,6 +94,8 @@ const Profile = (function () {
         if (typeof App !== 'undefined') {
             App.renderUserHeader();
         }
+        const displayName = document.getElementById('profile-display-name');
+        if (displayName) displayName.textContent = user.name || user.username || '—';
 
         if (typeof Utils !== 'undefined') {
             Utils.showToast('اطلاعات حساب کاربری با موفقیت به‌روزرسانی شد.', 'success');
