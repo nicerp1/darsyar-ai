@@ -64,14 +64,14 @@ const Schedule = (function () {
         const root = document.getElementById('schedule-days-list'); if (!root) return;
         root.innerHTML = current().map((day, dayIndex) => {
             const total = day.tasks.reduce((sum, task) => sum + Number(task.durationMinutes || 0), 0);
-            const tasks = day.tasks.map((task, taskIndex) => { const status = statuses[task.status] || statuses.pending; return `<article class="day-task" style="--task-color:${task.color}">
+            const tasks = day.tasks.map((task, taskIndex) => { const status = statuses[task.status] || statuses.pending; return `<article class="day-task" data-status="${task.status}" data-minutes="${task.durationMinutes}" style="--task-color:${task.color}">
                 <button class="day-task-main" type="button" onclick="Schedule.openEditTaskModal(${dayIndex},${taskIndex})">
                     <span class="day-task-number">${Utils.toPersianDigits(taskIndex + 1)}</span><span class="day-task-copy"><strong>${esc(task.subject)}</strong><small>${esc(task.note || 'بدون توضیح تکمیلی')}</small></span>
                     <span class="day-task-duration"><span class="material-symbols-outlined" aria-hidden="true">schedule</span>${Utils.toPersianDigits(task.durationMinutes)} دقیقه</span>
                 </button>
                 <div class="day-task-footer"><span class="schedule-status ${status[1]}">${status[0]}</span><button class="task-focus-button" type="button" onclick="Schedule.launchPomoForTask(${dayIndex},${taskIndex})" aria-label="شروع تمرکز برای ${esc(task.subject)}"><span class="material-symbols-outlined" aria-hidden="true">play_arrow</span> تمرکز</button></div>
             </article>`; }).join('') || '<div class="day-empty">هنوز تسکی برای این روز ثبت نشده است.</div>';
-            return `<section class="schedule-day-card"><header><div><span class="schedule-day-index">${Utils.toPersianDigits(dayIndex + 1)}</span><h3>${day.day}</h3></div><span>${Utils.toPersianDigits(day.tasks.length)} تسک · ${Utils.toPersianDigits(total)} دقیقه</span></header><div class="schedule-day-tasks">${tasks}</div><button class="schedule-add-task" type="button" onclick="Schedule.openEditTaskModal(${dayIndex},-1)"><span class="material-symbols-outlined" aria-hidden="true">add</span> افزودن تسک برای ${day.day}</button></section>`;
+            return `<section class="schedule-day-card" data-day="${dayIndex}" data-total="${day.tasks.length}" data-minutes="${total}"><header><div><span class="schedule-day-index">${Utils.toPersianDigits(dayIndex + 1)}</span><h3>${day.day}</h3></div><span>${Utils.toPersianDigits(day.tasks.length)} تسک · ${Utils.toPersianDigits(total)} دقیقه</span></header><div class="schedule-day-tasks">${tasks}</div><button class="schedule-add-task" type="button" onclick="Schedule.openEditTaskModal(${dayIndex},-1)"><span class="material-symbols-outlined" aria-hidden="true">add</span> افزودن تسک برای ${day.day}</button></section>`;
         }).join('');
         window.StudyFlow?.decorate(current(),adminTarget);
     }

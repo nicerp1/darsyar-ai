@@ -22,8 +22,28 @@ const Stats = (function () {
         return streak;
     }
 
+    let range = 7;
+    const pd = v => (typeof Utils !== 'undefined' ? Utils.toPersianDigits(v) : v);
+    const cssVar = (name, fallback) => (getComputedStyle(document.documentElement).getPropertyValue(name) || '').trim() || fallback;
+
     function init() {
+        const rangeBox = document.getElementById('stats-range');
+        if (rangeBox && !rangeBox.dataset.bound) {
+            rangeBox.dataset.bound = 'true';
+            rangeBox.addEventListener('click', event => {
+                const button = event.target.closest('[data-range]');
+                if (button) setRange(Number(button.dataset.range));
+            });
+            new MutationObserver(() => { if (document.getElementById('view-stats')?.classList.contains('active')) renderCharts(); })
+                .observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+        }
         renderStatsKPIs();
+        renderCharts();
+    }
+
+    function setRange(value) {
+        range = [7, 30, 0].includes(value) ? value : 7;
+        document.querySelectorAll('#stats-range [data-range]').forEach(button => button.setAttribute('aria-pressed', String(Number(button.dataset.range) === range)));
         renderCharts();
     }
 
@@ -34,101 +54,102 @@ const Stats = (function () {
         const totalHours = history.reduce((sum, item) => sum + item.hours, 0);
         const streak = calculateStreak(history);
 
-        const elToday = document.getElementById('stats-kpi-today');
-        const elWeek = document.getElementById('stats-kpi-week');
-        const elTotal = document.getElementById('stats-kpi-total');
-        const elStreak = document.getElementById('stats-kpi-streak');
-
-        const pd = typeof Utils !== 'undefined' ? Utils.toPersianDigits : (v => v);
-
-        if (elToday) elToday.textContent = `${pd(todayHours.toFixed(1))} س`;
-        if (elWeek) elWeek.textContent = `${pd(weekHours.toFixed(1))} س`;
-        if (elTotal) elTotal.textContent = `${pd(totalHours.toFixed(0))} س`;
-        if (elStreak) elStreak.textContent = `${pd(streak)} روز`;
+        const set = (id, text) => { const el = document.getElementById(id); if (el) el.textContent = text; };
+        set('stats-kpi-today', `${pd(todayHours.toFixed(1))} س`);
+        set('stats-kpi-week', `${pd(weekHours.toFixed(1))} س`);
+        set('stats-kpi-total', `${pd(totalHours.toFixed(0))} س`);
+        set('stats-kpi-streak', `${pd(streak)} روز`);
     }
 
+    function visibleRows(history) {
+        if (!range) return history;
+        const today = new Date(), byDate = new Map(history.map(item => [item.date, item.hours]));
+        return Array.from({ length: range }, (_, index) => { const day = new Date(today); day.setDate(day.getDate() - range + 1 + index); const date = localDate(day); return { date, hours: byDate.get(date) || 0 }; });
+    }
+
+    function toggle(id, show) { document.getElementById(id)?.classList.toggle('hidden', !show); }
+
     function renderCharts() {
-        if (typeof Chart === 'undefined') return;
-
-        const history = realStudyData();
-        const labels = history.map(h => typeof Utils !== 'undefined' ? Utils.toPersianDigits(h.date.substring(5)) : h.date);
-        const hoursData = history.map(h => h.hours);
-
-        // 1. Line Chart (Weekly Trend)
-        const lineCanvas = document.getElementById('chart-stats-line');
-        if (lineCanvas) {
-            if (lineChartInstance) lineChartInstance.destroy();
-            const ctx = lineCanvas.getContext('2d');
-            lineChartInstance = new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: labels,
-                    datasets: [{
-                        label: 'ساعات مطالعه',
-                        data: hoursData,
-                        borderColor: '#05319e',
-                        backgroundColor: 'rgba(5, 49, 158, 0.15)',
-                        fill: true,
-                        tension: 0.35,
-                        borderWidth: 3,
-                        pointBackgroundColor: '#c9a03e',
-                        pointBorderColor: '#fff',
-                        pointRadius: 5
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: { legend: { display: false } },
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            ticks: { callback: v => typeof Utils !== 'undefined' ? Utils.toPersianDigits(v) : v }
-                        }
-                    }
-                }
-            });
+        const errorBox = document.getElementById('stats-error');
+        if (typeof Chart === 'undefined') {
+            toggle('stats-error', true);
+            ['stats-line-wrap', 'stats-bar-wrap'].forEach(id => document.getElementById(id)?.classList.add('hidden'));
+            return;
         }
-
-        // 2. Bar Chart (Subject Comparison)
-        const barCanvas = document.getElementById('chart-stats-bar');
-        if (barCanvas) {
-            if (barChartInstance) barChartInstance.destroy();
-            const ctx = barCanvas.getContext('2d');
-            const subjects = new Map();
-            (Storage.get('manual_reports', []) || []).filter(item => item?.subject && item.status !== 'missed').forEach(item => subjects.set(item.subject.trim(), (subjects.get(item.subject.trim()) || 0) + Number(item.minutes || 0) / 60));
-            const subjectRows = [...subjects.entries()].sort((a,b) => b[1] - a[1]).slice(0, 8);
-            barChartInstance = new Chart(ctx, {
-                type: 'bar',
-                data: {
-                    labels: subjectRows.length ? subjectRows.map(item => item[0]) : ['هنوز گزارشی ثبت نشده'],
-                    datasets: [{
-                        label: 'ساعات مطالعه این هفته',
-                        data: subjectRows.length ? subjectRows.map(item => Number(item[1].toFixed(2))) : [0],
-                        backgroundColor: [
-                            'rgba(16, 185, 129, 0.75)',
-                            'rgba(245, 158, 11, 0.75)',
-                            'rgba(14, 165, 233, 0.75)',
-                            'rgba(99, 102, 241, 0.75)',
-                            'rgba(201, 160, 62, 0.75)'
-                        ],
-                        borderRadius: 8
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: { legend: { display: false } },
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            ticks: { callback: v => typeof Utils !== 'undefined' ? Utils.toPersianDigits(v) : v }
-                        }
-                    }
-                }
-            });
+        toggle('stats-error', false);
+        try {
+            renderLine();
+            renderBars();
+        } catch (error) {
+            console.error('Stats chart failed', error);
+            toggle('stats-error', true);
         }
+    }
 
+    function chartBase() {
+        const muted = cssVar('--m-muted', '#94a3b8'), line = cssVar('--m-line', 'rgba(148,163,184,.18)');
+        Chart.defaults.font.family = "Kalameh, Vazirmatn, Tahoma, sans-serif";
+        Chart.defaults.font.size = 11;
+        Chart.defaults.color = muted;
+        return {
+            muted, line,
+            tooltip: { rtl: true, textDirection: 'rtl', displayColors: false, padding: 10, cornerRadius: 10, titleFont: { size: 12 }, bodyFont: { size: 12 }, bodyAlign: 'right', titleAlign: 'right' }
+        };
+    }
+
+    function renderLine() {
+        const canvas = document.getElementById('chart-stats-line');
+        if (!canvas) return;
+        if (lineChartInstance) { lineChartInstance.destroy(); lineChartInstance = null; }
+        const rows = visibleRows(realStudyData()), hasData = rows.some(item => item.hours > 0);
+        document.getElementById('stats-line-wrap')?.classList.remove('hidden', 'm-skel');
+        document.getElementById('stats-line-wrap')?.classList.toggle('hidden', !hasData);
+        toggle('stats-line-empty', !hasData);
+        if (!hasData) return;
+        const base = chartBase(), color = cssVar('--m-chart', '#4f8cff');
+        const labels = rows.map(item => pd(item.date.substring(5)));
+        lineChartInstance = new Chart(canvas.getContext('2d'), {
+            type: 'line',
+            data: { labels, datasets: [{ label: 'ساعات مطالعه', data: rows.map(item => item.hours), borderColor: color, backgroundColor: color + '22', fill: true, tension: 0.32, borderWidth: 2, pointRadius: rows.length > 14 ? 0 : 3, pointHoverRadius: 5, pointHitRadius: 18, pointBackgroundColor: color, pointBorderColor: 'transparent' }] },
+            options: {
+                responsive: true, maintainAspectRatio: false, animation: { duration: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 0 : 450 },
+                interaction: { mode: 'index', intersect: false },
+                layout: { padding: { top: 6, left: 2, right: 2 } },
+                plugins: { legend: { display: false }, tooltip: { ...base.tooltip, callbacks: { label: ctx => `${pd(Number(ctx.parsed.y).toFixed(1))} ساعت` } } },
+                scales: {
+                    x: { reverse: true, grid: { display: false }, border: { display: false }, ticks: { maxRotation: 0, autoSkip: true, maxTicksLimit: 5, padding: 6 } },
+                    y: { position: 'right', beginAtZero: true, border: { display: false }, grid: { color: base.line }, ticks: { maxTicksLimit: 4, padding: 6, callback: v => pd(v) } }
+                }
+            }
+        });
+    }
+
+    function renderBars() {
+        const canvas = document.getElementById('chart-stats-bar');
+        if (!canvas) return;
+        if (barChartInstance) { barChartInstance.destroy(); barChartInstance = null; }
+        const subjects = new Map();
+        (Storage.get('manual_reports', []) || []).filter(item => item?.subject && item.status !== 'missed').forEach(item => subjects.set(item.subject.trim(), (subjects.get(item.subject.trim()) || 0) + Number(item.minutes || 0) / 60));
+        const subjectRows = [...subjects.entries()].sort((a, b) => b[1] - a[1]).slice(0, 8);
+        const wrap = document.getElementById('stats-bar-wrap');
+        wrap?.classList.remove('m-skel');
+        wrap?.classList.toggle('hidden', !subjectRows.length);
+        toggle('stats-bar-empty', !subjectRows.length);
+        if (!subjectRows.length) return;
+        if (wrap) wrap.style.height = `${Math.max(130, subjectRows.length * 36 + 30)}px`;
+        const base = chartBase(), color = cssVar('--m-chart', '#4f8cff');
+        barChartInstance = new Chart(canvas.getContext('2d'), {
+            type: 'bar',
+            data: { labels: subjectRows.map(item => item[0]), datasets: [{ label: 'ساعات مطالعه', data: subjectRows.map(item => Number(item[1].toFixed(2))), backgroundColor: subjectRows.map((_, index) => color + Math.round(255 * Math.max(.4, 1 - index * .1)).toString(16).padStart(2, '0')), borderRadius: 6, borderSkipped: false, barThickness: 16 }] },
+            options: {
+                indexAxis: 'y', responsive: true, maintainAspectRatio: false, animation: { duration: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 0 : 450 },
+                plugins: { legend: { display: false }, tooltip: { ...base.tooltip, callbacks: { label: ctx => `${pd(Number(ctx.parsed.x).toFixed(1))} ساعت` } } },
+                scales: {
+                    x: { reverse: true, beginAtZero: true, border: { display: false }, grid: { color: base.line }, ticks: { maxTicksLimit: 4, callback: v => pd(v) } },
+                    y: { position: 'right', grid: { display: false }, border: { display: false }, ticks: { padding: 6, callback(value) { const label = String(this.getLabelForValue(value)); return label.length > 14 ? label.slice(0, 13) + '…' : label; } } }
+                }
+            }
+        });
     }
 
     function exportPDFReport() {
@@ -140,6 +161,7 @@ const Stats = (function () {
 
     return {
         init,
+        setRange,
         exportPDFReport
     };
 })();

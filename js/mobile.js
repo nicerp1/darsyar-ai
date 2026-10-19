@@ -124,6 +124,7 @@
     }
 
     function setupScheduleDays() {
+        return; // The shared day strip in js/mobile-redesign.js now owns day selection on every mobile surface.
         const area = document.getElementById('schedule-printable-area');
         const list = document.getElementById('schedule-days-list');
         if (!area || !list) return;
