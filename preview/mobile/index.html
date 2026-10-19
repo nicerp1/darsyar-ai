@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="robots" content="noindex, nofollow">
+    <meta name="description" content="پیش‌نمایش بدون ورودِ بازطراحی موبایل صفحات «آمار» و «برنامهٔ مطالعه» در درسیار">
+    <title>پیش‌نمایش موبایل — درسیار | آمار و برنامهٔ مطالعه</title>
+    <link rel="stylesheet" href="../../fonts/kalameh.css">
+    <link rel="icon" type="image/png" sizes="64x64" href="../../icons/icon-64.png">
+    <style>
+        :root {
+            --bg: #0d0f14; --panel: #161a22; --line: #262c3a; --ink: #eef1f6; --muted: #99a3b5;
+            --accent: #7b93ff; --accent-soft: rgba(123, 147, 255, .14); --device-w: 390px;
+            --ease: cubic-bezier(.22, 1, .36, 1);
+        }
+        * { box-sizing: border-box; }
+        html, body { margin: 0; padding: 0; }
+        body {
+            min-height: 100dvh; font-family: Kalameh, Tahoma, sans-serif; color: var(--ink);
+            background: radial-gradient(900px 520px at 85% -10%, rgba(123, 147, 255, .16), transparent 60%),
+                        radial-gradient(700px 480px at -10% 110%, rgba(64, 190, 140, .1), transparent 60%), var(--bg);
+        }
+        .layout { max-width: 1240px; margin: 0 auto; padding: 22px 20px 44px; display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 36px; align-items: start; }
+        header.top { grid-column: 1 / -1; display: flex; flex-wrap: wrap; align-items: center; gap: 14px 22px; }
+        .brand { display: flex; align-items: center; gap: 10px; }
+        .brand img { width: 36px; height: 36px; border-radius: 10px; }
+        .brand strong { font-size: 18px; display: block; line-height: 1.3; }
+        .brand small { font-size: 12px; color: var(--muted); }
+        .controls { display: flex; flex-wrap: wrap; gap: 8px; margin-inline-start: auto; align-items: center; }
+        .seg { display: inline-flex; gap: 2px; padding: 3px; border: 1px solid var(--line); border-radius: 12px; background: var(--panel); }
+        .seg button { min-height: 34px; padding: 0 13px; border: 0; border-radius: 9px; background: transparent; color: var(--muted); font: inherit; font-size: 13px; font-weight: 600; cursor: pointer; transition: background .2s, color .2s, transform .12s; }
+        .seg button:active { transform: scale(.96); }
+        .seg button[aria-pressed="true"] { background: var(--accent-soft); color: var(--ink); box-shadow: inset 0 0 0 1px var(--accent); }
+        .seg-label { font-size: 11px; color: var(--muted); margin-inline-end: -2px; }
+        .device-col { display: grid; justify-items: center; gap: 14px; }
+        .device {
+            width: var(--device-w); max-width: 100%; height: min(850px, calc(100dvh - 190px)); min-height: 540px;
+            border: 10px solid #1b1f29; border-radius: 46px; overflow: hidden; position: relative;
+            background: #fff; box-shadow: 0 30px 80px rgba(0, 0, 0, .5), 0 0 0 1px #2c3242;
+            transition: width .35s var(--ease);
+        }
+        .device::after { content: ''; position: absolute; top: 10px; inset-inline-start: 50%; transform: translateX(50%); width: 86px; height: 22px; border-radius: 12px; background: #0c0e13; pointer-events: none; }
+        .device iframe { width: 100%; height: 100%; border: 0; display: block; }
+        .frame-note { font-size: 12px; color: var(--muted); text-align: center; }
+        .frame-note b { color: var(--ink); }
+        aside.guide { position: sticky; top: 22px; max-width: 360px; }
+        aside.guide h1 { font-size: 24px; line-height: 1.5; margin: 4px 0 8px; }
+        aside.guide > p { font-size: 13.5px; line-height: 1.9; color: var(--muted); margin: 0 0 18px; }
+        .card { border: 1px solid var(--line); border-radius: 18px; background: var(--panel); padding: 16px; margin-bottom: 14px; }
+        .card h2 { font-size: 15px; margin: 0 0 10px; }
+        .card ol, .card ul { margin: 0; padding: 0 18px 0 0; font-size: 13px; line-height: 2; color: var(--muted); }
+        .card li b { color: var(--ink); font-weight: 700; }
+        .card.wide { grid-column: 1 / -1; }
+        footer { grid-column: 1 / -1; font-size: 12px; line-height: 1.9; color: var(--muted); border-top: 1px solid var(--line); padding-top: 14px; }
+        footer code { direction: ltr; display: inline-block; background: #0a0c10; border: 1px solid var(--line); border-radius: 6px; padding: 0 6px; font-size: 11px; color: #c9d4ff; }
+        @media (max-width: 1020px) {
+            .layout { grid-template-columns: 1fr; }
+            aside.guide { position: static; max-width: none; order: 3; }
+            .device { height: min(820px, calc(100dvh - 150px)); }
+        }
+        /* On real phones the preview becomes the app itself: no bezel. */
+        @media (max-width: 480px) {
+            .layout { padding: 0; gap: 0; }
+            header.top { padding: 12px 14px 10px; }
+            .brand small { display: none; }
+            .widths, .seg-label.widths { display: none; }
+            .device-col { gap: 0; }
+            .device { width: 100%; height: calc(100dvh - 118px); min-height: 0; border: 0; border-radius: 0; box-shadow: none; }
+            .device::after { display: none; }
+            .frame-note { display: none; }
+            aside.guide { padding: 16px 14px 26px; }
+            footer { margin: 0 14px 22px; }
+        }
+        @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+    </style>
+</head>
+<body>
+    <div class="layout">
+        <header class="top">
+            <div class="brand">
+                <img src="../../icons/icon-64.png" alt="">
+                <div>
+                    <strong>پیش‌نمایش بازطراحی موبایل درسیار</strong>
+                    <small>صفحه‌های «آمار» و «برنامهٔ مطالعه» — بدون نیاز به ورود</small>
+                </div>
+            </div>
+            <div class="controls" role="group" aria-label="کنترل‌های پیش‌نمایش">
+                <span class="seg-label">صفحه</span>
+                <div class="seg" id="seg-page">
+                    <button type="button" data-view="stats" aria-pressed="true">آمار</button>
+                    <button type="button" data-view="schedule" aria-pressed="false">برنامه</button>
+                </div>
+                <span class="seg-label widths">عرض گوشی</span>
+                <div class="seg widths" id="seg-width">
+                    <button type="button" data-width="320" aria-pressed="false">۳۲۰</button>
+                    <button type="button" data-width="360" aria-pressed="false">۳۶۰</button>
+                    <button type="button" data-width="375" aria-pressed="false">۳۷۵</button>
+                    <button type="button" data-width="390" aria-pressed="true">۳۹۰</button>
+                    <button type="button" data-width="430" aria-pressed="false">۴۳۰</button>
+                </div>
+                <span class="seg-label">تم</span>
+                <div class="seg" id="seg-theme">
+                    <button type="button" data-theme="light" aria-pressed="true">روشن</button>
+                    <button type="button" data-theme="dark" aria-pressed="false">تاریک</button>
+                </div>
+                <div class="seg">
+                    <button type="button" id="btn-reset" title="بازنشانی دادهٔ نمونه">بازنشانی داده</button>
+                </div>
+            </div>
+        </header>
+
+        <div class="device-col">
+            <div class="device" id="device">
+                <iframe id="app-frame" src="./app.html?tab=stats" title="پیش‌نمایش تعاملی صفحات آمار و برنامهٔ مطالعه" loading="eager"></iframe>
+            </div>
+            <p class="frame-note">عرض فعلی: <b id="frame-w">۳۹۰</b> پیکسل — داخل قاب درست مثل خود اپلیکیشن اسکرول و تعامل کنید. روی موبایل، قاب حذف می‌شود و تجربه تمام‌صفحه است.</p>
+        </div>
+
+        <aside class="guide">
+            <h1>دو صفحه، یک زبان طراحی موبایل</h1>
+            <p>این قاب، <b>همان کد واقعی محصول</b> است — همان CSS و همان رندررهای صفحهٔ آمار و برنامه — که با دادهٔ نمونه اجرا می‌شود تا بدون ساخت حساب بتوانید طراحی جدید را لمس کنید.</p>
+
+            <div class="card">
+                <h2>در آمار امتحان کنید</h2>
+                <ol>
+                    <li>روی ستون‌های نمودار بزنید؛ مقدار دقیق هر روز در بالای نمودار می‌آید.</li>
+                    <li>بازهٔ <b>۷ روز / ۳۰ روز</b> را عوض کنید.</li>
+                    <li>«زمان دقیق هر روز» را باز کنید و سهم هر درس را ببینید.</li>
+                    <li>پایین صفحه، از فرم «گزارش مطالعه» یک گزارش تازه ثبت کنید و برگردید به بالای آمار — اعداد زنده به‌روز می‌شوند.</li>
+                </ol>
+            </div>
+
+            <div class="card">
+                <h2>در برنامه امتحان کنید</h2>
+                <ol>
+                    <li>با نوار چسبان روزهای هفته جابه‌جا شوید — یا روی فهرست تسک‌ها <b>سوایپ</b> کنید.</li>
+                    <li>تیک یکی از تسک‌های امروز را بزنید و تکمیلش کنید؛ برای «شیمی» مسیر <b>تایمر تمرکز</b> هم آماده است.</li>
+                    <li>روی یک تسک بزنید؛ ویرایش به‌صورت شیت از پایین باز می‌شود — چیپ‌های انتخاب سریع مدت را تست کنید.</li>
+                    <li>با دکمهٔ «+» کنار عنوان روز، تسک تازه بسازید و نمای «جدول هفته» را هم ببینید.</li>
+                </ol>
+            </div>
+
+            <div class="card">
+                <h2>دربارهٔ امنیت این پیش‌نمایش</h2>
+                <ul>
+                    <li>بدون ورود و <b>بدون هیچ تماس با سرور یا دیتابیس واقعی</b> کار می‌کند.</li>
+                    <li>دادهٔ نمونه فقط در حافظهٔ همین مرورگر و جدا از دادهٔ کاربران است.</li>
+                    <li>احراز هویت و مسیرهای محافظت‌شدهٔ برنامه دست‌نخورده باقی مانده‌اند.</li>
+                </ul>
+            </div>
+        </aside>
+
+        <footer>
+            مسیر پیش‌نمایش: <code>/preview/mobile/</code> · نمای مستقیم هر صفحه: <code>app.html?tab=stats</code> و <code>app.html?tab=schedule</code> · تم تاریک: <code>&amp;theme=dark</code>
+        </footer>
+    </div>
+
+    <script>
+        (function () {
+            const frame = document.getElementById('app-frame');
+            const device = document.getElementById('device');
+            const frameW = document.getElementById('frame-w');
+            const fa = value => String(value).replace(/[0-9]/g, d => '۰۱۲۳۴۵۶۷۸۹'[d]);
+            const send = payload => frame.contentWindow?.postMessage({ darsyarPreview: true, ...payload }, location.origin === 'null' ? '*' : location.origin);
+
+            const bindSeg = (id, onPick) => {
+                const seg = document.getElementById(id);
+                seg?.addEventListener('click', event => {
+                    const button = event.target.closest('button');
+                    if (!button) return;
+                    seg.querySelectorAll('button').forEach(item => item.setAttribute('aria-pressed', String(item === button)));
+                    onPick(button);
+                });
+            };
+            bindSeg('seg-page', button => send({ type: 'navigate', view: button.dataset.view }));
+            bindSeg('seg-theme', button => send({ type: 'theme', theme: button.dataset.theme }));
+            bindSeg('seg-width', button => {
+                const width = Number(button.dataset.width);
+                device.style.setProperty('--device-w', width + 'px');
+                frameW.textContent = fa(width);
+            });
+            document.getElementById('btn-reset')?.addEventListener('click', () => send({ type: 'reset' }));
+        })();
+    </script>
+</body>
+</html>

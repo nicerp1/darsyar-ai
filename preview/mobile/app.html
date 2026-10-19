@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="robots" content="noindex, nofollow">
+    <title>پیش‌نمایش نمایشی درسیار — آمار و برنامهٔ مطالعه (موبایل)</title>
+    <script>
+        // Theme comes from the preview frame (?theme=dark) to avoid a flash.
+        (function () {
+            var theme = new URLSearchParams(location.search).get('theme');
+            document.documentElement.setAttribute('data-theme', theme === 'dark' ? 'dark' : 'light');
+        })();
+    </script>
+
+    <!-- Same stylesheets, same order as the production app -->
+    <link rel="stylesheet" href="../../fonts/kalameh.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0&display=swap">
+    <link rel="stylesheet" href="../../css/style.css">
+    <link rel="stylesheet" href="../../css/web-studio.css">
+    <link rel="stylesheet" href="../../css/study-workspace.css">
+    <link rel="stylesheet" href="../../css/community.css">
+    <link rel="stylesheet" href="../../css/study-flow.css">
+    <link rel="stylesheet" href="../../css/mobile-web.css">
+    <link rel="stylesheet" href="../../css/side-menu.css">
+    <link rel="stylesheet" href="../../css/mobile-redesign.css">
+    <style>
+        /* Preview-only note strip (not part of the product UI). */
+        .pv-note { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; padding: 8px 12px; border: 1px dashed #b9852b; border-radius: 12px; background: color-mix(in srgb, #b9852b 10%, transparent); font-size: 11.5px; line-height: 1.7; color: inherit; }
+        .pv-note span { flex: 1; }
+        .pv-note button { flex: none; min-height: 32px; padding: 0 10px; border: 1px solid currentColor; border-radius: 8px; background: none; color: inherit; font: inherit; font-size: 11px; cursor: pointer; }
+    </style>
+    <link rel="icon" type="image/png" sizes="64x64" href="../../icons/icon-64.png">
+</head>
+<body>
+
+    <!-- App Main Layout (authenticated shell, mirrored from index.html) -->
+    <div id="app-main-layout" class="app-layout" style="display: flex;">
+
+        <div id="sidebar-overlay" class="sidebar-overlay" onclick="App.closeMobileSidebar()"></div>
+
+        <aside id="sidebar" class="sidebar">
+            <div class="sidebar-header">
+                <div class="brand-logo" onclick="App.navigate('dashboard')" style="cursor: pointer;">
+                    <div class="brand-icon">
+                        <img src="../../icons/icon-192.png" alt="نشان درسیار" width="42" height="42">
+                    </div>
+                    <div class="brand-text">
+                        <div class="brand-name">درسیار <span class="brand-badge">PRO</span></div>
+                        <div class="brand-tagline">دستیار هوشمند دانش‌آموز</div>
+                    </div>
+                </div>
+            </div>
+
+            <nav class="sidebar-nav">
+                <div class="nav-section-title">فضای یادگیری</div>
+                <div class="nav-item active" id="nav-dashboard" onclick="App.navigate('dashboard')">
+                    <span class="material-symbols-outlined">dashboard</span>
+                    <span>داشبورد اصلی</span>
+                </div>
+                <div class="nav-item" id="nav-pomodoro" onclick="App.navigate('pomodoro')">
+                    <span class="material-symbols-outlined">timer</span>
+                    <span>پومودورو و تمرکز</span>
+                    <span class="nav-item-badge badge-gold">تمرکز</span>
+                </div>
+                <div class="nav-item" id="nav-flashcards" onclick="App.navigate('flashcards')">
+                    <span class="material-symbols-outlined">style</span>
+                    <span>فلش‌کارت و لایتنر</span>
+                    <span class="nav-item-badge">۵ جعبه</span>
+                </div>
+
+                <div class="nav-section-title">ابزارهای هوش مصنوعی</div>
+                <div class="nav-item" id="nav-ai-assistant" onclick="App.navigate('ai-assistant')">
+                    <span class="material-symbols-outlined">smart_toy</span>
+                    <span>دستیار درسیار (چت‌بات)</span>
+                </div>
+
+                <div class="nav-section-title">برنامه‌ریزی و ارزیابی</div>
+                <div class="nav-item" id="nav-schedule" onclick="App.navigate('schedule')">
+                    <span class="material-symbols-outlined">calendar_month</span>
+                    <span>برنامه مطالعاتی هفتگی</span>
+                </div>
+                <div class="nav-item" id="nav-exams" onclick="App.navigate('exams')">
+                    <span class="material-symbols-outlined">assignment</span>
+                    <span>آزمون‌ها و کارنامه</span>
+                </div>
+                <div class="nav-item" id="nav-stats" onclick="App.navigate('stats')">
+                    <span class="material-symbols-outlined">analytics</span>
+                    <span>آمار و گزارش‌ها</span>
+                </div>
+                <button type="button" class="nav-item web-only" id="nav-chat" onclick="App.navigate('chat')">
+                    <span class="material-symbols-outlined" aria-hidden="true">forum</span>
+                    <span>گفت‌وگو و یادداشت‌ها</span>
+                </button>
+
+                <div class="nav-section-title">رقابت اجتماعی</div>
+                <div class="nav-item" id="nav-gamification" onclick="App.navigate('gamification')">
+                    <span class="material-symbols-outlined">military_tech</span>
+                    <span>لیگ و دوستان</span>
+                </div>
+                <div class="nav-section-title">حساب کاربری</div>
+                <div class="nav-item" id="nav-profile" onclick="App.navigate('profile')">
+                    <span class="material-symbols-outlined">account_circle</span>
+                    <span>پروفایل کاربری</span>
+                </div>
+            </nav>
+
+            <div class="sidebar-footer">
+                <button class="btn-sidebar-logout" onclick="Auth.logout()">
+                    <span class="material-symbols-outlined">logout</span>
+                    <span>خروج از حساب</span>
+                </button>
+            </div>
+        </aside>
+
+        <div class="main-wrapper">
+
+            <header class="top-header">
+                <div class="header-right">
+                    <button class="menu-toggle-btn" onclick="App.toggleMobileSidebar()">
+                        <span class="material-symbols-outlined">menu</span>
+                    </button>
+                    <div class="header-search">
+                        <span class="material-symbols-outlined">search</span>
+                        <input type="text" id="global-search-input" placeholder="جستجوی سریع درس، ابزار یا فرمول...">
+                    </div>
+                </div>
+
+                <div class="header-left">
+                    <div class="header-streak-badge" title="زنجیره روزهای متوالی مطالعه">
+                        <span class="material-symbols-outlined" style="font-size: 18px;">local_fire_department</span>
+                        <span id="header-streak-count">۱۱ روز</span>
+                    </div>
+
+                    <button class="icon-btn" onclick="App.toggleTheme()" title="تغییر حالت روز و شب">
+                        <span class="material-symbols-outlined" id="theme-toggle-icon">dark_mode</span>
+                    </button>
+
+                    <button class="icon-btn" onclick="Communications.open('chat')" title="گفت‌وگو با مشاور" aria-label="باز کردن گفت‌وگو با مشاور">
+                        <span class="material-symbols-outlined" aria-hidden="true">forum</span>
+                        <span id="header-chat-dot" class="notification-dot hidden"></span>
+                    </button>
+
+                    <div class="user-profile-menu" onclick="App.navigate('profile')">
+                        <div class="avatar-badge" id="header-user-avatar">👩‍🎓</div>
+                        <span class="user-meta-name" id="header-user-name">دانش‌آموز نمایشی</span>
+                    </div>
+                </div>
+            </header>
+
+            <main class="content-body">
+
+                <div class="pv-note" role="note">
+                    <span><strong>محیط پیش‌نمایش:</strong> داده‌ها نمونه‌اند، بدون ورود و بدون اتصال به سرور؛ تغییراتی که این‌جا می‌دهی فقط روی همین دستگاه می‌ماند.</span>
+                    <button type="button" onclick="try{localStorage.removeItem('darsyar-mobile-preview-v1')}catch(_){}location.reload()">بازنشانی دادهٔ نمونه</button>
+                </div>
+
+                <!-- STUDY PLAN VIEW (verbatim from index.html) -->
+                <section id="view-schedule" class="view-section">
+                    <div class="section-heading-bar">
+                        <div>
+                            <h2 class="section-heading-title">
+                                <span class="material-symbols-outlined" style="color: var(--gold);">calendar_month</span>
+                                برنامه مطالعاتی هفتگی هوشمند
+                            </h2>
+                            <p style="font-size: 12px; color: var(--text-muted);">با مشاور یا مستقل؛ تسک‌های هر روز را با مدت پیشنهادی و وضعیت انجام مدیریت کنید</p>
+                        </div>
+                        <button class="btn-gold schedule-print-button" onclick="Schedule.printSchedule()" aria-label="چاپ برنامه هفتگی">
+                            <span class="material-symbols-outlined" aria-hidden="true">print</span>
+                            <span>چاپ برنامه</span>
+                        </button>
+                    </div>
+
+                    <div id="schedule-admin-tools" class="schedule-admin-tools hidden">
+                        <button id="schedule-admin-toggle" class="schedule-admin-toggle" type="button" aria-expanded="false" aria-controls="schedule-admin-drawer" onclick="Schedule.toggleAdminDrawer()">
+                            <span class="material-symbols-outlined" aria-hidden="true">manage_accounts</span>
+                            <span><strong>برنامه‌ریزی برای دانش‌آموز</strong><small id="schedule-admin-current">برای انتخاب دانش‌آموز، پنل را باز کنید</small></span>
+                            <span class="material-symbols-outlined schedule-admin-chevron" aria-hidden="true">expand_more</span>
+                        </button>
+                        <div id="schedule-admin-drawer" class="schedule-admin-drawer" hidden>
+                            <div class="form-group">
+                                <label class="form-label" for="schedule-admin-student">دانش‌آموز</label>
+                                <select id="schedule-admin-student" class="form-control" onchange="Schedule.selectAdminStudent(this.value)">
+                                    <option value="">برنامه خودم</option>
+                                </select>
+                            </div>
+                            <p>دانش‌آموز را انتخاب کنید و تسک‌های هر روز را همراه با مدت پیشنهادی ثبت کنید؛ تغییرات مستقیم در دیتابیس ذخیره می‌شود.</p>
+                        </div>
+                    </div>
+
+                    <div id="schedule-context-banner" class="schedule-context-banner hidden" role="status" aria-live="polite"></div>
+
+                    <div id="schedule-printable-area" class="schedule-days-list"><div id="schedule-days-list"></div></div>
+
+                    <div class="content-card manual-report-card">
+                        <div class="manual-report-heading"><span class="manual-report-heading-icon material-symbols-outlined" aria-hidden="true">fact_check</span><div><h3>گزارش مطالعه</h3><p>مطالعه واقعی را ثبت کن تا آمار تو دقیق ساخته شود.</p></div><output id="report-duration-preview"><strong>۰</strong><small>دقیقه</small></output></div>
+                        <form id="manual-report-form" class="manual-report-form" onsubmit="event.preventDefault(); Schedule.saveManualReport();">
+                            <div class="form-group"><label class="form-label" for="report-date">تاریخ</label><input id="report-date" class="form-control" type="date" required></div>
+                            <div class="form-group"><label class="form-label" for="report-subject">درس یا فعالیت</label><input id="report-subject" class="form-control" maxlength="100" required placeholder="مثلاً زیست‌شناسی"></div>
+                            <div class="form-group"><label class="form-label" for="report-start">از ساعت</label><input id="report-start" class="form-control" type="time" onchange="Schedule.updateReportDuration()" required></div>
+                            <div class="form-group"><label class="form-label" for="report-end">تا ساعت</label><input id="report-end" class="form-control" type="time" onchange="Schedule.updateReportDuration()" required></div>
+                            <div class="form-group"><label class="form-label" for="report-status">وضعیت انجام</label><select id="report-status" class="form-control"><option value="completed">کامل انجام شد</option><option value="partial">بخشی انجام شد</option><option value="missed">انجام نشد</option></select></div>
+                            <div class="form-group manual-report-notes"><label class="form-label" for="report-notes">توضیحات</label><textarea id="report-notes" class="form-control" maxlength="500" rows="2" placeholder="مبحث، تعداد تست یا نکته‌ای که باید پیگیری شود"></textarea></div>
+                            <button id="manual-report-submit" class="btn-gold" type="submit"><span class="material-symbols-outlined" aria-hidden="true">add_task</span> ثبت گزارش در دیتابیس</button>
+                        </form>
+                        <div id="manual-report-list" class="manual-report-list" aria-live="polite"></div>
+                    </div>
+                </section>
+
+                <!-- STATISTICS VIEW (StudyWorkspace renders the web markup) -->
+                <section id="view-stats" class="view-section m-page" data-m-page="stats"></section>
+
+            </main>
+        </div>
+    </div>
+
+    <!-- Task editor modal (verbatim from index.html) -->
+    <div id="modal-edit-schedule-slot" class="modal-overlay">
+        <div class="modal-box">
+            <div class="modal-header">
+                <div class="modal-title"><span class="material-symbols-outlined">edit_calendar</span> ویرایش تسک روزانه</div>
+                <button class="modal-close-btn" onclick="Utils.closeModal('modal-edit-schedule-slot')">✕</button>
+            </div>
+            <div class="modal-body">
+                <div style="font-weight: 700; color: var(--gold-light); margin-bottom: 14px;" id="edit-slot-day-name">شنبه · تسک جدید</div>
+                <div class="form-group">
+                    <label class="form-label" for="input-slot-subject">عنوان درس یا فعالیت</label>
+                    <input type="text" id="input-slot-subject" class="form-control">
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="input-slot-note">مبحث یا توضیحات تکمیلی</label>
+                    <input type="text" id="input-slot-note" class="form-control">
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="input-task-duration">مدت زمان تقریبی پیشنهادی (دقیقه)</label>
+                    <input type="number" id="input-task-duration" class="form-control" min="5" max="600" step="5" value="60" inputmode="numeric">
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="input-slot-color">رنگ نشانگر</label>
+                    <input type="color" id="input-slot-color" class="form-control" style="height: 40px; padding: 2px;">
+                </div>
+                <div id="slot-status-group" class="form-group">
+                    <label class="form-label" for="input-slot-status">وضعیت انجام</label>
+                    <select id="input-slot-status" class="form-control"><option value="pending">در انتظار انجام</option><option value="completed">کامل انجام شد</option><option value="partial">بخشی انجام شد</option><option value="missed">انجام نشد</option></select>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button id="delete-schedule-task" class="admin-danger-button" onclick="Schedule.deleteCurrentTask()"><span class="material-symbols-outlined" aria-hidden="true">delete</span> حذف تسک</button>
+                <button class="btn-primary" onclick="Utils.closeModal('modal-edit-schedule-slot')">انصراف</button>
+                <button class="btn-gold" onclick="Schedule.saveTaskSubmit()">ذخیره تسک</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Production modules (real renderers) + the isolated demo runtime -->
+    <script src="../../js/utils.js"></script>
+    <script src="./demo.js"></script>
+    <script src="../../js/web-studio.js"></script>
+    <script src="../../js/study-workspace.js"></script>
+    <script src="../../js/study-flow.js"></script>
+    <script src="../../js/stats.js"></script>
+    <script src="../../js/schedule.js"></script>
+    <script src="../../js/mobile-redesign.js"></script>
+    <script src="../../js/side-menu.js"></script>
+    <script>
+        // Preview boot: same entry points the real App uses.
+        WebStudio.init();
+        window.__previewSetTheme(document.documentElement.getAttribute('data-theme'));
+        App.navigate(new URLSearchParams(location.search).get('tab') === 'schedule' ? 'schedule' : 'stats');
+    </script>
+</body>
+</html>
