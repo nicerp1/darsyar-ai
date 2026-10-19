@@ -37,6 +37,8 @@
     <link rel="stylesheet" href="css/study-flow.css">
     <link rel="stylesheet" href="css/mobile-web.css">
     <link rel="stylesheet" href="css/side-menu.css">
+    <link rel="stylesheet" href="css/mobile-redesign.css">
+    <link rel="stylesheet" href="css/profile-v2.css">
     <link rel="manifest" href="manifest.json">
     <link rel="icon" type="image/png" sizes="64x64" href="icons/icon-64.png">
     <link rel="apple-touch-icon" sizes="192x192" href="icons/icon-192.png">
@@ -763,68 +765,67 @@
                 </section>
 
                 <!-- 9. STATS VIEW -->
-                <section id="view-stats" class="view-section">
+                <section id="view-stats" class="view-section m-page" data-m-page="stats">
 
-                    <div class="section-heading-bar">
+                    <div class="section-heading-bar m-page-head">
                         <div>
                             <h2 class="section-heading-title">
-                                <span class="material-symbols-outlined" style="color: var(--gold);">analytics</span>
-                                گزارش آماری عملکرد
+                                <span class="material-symbols-outlined" aria-hidden="true">analytics</span>
+                                آمار و گزارش‌ها
                             </h2>
-                            <p style="font-size: 12px; color: var(--text-muted);">تحلیل روند مطالعه و نمودارهای تحصیلی</p>
+                            <p>روند مطالعه و عملکرد تحصیلی تو</p>
                         </div>
-                        <button class="btn-gold" onclick="Stats.exportPDFReport()">
-                            <span class="material-symbols-outlined">download</span>
-                            دانلود گزارش جامع عملکرد
+                        <button class="m-head-action" type="button" onclick="Stats.exportPDFReport()" aria-label="دانلود گزارش جامع عملکرد">
+                            <span class="material-symbols-outlined" aria-hidden="true">download</span>
+                            <span>گزارش</span>
                         </button>
                     </div>
 
                     <!-- Printable Stats Report Area -->
                     <div id="stats-report-printable-area">
 
-                        <!-- 4 Stat Metric Cards -->
-                        <div class="kpi-grid">
-                            <div class="kpi-card">
-                                <div>
-                                    <div class="kpi-info-label">مطالعه امروز</div>
-                                    <div class="kpi-value" id="stats-kpi-today">۰ س</div>
-                                </div>
-                                <div class="kpi-icon-wrapper kpi-icon-blue"><span class="material-symbols-outlined">today</span></div>
+                        <!-- Key metrics -->
+                        <div class="m-stat-grid">
+                            <div class="m-stat m-stat-lead">
+                                <span class="m-stat-icon" aria-hidden="true"><span class="material-symbols-outlined">today</span></span>
+                                <div><div class="m-stat-label">مطالعه امروز</div><div class="m-stat-value" id="stats-kpi-today">۰ س</div></div>
                             </div>
-                            <div class="kpi-card">
-                                <div>
-                                    <div class="kpi-info-label">مجموع این هفته</div>
-                                    <div class="kpi-value" id="stats-kpi-week">۰ س</div>
-                                </div>
-                                <div class="kpi-icon-wrapper kpi-icon-gold"><span class="material-symbols-outlined">date_range</span></div>
+                            <div class="m-stat">
+                                <span class="m-stat-icon" aria-hidden="true"><span class="material-symbols-outlined">date_range</span></span>
+                                <div><div class="m-stat-label">مجموع این هفته</div><div class="m-stat-value" id="stats-kpi-week">۰ س</div></div>
                             </div>
-                            <div class="kpi-card">
-                                <div>
-                                    <div class="kpi-info-label">مجموع کل دوران</div>
-                                    <div class="kpi-value" id="stats-kpi-total">۰ س</div>
-                                </div>
-                                <div class="kpi-icon-wrapper kpi-icon-green"><span class="material-symbols-outlined">all_inclusive</span></div>
+                            <div class="m-stat">
+                                <span class="m-stat-icon" aria-hidden="true"><span class="material-symbols-outlined">all_inclusive</span></span>
+                                <div><div class="m-stat-label">مجموع کل دوران</div><div class="m-stat-value" id="stats-kpi-total">۰ س</div></div>
                             </div>
-                            <div class="kpi-card">
-                                <div>
-                                    <div class="kpi-info-label">استریک مداومت</div>
-                                    <div class="kpi-value" id="stats-kpi-streak">۰ روز</div>
-                                </div>
-                                <div class="kpi-icon-wrapper kpi-icon-gold"><span class="material-symbols-outlined">local_fire_department</span></div>
+                            <div class="m-stat">
+                                <span class="m-stat-icon m-stat-icon-warm" aria-hidden="true"><span class="material-symbols-outlined">local_fire_department</span></span>
+                                <div><div class="m-stat-label">استریک مداومت</div><div class="m-stat-value" id="stats-kpi-streak">۰ روز</div></div>
                             </div>
                         </div>
 
-                        <!-- 3 Charts Grid -->
-                        <div class="dashboard-split-grid" style="margin-top: 24px;">
-                            <div class="content-card">
-                                <div class="content-card-title" style="margin-bottom: 14px;">📈 روند مطالعه روزانه (ساعت)</div>
-                                <div style="height: 230px;"><canvas id="chart-stats-line"></canvas></div>
-                            </div>
-                            <div class="content-card">
-                                <div class="content-card-title" style="margin-bottom: 14px;">📊 تفکیک دروس مطالعه‌شده</div>
-                                <div style="height: 230px;"><canvas id="chart-stats-bar"></canvas></div>
-                            </div>
-                        </div>
+                        <!-- Trend -->
+                        <section class="m-panel" aria-labelledby="stats-line-title">
+                            <header>
+                                <h3 id="stats-line-title">روند مطالعه روزانه (ساعت)</h3>
+                                <div class="m-seg" id="stats-range" role="group" aria-label="بازه نمودار">
+                                    <button type="button" data-range="7" aria-pressed="true">۷ روز</button>
+                                    <button type="button" data-range="30" aria-pressed="false">۳۰ روز</button>
+                                    <button type="button" data-range="0" aria-pressed="false">همه</button>
+                                </div>
+                            </header>
+                            <div class="m-chart m-skel" id="stats-line-wrap"><canvas id="chart-stats-line" role="img" aria-label="نمودار ساعات مطالعه روزانه"></canvas></div>
+                            <div class="m-empty hidden" id="stats-line-empty"><span class="material-symbols-outlined" aria-hidden="true">show_chart</span><strong>هنوز زمانی ثبت نشده است.</strong><p>با تایمر تمرکز یا گزارش دستی، نمودار شکل می‌گیرد.</p></div>
+                        </section>
+
+                        <!-- Subjects -->
+                        <section class="m-panel" aria-labelledby="stats-bar-title">
+                            <header><h3 id="stats-bar-title">تفکیک دروس مطالعه‌شده</h3></header>
+                            <div class="m-chart m-skel" id="stats-bar-wrap"><canvas id="chart-stats-bar" role="img" aria-label="نمودار ساعات مطالعه هر درس"></canvas></div>
+                            <div class="m-empty hidden" id="stats-bar-empty"><span class="material-symbols-outlined" aria-hidden="true">bar_chart</span><strong>هنوز گزارشی ثبت نشده است.</strong><p>درس و مدت مطالعه را در گزارش مطالعه ثبت کن.</p></div>
+                        </section>
+
+                        <div class="m-error hidden" id="stats-error" role="alert"><span class="material-symbols-outlined" aria-hidden="true">cloud_off</span><div><strong>نمودارها بارگذاری نشدند.</strong><p>اتصال اینترنت را بررسی کن و دوباره تلاش کن.</p></div><button type="button" onclick="Stats.init()">تلاش دوباره</button></div>
 
                     </div>
 
@@ -995,79 +996,7 @@
                 </section>
 
                 <!-- 13. USER PROFILE VIEW -->
-                <section id="view-profile" class="view-section">
-                    <div class="section-heading-bar">
-                        <div>
-                            <h2 class="section-heading-title">
-                                <span class="material-symbols-outlined" style="color: var(--gold);">account_circle</span>
-                                پروفایل و تنظیمات کاربری
-                            </h2>
-                            <p style="font-size: 12px; color: var(--text-muted);">ویرایش مشخصات، انتخاب آواتار و تغییر کلمه عبور</p>
-                        </div>
-                    </div>
-
-                    <div class="generator-layout-grid">
-
-                        <!-- Profile Card -->
-                        <div class="content-card" style="text-align: center;">
-                            <div style="width: 84px; height: 84px; border-radius: 50%; background: linear-gradient(135deg, var(--primary) 0%, var(--gold) 100%); margin: 0 auto 14px; display: flex; align-items: center; justify-content: center; font-size: 44px; box-shadow: var(--shadow-gold);" id="profile-avatar-preview">
-                                👩‍🎓
-                            </div>
-                            <div style="font-size: 13px; color: var(--text-muted); margin-bottom: 6px;">انتخاب آواتار:</div>
-                            <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 20px;" id="profile-avatar-picker"></div>
-
-                            <div style="background: var(--bg-surface); padding: 12px; border-radius: var(--radius-md); border: 1px solid var(--border-subtle); text-align: right;">
-                                <div style="font-size: 12px; margin-bottom: 4px;" id="profile-role-badge">دانش‌آموز کوشا 🎓</div>
-                                <div style="font-size: 12px; color: var(--gold-light);" data-feature="subscription" id="profile-plan-badge">پلن: رایگان</div>
-                            </div>
-                        </div>
-
-                        <!-- Edit Form -->
-                        <div class="content-card">
-                            <div class="form-group">
-                                <label class="form-label">نام و نام خانوادگی</label>
-                                <input type="text" id="profile-name" class="form-control">
-                            </div>
-
-                            <div class="form-group">
-                                <label class="form-label">نام کاربری (غیرقابل تغییر)</label>
-                                <input type="text" id="profile-username" class="form-control" disabled>
-                            </div>
-
-                            <div class="form-group">
-                                <label class="form-label">رشته و مقطع تحصیلی</label>
-                                <select id="profile-grade" class="form-control">
-                                    <option value="دوازدهم تجربی">دوازدهم تجربی</option>
-                                    <option value="دوازدهم ریاضی">دوازدهم ریاضی</option>
-                                    <option value="دوازدهم انسانی">دوازدهم انسانی</option>
-                                    <option value="دانشجوی کارشناسی">دانشجوی کارشناسی</option>
-                                    <option value="پایه‌های دهم و یازدهم">پایه‌های دهم و یازدهم</option>
-                                    <option value="مدیر سامانه / دانشگاهی">مدیر سامانه / دانشگاهی</option>
-                                </select>
-                            </div>
-
-                            <div class="form-group">
-                                <label class="form-label">آدرس ایمیل</label>
-                                <input type="email" id="profile-email" class="form-control">
-                            </div>
-
-                            <div class="form-group">
-                                <label class="form-label">رمز عبور فعلی (فقط برای تغییر رمز)</label>
-                                <input type="password" id="profile-current-password" class="form-control" autocomplete="current-password">
-                            </div>
-                            <div class="form-group">
-                                <label class="form-label">رمز عبور جدید؛ حداقل ۸ نویسه</label>
-                                <input type="password" id="profile-new-password" class="form-control" autocomplete="new-password" placeholder="اگر نمی‌خواهید تغییر کند، خالی بگذارید">
-                            </div>
-
-                            <button class="btn-gold" style="width: 100%; margin-top: 10px;" onclick="Profile.saveProfileSubmit()">
-                                <span class="material-symbols-outlined">save</span>
-                                ذخیره تغییرات پروفایل
-                            </button>
-                        </div>
-
-                    </div>
-                </section>
+                <section id="view-profile" class="view-section m-page" data-m-page="profile"></section>
 
             </main>
 
@@ -1406,6 +1335,7 @@
     <script src="js/study-workspace.js"></script>
     <script src="js/mobile.js"></script>
     <script src="js/side-menu.js"></script>
+    <script src="js/mobile-redesign.js"></script>
 
 </body>
 </html>
