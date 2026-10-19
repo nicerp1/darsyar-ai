@@ -1,9 +1,10 @@
 /**
- * Mobile redesign runtime — the behavior layer for css/mobile-redesign.css.
+ * Mobile redesign v2 runtime — the behavior layer for css/mobile-redesign.css.
  *
- * The stylesheet declares the whole phone layout for the Statistics and
- * Study Plan pages and expects a small set of runtime hooks (classes and
- * nodes). This file provides exactly those hooks:
+ * The stylesheet declares the whole phone layout (v2 "Focus Indigo"
+ * identity) for the Statistics and Study Plan pages and expects a small
+ * set of runtime hooks (classes and nodes). This file provides exactly
+ * those hooks:
  *
  *  - activates the redesign (`html.m-redesign`) and mirrors the in-app
  *    "reduce motion" setting onto `html[data-motion="off"]`
@@ -68,7 +69,19 @@
     });
 
     /* ------------------------------------------------- page entrances */
+    /* The v2 palette (css/mobile-redesign.css) is scoped to `body.m2-on`,
+       so the new identity paints only the Statistics / Study Plan pages —
+       the profile keeps the compatibility tokens defined on <html>. */
+    function syncBodyView() {
+        if (!document.body) return;
+        const statsOn = document.getElementById('view-stats')?.classList.contains('active');
+        const scheduleOn = document.getElementById('view-schedule')?.classList.contains('active');
+        document.body.classList.toggle('m2-on', Boolean(statsOn || scheduleOn));
+        document.body.classList.toggle('m2-stats', Boolean(statsOn));
+        document.body.classList.toggle('m2-schedule', Boolean(scheduleOn));
+    }
     const enterObserver = new MutationObserver(records => records.forEach(record => {
+        syncBodyView();
         const view = record.target;
         if (!view.classList.contains('active') || view.classList.contains('m-enter')) return;
         syncMotion();
@@ -231,7 +244,7 @@
                 const classes = [dayIndex === today ? 'is-today' : '', !item.total ? 'is-empty' : ''].join(' ').trim();
                 const label = `${DAY_NAMES[dayIndex]} ${dayFullFmt.format(dates[dayIndex])}`
                     + (item.total ? `، ${pd(item.done)} از ${pd(item.total)} تسک انجام شده` : '، بدون تسک');
-                return `<button type="button" data-m-day="${dayIndex}"${classes ? ` class="${classes}"` : ''} aria-pressed="false" aria-label="${label}"><small>${weekdayNarrowFmt.format(dates[dayIndex])}</small><strong>${dayNumberFmt.format(dates[dayIndex])}</strong><span class="m-chip-meter" aria-hidden="true"><b style="width:${percent}%"></b></span></button>`;
+                return `<button type="button" data-m-day="${dayIndex}"${classes ? ` class="${classes}"` : ''} style="--pct:${percent}%" aria-pressed="false" aria-label="${label}"><small>${weekdayNarrowFmt.format(dates[dayIndex])}</small><span class="m-day-ring" aria-hidden="true"><strong>${dayNumberFmt.format(dates[dayIndex])}</strong></span></button>`;
             }).join('');
             if (hadFocus) strip.querySelector(`[data-m-day="${selectedDay}"]`)?.focus({ preventScroll: true });
         }
@@ -445,6 +458,7 @@
     /* ---------------------------------------------------------------- init */
     syncMotion();
     syncViewport();
+    syncBodyView();
     setupTaskSheet();
     setupReportCard();
     sheetifyCompletionDialog();
