@@ -1,0 +1,79 @@
+/* ==========================================================================
+   Site header (web: phone + desktop). The Android app keeps its own header.
+   Principles applied: one clear title (where am I) · grouped actions · one control size/shape ·
+   44px touch targets on phones · visible focus · elevation only when content scrolls under it.
+   Loads last, so it is the single source of truth for header layout.
+   ========================================================================== */
+html:not(.capacitor-app) body .top-header {
+    --hdr-btn: 42px;
+    position: sticky; top: 0; z-index: 60; display: flex; align-items: center; gap: 20px; direction: rtl;
+    height: 76px; min-height: 76px; padding: 0 32px 0 28px; box-sizing: border-box;
+    background: color-mix(in srgb, var(--studio-bg) 84%, transparent);
+    -webkit-backdrop-filter: blur(18px) saturate(1.35); backdrop-filter: blur(18px) saturate(1.35);
+    border: 0; box-shadow: 0 1px 0 var(--studio-line); transition: box-shadow .3s ease, background .3s ease;
+}
+html:not(.capacitor-app) body .top-header.is-scrolled { box-shadow: 0 1px 0 var(--studio-line), 0 12px 32px rgba(12, 8, 34, .12); }
+html:not(.capacitor-app) body .top-header .header-right { flex: 0 0 auto; gap: 0; min-width: 0; }
+
+/* title block: parent label above, page name below (desktop) */
+html:not(.capacitor-app) body .top-header .studio-breadcrumb { display: grid; flex: 1 1 auto; min-width: 0; margin: 0; gap: 1px; align-content: center; }
+html:not(.capacitor-app) body .top-header .studio-breadcrumb b { display: none; }
+html:not(.capacitor-app) body .top-header .studio-breadcrumb > span { font-size: 12px; font-weight: 500; color: var(--studio-muted); line-height: 1.4; }
+html:not(.capacitor-app) body .top-header .studio-breadcrumb strong { font-size: 22px; font-weight: 800; letter-spacing: -.3px; line-height: 1.3; color: var(--studio-ink); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+html:not(.capacitor-app) body .top-header .studio-breadcrumb .hdr-sub { display: none; }
+html:not(.capacitor-app) body .top-header .studio-mobile-brand { display: none; }
+
+/* actions: one capsule, one control size */
+html:not(.capacitor-app) body .top-header .header-left {
+    flex: 0 0 auto; display: flex; align-items: center; gap: 4px; margin: 0; padding: 5px;
+    border-radius: 20px; background: var(--studio-surface); border: 1px solid var(--studio-line);
+}
+html:not(.capacitor-app) body .top-header .header-left .icon-btn,
+html:not(.capacitor-app) body .top-header #community-bell {
+    position: relative; display: grid; place-items: center; width: var(--hdr-btn); min-width: var(--hdr-btn); height: var(--hdr-btn); min-height: var(--hdr-btn);
+    padding: 0; border: 0; border-radius: 14px; background: transparent; color: var(--studio-ink); box-shadow: none; transform: none;
+    transition: background .2s ease, color .2s ease, transform .2s cubic-bezier(.3, 1.5, .5, 1);
+}
+html:not(.capacitor-app) body .top-header .header-left .icon-btn .material-symbols-outlined { font-size: 22px; }
+html:not(.capacitor-app) body .top-header .header-left .icon-btn:hover,
+html:not(.capacitor-app) body .top-header #community-bell:hover { background: color-mix(in srgb, var(--studio-accent) 13%, transparent); color: var(--studio-accent); transform: none; border: 0; }
+html:not(.capacitor-app) body .top-header .header-left .icon-btn:active { transform: scale(.92); }
+html:not(.capacitor-app) body .top-header .user-profile-menu {
+    position: relative; display: flex; align-items: center; gap: 10px; height: var(--hdr-btn); min-width: 0; width: auto; padding: 0 6px 0 14px; margin-inline-start: 6px;
+    border: 0; border-radius: 14px; background: transparent; color: var(--studio-ink); box-shadow: none; cursor: pointer; transition: background .2s ease;
+}
+html:not(.capacitor-app) body .top-header .user-profile-menu::before { content: ''; position: absolute; inset-block: 9px; inset-inline-start: -5px; width: 1px; background: var(--studio-line); }
+html:not(.capacitor-app) body .top-header .user-profile-menu:hover { background: color-mix(in srgb, var(--studio-accent) 11%, transparent); }
+html:not(.capacitor-app) body .top-header .user-profile-menu .avatar-badge { width: 34px; height: 34px; flex: none; border-radius: 50%; }
+html:not(.capacitor-app) body .top-header .user-meta-name { max-width: 150px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 14px; font-weight: 700; color: var(--studio-ink); }
+html:not(.capacitor-app) body .top-header :is(button, .user-profile-menu):focus-visible { outline: 2px solid var(--studio-accent); outline-offset: 2px; }
+
+/* skip link (keyboard / screen reader) */
+.hdr-skip { position: fixed; top: -60px; inset-inline-start: 16px; z-index: 200; padding: 10px 16px; border-radius: 12px; background: var(--studio-accent, #6d4bc3); color: var(--studio-on-accent, #fff); font-weight: 700; text-decoration: none; transition: top .2s ease; }
+.hdr-skip:focus { top: 12px; }
+
+/* ---------- Phone ---------- */
+@media (max-width: 720px) {
+    html:not(.capacitor-app) body .top-header { --hdr-btn: 40px; height: 64px; min-height: 64px; gap: 10px; padding: 8px 12px; background: color-mix(in srgb, var(--studio-surface) 88%, transparent); }
+    html:not(.capacitor-app) body .top-header .menu-toggle-btn { width: 46px; height: 46px; min-width: 46px; border: 0; border-radius: 16px; background: var(--studio-raised); color: var(--studio-ink); transition: transform .2s cubic-bezier(.3, 1.5, .5, 1), background .2s; }
+    html:not(.capacitor-app) body .top-header .menu-toggle-btn:active { transform: scale(.92); }
+    html:not(.capacitor-app) body .top-header .menu-toggle-btn .material-symbols-outlined { font-size: 24px; }
+    html:not(.capacitor-app) body .top-header .studio-breadcrumb { display: grid; gap: 0; }
+    html:not(.capacitor-app) body .top-header .studio-breadcrumb > span { display: none; }
+    html:not(.capacitor-app) body .top-header .studio-breadcrumb strong { font-size: 18px; letter-spacing: -.2px; }
+    html:not(.capacitor-app) body .top-header .studio-breadcrumb .hdr-sub { display: block; font-size: 11.5px; line-height: 1.4; color: var(--studio-muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    html:not(.capacitor-app) body .top-header .header-left { gap: 2px; padding: 3px; border-radius: 18px; }
+    html:not(.capacitor-app) body .top-header .header-left .icon-btn, html:not(.capacitor-app) body .top-header #community-bell { border-radius: 14px; }
+    html:not(.capacitor-app) body .top-header .user-profile-menu { width: var(--hdr-btn); padding: 0; justify-content: center; margin-inline-start: 2px; }
+    html:not(.capacitor-app) body .top-header .user-profile-menu::before { inset-inline-start: -3px; }
+    html:not(.capacitor-app) body .top-header .user-profile-menu .avatar-badge { width: 32px; height: 32px; }
+    html:not(.capacitor-app) body .top-header .user-meta-name { display: none; }
+}
+@media (max-width: 360px) { html:not(.capacitor-app) body .top-header .studio-breadcrumb .hdr-sub { display: none; } }
+@media (prefers-reduced-motion: reduce) { html:not(.capacitor-app) body .top-header, html:not(.capacitor-app) body .top-header * { transition: none !important; } }
+@media print { .top-header, .hdr-skip { display: none !important; } }
+
+/* Desktop: the sidebar brand block and the header share one baseline (same height, borders line up) */
+@media (min-width: 721px) {
+    html:not(.capacitor-app) body #sidebar .sidebar-header { box-sizing: border-box; height: 76px; min-height: 76px; padding-block: 0; display: flex; align-items: center; }
+}

@@ -74,6 +74,7 @@ const Schedule = (function () {
             return `<section class="schedule-day-card" data-day="${dayIndex}" data-total="${day.tasks.length}" data-minutes="${total}"><header><div><span class="schedule-day-index">${Utils.toPersianDigits(dayIndex + 1)}</span><h3>${day.day}</h3></div><span>${Utils.toPersianDigits(day.tasks.length)} تسک · ${Utils.toPersianDigits(total)} دقیقه</span></header><div class="schedule-day-tasks">${tasks}</div><button class="schedule-add-task" type="button" onclick="Schedule.openEditTaskModal(${dayIndex},-1)"><span class="material-symbols-outlined" aria-hidden="true">add</span> افزودن تسک برای ${day.day}</button></section>`;
         }).join('');
         window.StudyFlow?.decorate(current(),adminTarget);
+        document.dispatchEvent(new CustomEvent('schedule:rendered'));
     }
     function openEditTaskModal(dayIndex, taskIndex) {
         editDay = dayIndex; editTask = taskIndex; const task = current()[dayIndex]?.tasks?.[taskIndex] || {};
@@ -131,6 +132,7 @@ const Schedule = (function () {
     async function removeManualReport(id) { if (!confirm('این گزارش حذف شود؟')) return; try { await Storage.saveConfirmed('manual_reports', (Storage.get('manual_reports',[])||[]).filter(item => item.id !== id)); renderReports(); } catch(error) { Utils.showToast(error.message,'error'); } }
     function openForStudent(username) { requestedTarget = username; App.navigate('schedule'); toggleAdminDrawer(true); }
     function printSchedule() { Utils?.printElement('schedule-printable-area', adminTarget ? `برنامه ${adminTarget.name || adminTarget.username}` : 'برنامه مطالعاتی هفتگی درسیار'); }
-    return { init, toggleAdminDrawer, selectAdminStudent, openEditTaskModal, saveTaskSubmit, deleteCurrentTask, launchPomoForTask, updateReportDuration, saveManualReport, removeManualReport, openForStudent, printSchedule };
+    const getState = () => ({ days: current(), manager: Boolean(adminTarget), target: adminTarget });
+    return { getState, init, toggleAdminDrawer, selectAdminStudent, openEditTaskModal, saveTaskSubmit, deleteCurrentTask, launchPomoForTask, updateReportDuration, saveManualReport, removeManualReport, openForStudent, printSchedule };
 })();
 window.Schedule = Schedule;
