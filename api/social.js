@@ -2,6 +2,7 @@ const { db, getSession, getAccountType } = require('./_supabase');
 
 const normalize = value => String(value || '').trim().toLowerCase();
 const unique = values => [...new Set((Array.isArray(values) ? values : []).map(normalize).filter(Boolean))];
+const usernameFilter = values => `username=in.(${values.map(value => encodeURIComponent(value)).join(',')})`;
 const getData = async (username, key, fallback) => (await db(`app_data?username=eq.${encodeURIComponent(username)}&key=eq.${encodeURIComponent(key)}&select=value`))?.[0]?.value ?? fallback;
 const putData = (username, key, value) => db('app_data?on_conflict=username,key', { method: 'POST', prefer: 'resolution=merge-duplicates,return=minimal', body: JSON.stringify({ username, key, value, updated_at: new Date().toISOString() }) });
 const present = (profile, social = {}) => ({ username: profile.username, name: String(social.displayName || profile.name || profile.username).slice(0, 40), avatar: profile.avatar || '👩‍🎓', grade: social.showGrade === false ? '' : (profile.grade || ''), bio: String(social.bio || '').slice(0, 120), xp: Math.max(0, Number(profile.xp) || 0), level: Math.max(1, Number(profile.level) || 1) });
@@ -9,15 +10,24 @@ const period = () => new Date().toISOString().slice(0, 7);
 
 async function visibleStudents() {
     const rows = (await db('app_data?key=eq.social_profile&select=username,value')).filter(row => row.value?.leagueVisible === true);
-    const output = [];
-    for (const row of rows) {
-        const profile = (await db(`profiles?username=eq.${encodeURIComponent(row.username)}&select=username,name,avatar,grade,xp,level`))?.[0];
-        if (profile && await getAccountType(profile.username) === 'student') {
-            const points = await getData(profile.username, 'league_points', {});
-            output.push({ ...present(profile, row.value), seasonPoints: points.period === period() ? Math.max(0, Number(points.points) || 0) : 0 });
-        }
-    }
-    return output;
+    const names = unique(rows.map(row => row.username)).filter(name => /^[a-z0-9_.-]{3,32}$/.test(name) && name !== 'kiankaki');
+    if (!names.length) return [];
+    const filter = usernameFilter(names);
+    const [profiles, accounts, points] = await Promise.all([
+        db(`profiles?${filter}&select=username,name,avatar,grade,xp,level`),
+        db(`app_data?key=eq.account_type&${filter}&select=username,value`),
+        db(`app_data?key=eq.league_points&${filter}&select=username,value`)
+    ]);
+    const profileByName = new Map(profiles.map(profile => [profile.username, profile]));
+    const accountByName = new Map(accounts.map(row => [row.username, row.value]));
+    const pointsByName = new Map(points.map(row => [row.username, row.value]));
+    const settingsByName = new Map(rows.map(row => [row.username, row.value]));
+    return names.flatMap(name => {
+        const profile = profileByName.get(name);
+        if (!profile || accountByName.get(name) === 'advisor') return [];
+        const score = pointsByName.get(name) || {};
+        return [{ ...present(profile, settingsByName.get(name)), seasonPoints: score.period === period() ? Math.max(0, Number(score.points) || 0) : 0 }];
+    });
 }
 
 module.exports = async (req, res) => {
@@ -30,9 +40,15 @@ module.exports = async (req, res) => {
             const friends = unique(await getData(actor.username, 'friends', []));
             const requests = unique(await getData(actor.username, 'friend_requests', []));
             const people = {};
-            for (const username of unique([...friends, ...requests])) {
-                const profile = (await db(`profiles?username=eq.${encodeURIComponent(username)}&select=username,name,avatar,grade,xp,level`))?.[0];
-                if (profile) people[username] = present(profile, await getData(username, 'social_profile', {}));
+            const names = unique([...friends, ...requests]).filter(name => /^[a-z0-9_.-]{3,32}$/.test(name));
+            if (names.length) {
+                const filter = usernameFilter(names);
+                const [profiles, settings] = await Promise.all([
+                    db(`profiles?${filter}&select=username,name,avatar,grade,xp,level`),
+                    db(`app_data?key=eq.social_profile&${filter}&select=username,value`)
+                ]);
+                const socialByName = new Map(settings.map(row => [row.username, row.value]));
+                profiles.forEach(profile => { people[profile.username] = present(profile, socialByName.get(profile.username) || {}); });
             }
             const leaderboard = (await visibleStudents()).sort((a, b) => b.seasonPoints - a.seasonPoints || a.username.localeCompare(b.username)).slice(0, 50).map((item, index) => ({ ...item, rank: index + 1, isFriend: friends.includes(item.username), isMe: item.username === actor.username }));
             return res.status(200).json({ profile: present(actor, social), settings: { leagueVisible: social.leagueVisible === true, showGrade: social.showGrade !== false, bio: String(social.bio || '') }, friends: friends.map(username => people[username]).filter(Boolean), requests: requests.map(username => people[username]).filter(Boolean), leaderboard, season: { title: 'لیگ ماهانه مطالعه', prize: 'یک ماه اشتراک ویژه برای ۳ نفر اول', verificationRequired: true } });

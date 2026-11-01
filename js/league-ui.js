@@ -8,6 +8,7 @@
     const pd = v => (window.Utils?.toPersianDigits ? Utils.toPersianDigits(v) : String(v ?? ''));
     const esc = v => String(v ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
     const ico = n => `<span class="material-symbols-outlined" aria-hidden="true">${n}</span>`;
+    const avatar = value => window.ProfileStudio?.avatarHTML ? ProfileStudio.avatarHTML(value) : ico('person');
     const LEVELS = ['تازه‌کار', 'پوینده', 'پرتلاش', 'نخبه', 'استاد'], T = [0, 200, 600, 1200, 2500, 5000];
     const lvl = n => LEVELS[Math.max(1, Math.min(5, Number(n) || 1)) - 1];
     let root, tab = 'league', sig = '', armed = null;
@@ -66,21 +67,29 @@
 
     function board(model) {
         const box = $('#lgx-board');
-        if (!model) { box.innerHTML = '<div class="lgx-skel"><i></i><i></i><i></i><i></i></div>'; return; }
+        if (!model) {
+            const error = window.Gamification?.getError?.();
+            box.innerHTML = error ? `<div class="lgx-empty">${ico('wifi_off')}<p>${esc(error)}</p><button type="button" class="lgx-retry" data-act="retry">تلاش دوباره</button></div>` : '<div class="lgx-skel"><i></i><i></i><i></i><i></i></div>';
+            return;
+        }
         const list = model.leaderboard || [];
         if (!list.length) { box.innerHTML = `<div class="lgx-empty">${ico('groups')}<p>هنوز کسی با رضایت خودش وارد لیگ نشده است.</p></div>`; return; }
         const top = list.slice(0, 3), rest = list.slice(3), best = Math.max(1, ...list.map(i => i.seasonPoints || 0));
-        const pod = (it, pos) => it ? `<article class="lgx-pod p${pos}${it.isMe ? ' is-me' : ''}" style="--d:${pos === 1 ? 0 : pos === 2 ? 1 : 2}">${pos === 1 ? `<span class="lgx-crown">${ico('workspace_premium')}</span>` : ''}<span class="lgx-av">${esc(it.avatar)}</span><strong>${esc(it.name)}${it.isMe ? ' (تو)' : ''}</strong><small>${pd(it.seasonPoints || 0)} امتیاز</small><div class="lgx-step"><b>${pd(pos)}</b></div></article>` : '';
+        const pod = (it, pos) => it ? `<article class="lgx-pod p${pos}${it.isMe ? ' is-me' : ''}" style="--d:${pos === 1 ? 0 : pos === 2 ? 1 : 2}">${pos === 1 ? `<span class="lgx-crown">${ico('workspace_premium')}</span>` : ''}<span class="lgx-av" data-profile="${esc(it.username)}">${avatar(it.avatar)}</span><strong>${esc(it.name)}${it.isMe ? ' (تو)' : ''}</strong><small>${pd(it.seasonPoints || 0)} امتیاز</small><div class="lgx-step"><b>${pd(pos)}</b></div></article>` : '';
         const podium = top.length >= 3 ? `<div class="lgx-podium">${pod(top[1], 2)}${pod(top[0], 1)}${pod(top[2], 3)}</div>` : '';
-        const rows = (top.length >= 3 ? rest : list).map((it, i) => `<article class="lgx-row${it.isMe ? ' is-me' : ''}" style="--i:${i}"><b class="lgx-rank">${pd(it.rank)}</b><span class="lgx-av">${esc(it.avatar)}</span><div class="lgx-who"><strong>${esc(it.name)}${it.isMe ? '<em>تو</em>' : ''}${it.isFriend ? '<em class="f">دوست</em>' : ''}</strong><small>${lvl(it.level)}</small><i class="lgx-meter"><u style="width:${Math.round((it.seasonPoints || 0) / best * 100)}%"></u></i></div><span class="lgx-pts"><b>${pd(it.seasonPoints || 0)}</b><small>امتیاز</small></span></article>`).join('');
+        const rows = (top.length >= 3 ? rest : list).map((it, i) => `<article class="lgx-row${it.isMe ? ' is-me' : ''}" style="--i:${i}"><b class="lgx-rank">${pd(it.rank)}</b><span class="lgx-av" data-profile="${esc(it.username)}">${avatar(it.avatar)}</span><div class="lgx-who"><strong>${esc(it.name)}${it.isMe ? '<em>تو</em>' : ''}${it.isFriend ? '<em class="f">دوست</em>' : ''}</strong><small>${lvl(it.level)}</small><i class="lgx-meter"><u style="width:${Math.round((it.seasonPoints || 0) / best * 100)}%"></u></i></div><span class="lgx-pts"><b>${pd(it.seasonPoints || 0)}</b><small>امتیاز</small></span></article>`).join('');
         box.innerHTML = podium + `<div class="lgx-rows">${rows}</div>`;
+        box.querySelectorAll('[data-profile]').forEach(node => {
+            const person = list.find(item => item.username === node.dataset.profile);
+            if (person) window.Community?.bind?.(node, person);
+        });
     }
 
     const person = (p, actions) => `<article class="lgx-person"><span class="lgx-av2">${window.ProfileStudio?.avatarHTML ? ProfileStudio.avatarHTML(p.avatar) : ''}</span><div><strong>${esc(p.name)}</strong><small>@${esc(p.username)}${p.grade ? ` · ${esc(p.grade)}` : ''}</small><em>${pd(p.xp)} امتیاز · ${lvl(p.level)}</em></div>${actions}</article>`;
 
     function social(model) {
         const req = $('#lgx-requests'), fr = $('#lgx-friends');
-        if (!model) { req.innerHTML = ''; fr.innerHTML = '<div class="lgx-skel"><i></i><i></i></div>'; return; }
+        if (!model) { req.innerHTML = ''; fr.innerHTML = window.Gamification?.getError?.() ? `<div class="lgx-empty">${ico('wifi_off')}<p>دوستان بارگذاری نشدند.</p><button type="button" class="lgx-retry" data-act="retry">تلاش دوباره</button></div>` : '<div class="lgx-skel"><i></i><i></i></div>'; return; }
         const n = model.requests.length; $('#lgx-rq').hidden = !n; $('#lgx-rq').textContent = pd(n);
         req.innerHTML = n ? `<div class="lgx-reqs"><h4>${ico('mail')}درخواست‌های دوستی</h4>${model.requests.map(p => person(p, `<div class="lgx-acts"><button type="button" class="ok" data-fa="accept" data-u="${esc(p.username)}">پذیرش</button><button type="button" data-fa="reject" data-u="${esc(p.username)}">رد</button></div>`)).join('')}</div>` : '';
         fr.innerHTML = model.friends.length ? model.friends.map(p => person(p, `<button type="button" class="lgx-rm" data-rm="${esc(p.username)}" aria-label="حذف ${esc(p.name)} از دوستان">${ico('person_remove')}</button>`)).join('') : `<div class="lgx-empty">${ico('diversity_3')}<p>هنوز دوستی اضافه نکرده‌ای. نام کاربری یک هم‌کلاسی را بنویس!</p></div>`;
@@ -91,7 +100,17 @@
         if (!mount()) return;
         const user = window.Storage?.getCurrentUser?.(), model = window.Gamification?.getModel?.(), student = user?.accountType === 'student';
         const grid = $('#lgx-grid');
-        if (!student) { $('#lgx-hero').innerHTML = ''; $('.lgx-tabs').hidden = true; grid.innerHTML = `<div class="lgx-empty wide">${ico('school')}<p>لیگ و دوستان برای حساب دانش‌آموز فعال است.</p></div>`; return; }
+        const unavailable = $('#lgx-unavailable');
+        if (!student) {
+            $('#lgx-hero').innerHTML = '';
+            $('.lgx-tabs').hidden = true;
+            grid.hidden = true;
+            if (!unavailable) root.insertAdjacentHTML('beforeend', `<div class="lgx-empty wide" id="lgx-unavailable">${ico('school')}<p>لیگ و دوستان برای حساب دانش‌آموز فعال است.</p></div>`);
+            return;
+        }
+        grid.hidden = false;
+        $('.lgx-tabs').hidden = false;
+        unavailable?.remove();
         const me = model?.leaderboard?.find(i => i.isMe);
         hero(user, model, me?.rank, me);
         const prize = document.querySelector('#view-gamification .league-prize-card');
@@ -113,6 +132,7 @@
         const b = e.target.closest('[data-tab],[data-fa],[data-rm],[data-act]'); if (!b || !root.contains(b)) return;
         const G = window.Gamification;
         if (b.dataset.tab) return setTab(b.dataset.tab);
+        if (b.dataset.act === 'retry') return G?.init();
         if (b.dataset.fa) return G?.friendAction(b.dataset.fa, b.dataset.u);
         if (b.dataset.rm) {                                // two-step remove: first tap arms the button
             if (armed === b) { armed = null; return G?.friendAction('remove', b.dataset.rm); }

@@ -1,11 +1,11 @@
-/* Side menu (mobile web, <=720px): green drawer on the right, page shrinks to the left.
+/* Side menu (mobile web, <=720px): purple drawer on the right, page shrinks to the left.
    Driven by --mp (0..1) from js/side-menu.js. Tune: --menu-shift (how far the page moves). */
 @media (max-width:720px) {
   html:not(.capacitor-app) { --mp:0; --ms:0; --menu-shift:64%; --menu-scale:.34; --menu-radius:34px; }
   html:not(.capacitor-app) body.web-mobile-drawer-open { overflow:hidden; }
 
   /* Menu panel stays in place; its content slides in */
-  html:not(.capacitor-app) #sidebar { width:100vw; transform:none!important; background:linear-gradient(180deg,#41a574 0%,#177344 55%,#0b5a30 100%); transition:visibility 0s linear .75s; }
+  html:not(.capacitor-app) #sidebar { width:100vw; transform:none!important; background:linear-gradient(165deg,#6d4bc3 0%,#49338e 48%,#261d4f 100%); transition:visibility 0s linear .75s; }
   html:not(.capacitor-app) #sidebar.open { transition-delay:0s; }
   html:not(.capacitor-app) #sidebar .sidebar-header { height:auto; min-height:0; padding:calc(26px + env(safe-area-inset-top)) 26px 18px 39vw; }
   html:not(.capacitor-app) #sidebar .sidebar-header,
@@ -20,7 +20,7 @@
 
   /* Items: closer to the right edge */
   html:not(.capacitor-app) #sidebar .sidebar-nav { padding:4px 14px 20px 39vw; }
-  html:not(.capacitor-app) #sidebar .sidebar-nav .nav-section-title { padding:16px 12px 4px; color:#d6f0dcb0; font-size:10px; }
+  html:not(.capacitor-app) #sidebar .sidebar-nav .nav-section-title { padding:16px 12px 4px; color:#e4d9ffb8; font-size:10px; }
   html:not(.capacitor-app) #sidebar .sidebar-nav .nav-item { min-height:52px; margin:0; padding:8px 12px; gap:14px; border-radius:14px; background:transparent; color:#fff; font-size:14.5px; font-weight:500; box-shadow:none; }
   html:not(.capacitor-app) #sidebar .sidebar-nav .nav-item > span { white-space:nowrap; }
   html:not(.capacitor-app) #sidebar .sidebar-nav .nav-item-badge { margin-inline-start:auto; padding:2px 6px; font-size:9px; background:#ffffff26; color:#fff; }

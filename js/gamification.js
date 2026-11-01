@@ -1,6 +1,6 @@
 /** Real, opt-in student league and friendships. */
 const Gamification = (function () {
-    let model = null;
+    let model = null, loadError = null;
     const esc = value => String(value ?? '').replace(/[&<>'"]/g, char => ({ '&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;' }[char]));
     const pd = value => typeof Utils !== 'undefined' ? Utils.toPersianDigits(value) : value;
     async function request(options = {}) {
@@ -40,11 +40,12 @@ const Gamification = (function () {
         document.dispatchEvent(new CustomEvent('league:rendered'));
     }
     async function init() {
+        model = null; loadError = null;
         renderLevelProgress();
         const user = Storage.getCurrentUser(), shell = document.getElementById('game-social-shell');
         if (user?.accountType !== 'student') { if (shell) shell.innerHTML = '<div class="social-empty"><span class="material-symbols-outlined">school</span><p>لیگ و دوستان برای حساب دانش‌آموز فعال است.</p></div>'; return; }
         if (shell) shell.classList.add('is-loading');
-        try { model = await request(); render(); document.querySelectorAll('#friend-requests .social-avatar').forEach((node,i)=>Community.bind(node,model.requests[i])); } catch (error) { Utils.showToast(error.message, 'error'); }
+        try { model = await request(); render(); document.querySelectorAll('#friend-requests .social-avatar').forEach((node,i)=>Community.bind(node,model.requests[i])); } catch (error) { loadError = error.message || 'لیگ بارگذاری نشد. اتصال اینترنت را بررسی کن.'; document.dispatchEvent(new CustomEvent('league:rendered')); Utils.showToast(loadError, 'error'); }
         finally { if (shell) shell.classList.remove('is-loading'); }
     }
     async function saveSettings() {
@@ -61,6 +62,6 @@ const Gamification = (function () {
         try { await request({ method:'POST', body:JSON.stringify({ action, username }) }); await init(); Utils.showToast(action === 'accept' ? 'دوست جدید اضافه شد.' : 'فهرست دوستان به‌روزرسانی شد.', 'success'); }
         catch (error) { Utils.showToast(error.message, 'error'); }
     }
-    return { getModel: () => model, init, renderLevelProgress, saveSettings, sendRequest, friendAction };
+    return { getModel: () => model, getError: () => loadError, init, renderLevelProgress, saveSettings, sendRequest, friendAction };
 })();
 window.Gamification = Gamification;
