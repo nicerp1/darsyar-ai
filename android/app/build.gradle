@@ -7,8 +7,8 @@ android {
         applicationId "ir.darsyar.app"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 10
-        versionName "1.0.9"
+        versionCode (System.getenv("DARSYAR_VERSION_CODE")?.toInteger() ?: 11)
+        versionName (System.getenv("DARSYAR_VERSION_NAME") ?: "1.0.10")
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         aaptOptions {
              // Files and dirs to omit from the packaged assets dir, modified to accommodate modern web apps.

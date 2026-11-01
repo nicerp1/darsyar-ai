@@ -79,7 +79,7 @@ const WebStudio = (() => {
         document.querySelector('[onclick="App.toggleTheme()"]')?.setAttribute('aria-label', 'تغییر تم روشن و تاریک');
         const header = document.querySelector('.top-header');
         const mobileBrand = document.createElement('div'); mobileBrand.className = 'studio-mobile-brand';
-        mobileBrand.innerHTML = '<img src="icons/icon-64.png" width="31" height="31" alt=""><span>درسیار</span>';
+        mobileBrand.innerHTML = '<img src="icons/icon-64.png?v=2" width="31" height="31" alt=""><span>درسیار</span>';
         header?.insertBefore(mobileBrand, header.querySelector('.header-left'));
         const mobileNav = document.createElement('nav'); mobileNav.className = 'studio-mobile-nav'; mobileNav.setAttribute('aria-label','پیمایش اصلی');
         mobileNav.innerHTML = [['dashboard','home','خانه'],['stats','chart','آمار'],['pomodoro','timer','تمرکز'],['schedule','calendar','برنامه'],['profile','user','پروفایل']].map(([route,glyph,label])=>`<button type="button" data-mobile-route="${route}" aria-label="${label}" onclick="App.navigate('${route}')">${icon(glyph)}<span>${label}</span></button>`).join('');

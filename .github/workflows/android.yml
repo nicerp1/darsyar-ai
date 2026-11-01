@@ -23,7 +23,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   build-release-apk:
@@ -47,6 +47,13 @@ jobs:
         run: npm ci
       - name: Sync Capacitor
         run: npm run android:sync
+      - name: Set monotonic Android version
+        run: |
+          code=$((GITHUB_RUN_NUMBER - 38))
+          patch=$((GITHUB_RUN_NUMBER - 39))
+          test "$code" -ge 11
+          echo "DARSYAR_VERSION_CODE=$code" >> "$GITHUB_ENV"
+          echo "DARSYAR_VERSION_NAME=1.0.$patch" >> "$GITHUB_ENV"
       - name: Restore release signing key
         env:
           DARSYAR_KEYSTORE_BASE64: ${{ secrets.DARSYAR_KEYSTORE_BASE64 }}
@@ -68,7 +75,18 @@ jobs:
       - name: Upload signed APK
         uses: actions/upload-artifact@v4
         with:
-          name: darsyar-1.0.9-myket-release
+          name: darsyar-android-${{ github.run_number }}
           path: android/app/build/outputs/apk/release/app-release.apk
           if-no-files-found: error
           retention-days: 30
+      - name: Publish public APK release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          cp android/app/build/outputs/apk/release/app-release.apk darsyar.apk
+          tag="android-build-${GITHUB_RUN_NUMBER}"
+          if gh release view "$tag" >/dev/null 2>&1; then
+            gh release upload "$tag" darsyar.apk --clobber
+          else
+            gh release create "$tag" darsyar.apk --target "$GITHUB_SHA" --title "درسیار Android ${DARSYAR_VERSION_NAME}" --notes "نسخه امضاشده اندروید درسیار. شناسه: ir.darsyar.app؛ نسخه ساخت: ${DARSYAR_VERSION_CODE}."
+          fi

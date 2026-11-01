@@ -4,7 +4,8 @@ from PIL import Image, ImageDraw
 
 ROOT = Path(__file__).resolve().parents[1]
 SOURCE = ROOT / "assets/brand/darsyar-logo.png"
-NAVY = (3, 16, 55, 255)
+MARK = ROOT / "assets/brand/darsyar-mark.png"
+PURPLE = (43, 4, 84, 255)
 
 
 def contain(image: Image.Image, size: tuple[int, int], ratio: float = 1.0) -> Image.Image:
@@ -24,6 +25,9 @@ def save_png(image: Image.Image, path: Path) -> None:
 master = Image.open(SOURCE).convert("RGBA")
 master = contain(master, (1024, 1024))
 save_png(master, ROOT / "assets/brand/darsyar-logo.png")
+mark = Image.open(MARK).convert("RGBA")
+mark = contain(mark, (1024, 1024))
+save_png(mark, MARK)
 
 for size in (64, 192, 512):
     save_png(master.resize((size, size), Image.Resampling.LANCZOS), ROOT / f"icons/icon-{size}.png")
@@ -42,20 +46,20 @@ for density, (launcher_size, foreground_size) in densities.items():
 
     round_mask = Image.new("L", (launcher_size, launcher_size), 0)
     ImageDraw.Draw(round_mask).ellipse((0, 0, launcher_size - 1, launcher_size - 1), fill=255)
-    round_icon = Image.new("RGBA", (launcher_size, launcher_size), NAVY)
+    round_icon = Image.new("RGBA", (launcher_size, launcher_size), PURPLE)
     round_icon.alpha_composite(launcher)
     round_icon.putalpha(round_mask)
     save_png(round_icon, folder / "ic_launcher_round.png")
 
-    foreground = contain(master, (foreground_size, foreground_size), 0.68)
+    foreground = contain(mark, (foreground_size, foreground_size), 0.8)
     save_png(foreground, folder / "ic_launcher_foreground.png")
 
 for splash_path in (ROOT / "android/app/src/main/res").glob("drawable*/splash.png"):
     with Image.open(splash_path) as current:
         size = current.size
-    splash = Image.new("RGBA", size, NAVY)
-    mark = contain(master, size, 0.26)
-    splash.alpha_composite(mark)
+    splash = Image.new("RGBA", size, PURPLE)
+    splash_mark = contain(mark, size, 0.26)
+    splash.alpha_composite(splash_mark)
     save_png(splash.convert("RGB"), splash_path)
 
 print("Brand assets generated successfully.")

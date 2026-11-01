@@ -12,8 +12,16 @@
         { view: 'stats', icon: 'monitoring', label: 'آمار' }
     ];
     const esc = value => String(value ?? '').replace(/[&<>'"]/g, char => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[char]));
+    let viewTrail = [], lastView = '', returning = false;
 
     function currentView() { return document.querySelector('.view-section.active')?.id?.replace('view-', '') || 'dashboard'; }
+    function rememberView(view) {
+        if (view === lastView) return;
+        lastView = view;
+        if (returning) { returning = false; return; }
+        if (viewTrail.at(-1) !== view) viewTrail.push(view);
+        if (viewTrail.length > 30) viewTrail.shift();
+    }
     function syncActiveNavigation(view = currentView()) {
         const toolViews = ['ai-assistant','flashcards','ai-writing','ai-research','gamification','admin'];
         const direct = destinations.some(item => item.view === view) ? view : (toolViews.includes(view) ? 'mobile-tools' : 'dashboard');
@@ -54,7 +62,7 @@
     function decorateHeader() {
         const header = document.querySelector('.top-header');
         if (!header || header.querySelector('.android-brand-title')) return;
-        header.innerHTML = `<button class="android-brand-title" type="button" onclick="App.navigate('dashboard')" aria-label="رفتن به صفحه امروز"><span><strong>درسیار</strong><small>همراه هوشمند مطالعه</small></span><img src="icons/icon-64.png" alt="نشان درسیار"></button>
+        header.innerHTML = `<button class="android-brand-title" type="button" onclick="App.navigate('dashboard')" aria-label="رفتن به صفحه امروز"><span><strong>درسیار</strong><small>همراه هوشمند مطالعه</small></span><img src="icons/icon-64.png?v=2" alt="نشان درسیار"></button>
             <div class="android-header-actions">
                 <button class="icon-btn" type="button" onclick="App.toggleTheme()" aria-label="تغییر حالت نمایش"><span class="material-symbols-outlined" id="theme-toggle-icon" aria-hidden="true">light_mode</span></button>
                 <button class="icon-btn" type="button" onclick="Communications.open('notes')" aria-label="یادداشت‌ها"><span class="material-symbols-outlined" aria-hidden="true">sticky_note_2</span></button>
@@ -152,20 +160,31 @@
         if (typeof Utils !== 'undefined') Utils.showToast(status.connected ? 'دوباره آنلاین شدی.' : 'اینترنت قطع است؛ تغییرات پس از اتصال همگام می‌شوند.', status.connected ? 'success' : 'warning');
     });
     plugins.App?.addListener?.('backButton', () => {
+        if (document.getElementById('focus-fullscreen-overlay')?.classList.contains('active')) return Pomodoro.exitFullscreenFocus();
+        if (document.querySelector('.im-extra-dialog[open]')) return window.MessengerExtras?.close?.();
+        const dialog = document.querySelector('dialog[open]');
+        if (dialog) return dialog.close();
         const communications = document.getElementById('communications-drawer');
         if (communications?.classList.contains('open')) return Communications.close();
         const modal = document.querySelector('.modal-overlay.active, .modal-overlay.show');
         if (modal) return Utils.closeModal(modal.id);
         if (document.getElementById('sidebar')?.classList.contains('open')) return closeMoreSheet();
-        if (currentView() === 'ai-assistant') { App.navigate('mobile-tools'); return syncActiveNavigation('mobile-tools'); }
-        if (currentView() !== 'dashboard') { App.navigate('dashboard'); return syncActiveNavigation('dashboard'); }
-        plugins.App.exitApp?.();
+        if (viewTrail.length > 1) {
+            viewTrail.pop();
+            const previous = viewTrail.at(-1);
+            returning = true;
+            App.navigate(previous);
+            syncActiveNavigation(previous);
+            return;
+        }
+        if (currentView() !== 'dashboard') { returning = true; App.navigate('dashboard'); syncActiveNavigation('dashboard'); }
     });
     document.addEventListener('DOMContentLoaded', () => {
+        rememberView(currentView());
         createToolsHub(); createBottomNavigation(); decorateHeader(); decorateAiChat(); updateRoleAccess(); renderMobileDashboard(); setupScheduleDays(); syncActiveNavigation();
         document.getElementById('sidebar-overlay')?.addEventListener('click', closeMoreSheet);
         document.querySelectorAll('#sidebar .nav-item').forEach(item => item.addEventListener('click', () => window.setTimeout(closeMoreSheet, 80)));
         const content = document.querySelector('.content-body');
-        if (content) new MutationObserver(() => { const view = currentView(); updateRoleAccess(); syncActiveNavigation(view); document.body.classList.toggle('ai-chat-page-open', view === 'ai-assistant'); if (view === 'dashboard') renderMobileDashboard(); if (view === 'schedule') setupScheduleDays(); }).observe(content, { subtree: true, attributes: true, attributeFilter: ['class'] });
+        if (content) new MutationObserver(() => { const view = currentView(); rememberView(view); updateRoleAccess(); syncActiveNavigation(view); document.body.classList.toggle('ai-chat-page-open', view === 'ai-assistant'); if (view === 'dashboard') renderMobileDashboard(); if (view === 'schedule') setupScheduleDays(); }).observe(content, { subtree: true, attributes: true, attributeFilter: ['class'] });
     });
 })();

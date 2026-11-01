@@ -24,7 +24,9 @@ module.exports = async(req,res) => {
         if(req.method==='POST' && req.body?.action==='news'){
             if(actor.username!=='kiankaki')return res.status(403).json({error:'فقط مدیر سایت می‌تواند اطلاعیه منتشر کند.'});
             const title=String(req.body.title||'').trim(); if(!title||title.length>300)return res.status(400).json({error:'متن اطلاعیه باید بین ۱ تا ۳۰۰ نویسه باشد.'});
-            await notify('kiankaki','news',title); return res.status(200).json({ok:true});
+            const target=String(req.body.target||'').trim();
+            if(target && target!=='https://github.com/nicerp1/darsyar-ai/releases/latest/download/darsyar.apk')return res.status(400).json({error:'پیوند دانلود معتبر نیست.'});
+            await notify('kiankaki','news',title,target); return res.status(200).json({ok:true});
         }
         if(req.method==='POST' && req.body?.action==='read'){
             const ids=[...new Set(Array.isArray(req.body.ids)?req.body.ids:[])].slice(0,80).filter(id=>/^(notice|news)_[a-f0-9-]{36}$/.test(id));
