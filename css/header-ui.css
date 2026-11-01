@@ -1,5 +1,5 @@
 /* ==========================================================================
-   Site header (web: phone + desktop). The Android app keeps its own header.
+   Site header (web: phone + desktop, shared with the Android mobile shell).
    Principles applied: one clear title (where am I) · grouped actions · one control size/shape ·
    44px touch targets on phones · visible focus · elevation only when content scrolls under it.
    Loads last, so it is the single source of truth for header layout.

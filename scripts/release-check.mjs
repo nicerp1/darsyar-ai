@@ -2,8 +2,8 @@ import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 
 const read = path => readFile(new URL(`../${path}`, import.meta.url), 'utf8');
-const [pkg, gradle, workflow, app, auth, dataApi, chatApi, socialApi, game, index, privacy, sync, capacitor, manifest, stats, mobile] = await Promise.all([
-  read('package.json').then(JSON.parse), read('android/app/build.gradle'), read('.github/workflows/android.yml'), read('js/app.js'), read('api/auth.js'), read('api/data.js'), read('api/chat.js'), read('api/social.js'), read('js/gamification.js'), read('index.html'), read('privacy.html'), read('scripts/sync-mobile.mjs'), read('capacitor.config.json').then(JSON.parse), read('android/app/src/main/AndroidManifest.xml'), read('js/stats.js'), read('js/mobile.js')
+const [pkg, gradle, workflow, app, auth, dataApi, chatApi, socialApi, game, index, privacy, sync, capacitor, manifest, stats, mobile, studio, nativeCss] = await Promise.all([
+  read('package.json').then(JSON.parse), read('android/app/build.gradle'), read('.github/workflows/android.yml'), read('js/app.js'), read('api/auth.js'), read('api/data.js'), read('api/chat.js'), read('api/social.js'), read('js/gamification.js'), read('index.html'), read('privacy.html'), read('scripts/sync-mobile.mjs'), read('capacitor.config.json').then(JSON.parse), read('android/app/src/main/AndroidManifest.xml'), read('js/stats.js'), read('js/mobile.js'), read('js/web-studio.js'), read('css/native-shell.css')
 ]);
 
 assert.equal(pkg.version, '1.0.10');
@@ -30,8 +30,13 @@ assert.doesNotMatch([index, app].join('\n'), /localStorage|sessionStorage/);
 assert.doesNotMatch(index, /js\/default-content\.js/);
 assert.doesNotMatch(index, /stats-exam-history|تاریخچه آزمون‌های ثبت‌شده/);
 assert.doesNotMatch(stats, /3\.5|12\.5, 9\.0|weekHours \* 4\.2/);
-assert.match(mobile, /پنل مدیریت مشاور/);
-assert.match(mobile, /برنامه خودت را بساز/);
+assert.match(mobile, /classList\.add\('native-shell'\)/);
+assert.doesNotMatch(mobile, /classList\.add\('capacitor-app'\)|android-bottom-nav|android-dashboard/);
+assert.match(studio, /window\.DarsyarPlatform\?\.native\s*\?\s*'درسیار'/);
+assert.match(app, /const mobileWeb = matchMedia\('\(max-width: 720px\)'\)\.matches/);
+assert.match(index, /css\/native-shell\.css/);
+assert.match(nativeCss, /safe-area-inset-top/);
+assert.match(nativeCss, /safe-area-inset-bottom/);
 assert.match(index, /رقابت اجتماعی/);
 assert.match(index, /id="view-gamification"/);
 assert.doesNotMatch(stats, /league|leaderboard|لیگ/);

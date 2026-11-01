@@ -91,7 +91,7 @@ const WebStudio = (() => {
             if (active) button.setAttribute('aria-current','page');
         });
         const crumb = document.createElement('div'); crumb.className = 'studio-breadcrumb';
-        crumb.innerHTML = '<span>فضای یادگیری من</span><b aria-hidden="true">/</b><strong id="studio-page-name">امروزِ تو</strong>';
+        crumb.innerHTML = `<span>فضای یادگیری من</span><b aria-hidden="true">/</b><strong id="studio-page-name">${window.DarsyarPlatform?.native?'درسیار':'امروزِ تو'}</strong>`;
         header?.insertBefore(crumb, header.querySelector('.header-left'));
         const page = document.createElement('section'); page.id = 'view-chat'; page.className = 'view-section';
         page.innerHTML = `<header class="studio-page-heading"><div><span class="studio-eyebrow">همراه مسیرت</span><h1>یک گفت‌وگوی خوب، یک قدم جلوتر.</h1><p>پیام‌ها، بازخوردها و یادداشت‌هایت؛ همه در یک فضای آرام.</p></div>${icon('chat','studio-heading-icon')}</header><div class="studio-chat-layout"><aside class="studio-chat-aside"><span class="studio-eyebrow">فضای ارتباط</span><div class="studio-contact-symbol">${icon('people')}</div><h2 id="studio-chat-peer"></h2><p id="studio-chat-hint"></p><div class="studio-chat-shortcuts"><button type="button" onclick="Communications.switchTab('chat')">${icon('chat')}گفت‌وگو${icon('arrow')}</button><button type="button" onclick="Communications.switchTab('notes')">${icon('note')}یادداشت‌های شخصی${icon('arrow')}</button><button type="button" onclick="App.navigate('ai-assistant')">${icon('spark')}دستیار هوشمند${icon('arrow')}</button></div><div class="studio-privacy">${icon('shield')}<p>اطلاعات خصوصی و رمز عبورت را در گفت‌وگو ارسال نکن.</p></div></aside><div id="studio-chat-host"></div></div>`;
@@ -150,7 +150,7 @@ const WebStudio = (() => {
         });
         if(name==='chat'&&window.Messenger){clearTransition();return;}
         const view = document.getElementById(`view-${name}`);
-        const crumb = document.getElementById('studio-page-name'); if (crumb) crumb.textContent = viewLabels[name] || 'درسیار';
+        const crumb = document.getElementById('studio-page-name'); if (crumb) crumb.textContent = window.DarsyarPlatform?.native ? 'درسیار' : (viewLabels[name] || 'درسیار');
         document.querySelectorAll('.sidebar .nav-item').forEach(item => item.setAttribute('aria-current', item.classList.contains('active') ? 'page' : 'false'));
         if (!view || reduced() || !view.animate || name === previous) return;
         const navs = [...document.querySelectorAll('.sidebar .nav-item')];

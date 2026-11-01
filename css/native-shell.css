@@ -1,0 +1,22 @@
+/* Android shares the mobile website UI; only the system-bar insets differ. */
+@media (max-width: 720px) {
+    html.native-shell {
+        --native-safe-top: max(24px, env(safe-area-inset-top, 0px));
+        --native-safe-bottom: max(12px, env(safe-area-inset-bottom, 0px));
+    }
+    html.native-shell body { min-height: 100dvh; background: var(--studio-bg); }
+    html.native-shell body .top-header {
+        height: calc(64px + var(--native-safe-top));
+        min-height: calc(64px + var(--native-safe-top));
+        padding-block: calc(8px + var(--native-safe-top)) 8px;
+        padding-inline: max(12px, env(safe-area-inset-right, 0px)) max(12px, env(safe-area-inset-left, 0px));
+    }
+    html.native-shell body .studio-mobile-nav {
+        height: calc(var(--m-nav-h, 58px) + var(--native-safe-bottom));
+        padding-bottom: var(--native-safe-bottom);
+        padding-inline: max(8px, env(safe-area-inset-right, 0px)) max(8px, env(safe-area-inset-left, 0px));
+    }
+    html.native-shell body .content-body { padding-bottom: calc(80px + var(--native-safe-bottom)); }
+    html.native-shell body #sidebar .sidebar-header { padding-top: calc(26px + var(--native-safe-top)); }
+    html.native-shell body :is(#im-header, .im-sidebar > header, .aw-conversation-header) { padding-top: var(--native-safe-top); }
+}
