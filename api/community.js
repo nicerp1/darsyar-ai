@@ -1,5 +1,12 @@
 const {db,getSession,getDataValue,getAccountType} = require('./_supabase');
 const {notify} = require('./_notifications');
+const androidReleaseNotice={
+    id:'news_111bbab6-8ccd-42bf-a943-a5e96874405f',
+    type:'news',
+    title:'نسخه جدید اپلیکیشن اندروید درسیار آماده است. برای دریافت و نصب، این اعلان را باز کنید.',
+    target:'https://github.com/nicerp1/darsyar-ai/releases/latest/download/darsyar.apk',
+    createdAt:'2026-11-01T16:45:00.000Z'
+};
 module.exports = async(req,res) => {
     res.setHeader('Cache-Control','private, no-store');
     try {
@@ -19,7 +26,7 @@ module.exports = async(req,res) => {
                 db(`app_data?username=eq.${encodeURIComponent(actor.username)}&key=like.read_*&select=key&order=updated_at.desc&limit=300`)
             ]);
             const seen=new Set((read||[]).map(r=>r.key.slice(5)));
-            return res.status(200).json({items:[...(personal||[]),...(news||[])].map(r=>({...r.value,read:seen.has(r.value.id)})).sort((a,b)=>b.createdAt.localeCompare(a.createdAt))});
+            return res.status(200).json({items:[...(personal||[]),...(news||[])].map(r=>({...r.value,read:seen.has(r.value.id)})).concat({...androidReleaseNotice,read:seen.has(androidReleaseNotice.id)}).sort((a,b)=>b.createdAt.localeCompare(a.createdAt))});
         }
         if(req.method==='POST' && req.body?.action==='news'){
             if(actor.username!=='kiankaki')return res.status(403).json({error:'فقط مدیر سایت می‌تواند اطلاعیه منتشر کند.'});
