@@ -3,6 +3,6 @@
   "appName": "درسیار",
   "webDir": "www",
   "server": { "androidScheme": "https", "hostname": "localhost", "cleartext": false },
-  "android": { "allowMixedContent": false, "backgroundColor": "#090e1a" },
+  "android": { "allowMixedContent": false, "backgroundColor": "#2B0454" },
   "plugins": { "CapacitorHttp": { "enabled": true }, "SplashScreen": { "launchShowDuration": 1100, "launchAutoHide": true, "backgroundColor": "#2B0454", "showSpinner": false }, "StatusBar": { "style": "LIGHT", "overlaysWebView": true, "backgroundColor": "#00000000" } }
 }
