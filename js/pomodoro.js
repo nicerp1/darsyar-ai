@@ -25,6 +25,7 @@ const Pomodoro = (function () {
         updateDisplay();
         updateControlButtons();
         setupScheduleTaskOptions();
+        document.dispatchEvent(new CustomEvent('pomodoro:rendered'));
         if (!visibilityListenerReady) {
             document.addEventListener('visibilitychange', reconcileTimer);
             document.addEventListener('fullscreenchange', () => {

@@ -1,0 +1,169 @@
+/* ==========================================================================
+   Messenger — professional chat redesign (phone + desktop). Same markup/behaviour; js/messenger-ui.js adds
+   message grouping, context menu, swipe-to-reply, scroll-to-bottom, attach menu, mic/send morph and list filters.
+   ========================================================================== */
+html body #im-shell {
+    --im-acc: var(--m-accent, var(--studio-accent, #6d4bc3)); --im-on: var(--m-on-accent, #fff);
+    --im-bubble-in: var(--m-surface, var(--studio-surface, #fff)); --im-bubble-out: var(--im-acc);
+    grid-template-columns: minmax(320px, 380px) minmax(0, 1fr);
+}
+html body #im-shell .im-sidebar { box-shadow: none; border-inline-end: 1px solid var(--im-line); }
+
+/* ---------- thread list ---------- */
+html body #im-shell .im-sidebar > header { min-height: 68px; padding: 10px 14px 6px 16px; border-bottom: 0; }
+html body #im-shell .im-sidebar h1 { font-size: 22px; font-weight: 800; letter-spacing: -.3px; }
+html body #im-shell .im-search { margin: 4px 14px 6px; min-height: 46px; border-radius: 16px; background: color-mix(in srgb, var(--im-text) 6%, transparent); border: 1.5px solid transparent; }
+html body #im-shell .im-search input { font-size: 14.5px; }
+.im-filters { display: flex; gap: 8px; padding: 4px 14px 10px; overflow-x: auto; scrollbar-width: none; flex-shrink: 0; }
+.im-filters button { flex: none; height: 34px; padding: 0 14px; border: 0; border-radius: 17px; background: color-mix(in srgb, var(--im-text) 6%, transparent); color: var(--im-muted); font: inherit; font-size: 13px; font-weight: 700; cursor: pointer; transition: background .2s, color .2s, transform .2s; }
+.im-filters button[aria-pressed="true"] { background: var(--im-acc); color: var(--im-on); }
+.im-filters button:active { transform: scale(.94); }
+html body #im-shell .im-threads { padding: 2px 8px 12px; }
+html body #im-shell .im-thread { position: relative; display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: 12px; min-height: 72px; margin: 2px 0; padding: 8px 10px; border: 0; border-radius: 18px; background: transparent; box-shadow: none; text-align: start; transition: background .18s ease, transform .2s; }
+html body #im-shell .im-thread:hover { background: color-mix(in srgb, var(--im-text) 5%, transparent); }
+html body #im-shell .im-thread:active { transform: scale(.985); }
+html body #im-shell .im-thread.selected { background: color-mix(in srgb, var(--im-acc) 14%, transparent); box-shadow: none; }
+html body #im-shell .im-thread.selected .im-thread-copy strong { color: var(--im-text); }
+html body #im-shell .im-thread .im-avatar { width: 54px; height: 54px; }
+html body #im-shell .im-thread-copy { display: grid; gap: 2px; min-width: 0; }
+html body #im-shell .im-thread-copy strong { font-size: 15.5px; font-weight: 700; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+html body #im-shell .im-thread-copy small { font-size: 13px; color: var(--im-muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+html body #im-shell .im-thread-meta { display: grid; justify-items: end; align-content: center; gap: 5px; min-width: 44px; font-size: 11.5px; color: var(--im-muted); }
+html body #im-shell .im-thread-meta time { font-variant-numeric: tabular-nums; }
+html body #im-shell .im-thread-meta i { width: 12px; height: 12px; border-radius: 50%; background: var(--im-acc); box-shadow: 0 0 0 4px color-mix(in srgb, var(--im-acc) 18%, transparent); animation: imx-pulse 2.4s ease-in-out infinite; }
+html body #im-shell .im-thread:has(.im-thread-meta i) .im-thread-copy strong { font-weight: 800; }
+html body #im-shell .im-thread:has(.im-thread-meta i) .im-thread-copy small { color: var(--im-text); }
+html body #im-shell .im-threads[data-filter="unread"] .im-thread:not(:has(.im-thread-meta i)) { display: none; }
+html body #im-shell .im-threads[data-filter="special"] .im-thread:not([data-peer^="~"]) { display: none; }
+html body #im-shell .im-sidebar > footer { display: none; }
+
+/* ---------- conversation ---------- */
+html body #im-shell .im-conversation { position: relative; background-color: var(--im-wall); }
+html body #im-header { position: relative; z-index: 3; min-height: 68px; padding-inline: 14px 12px; gap: 10px; border-bottom: 1px solid color-mix(in srgb, var(--im-line) 80%, transparent); }
+html body #im-header #im-person { display: flex; align-items: center; gap: 12px; flex: 1; min-width: 0; border: 0; background: transparent; padding: 4px 6px; border-radius: 14px; text-align: start; transition: background .2s; }
+html body #im-header #im-person:hover { background: color-mix(in srgb, var(--im-text) 5%, transparent); }
+html body #im-header .im-avatar { width: 44px; height: 44px; }
+html body #im-header #im-name { display: block; font-size: 16.5px; font-weight: 800; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+html body #im-header #im-subtitle { display: block; font-size: 12.5px; color: var(--im-muted); }
+html body #im-header .im-icon { width: 44px; height: 44px; border-radius: 50%; }
+
+html body #im-shell .im-log { display: flex; flex-direction: column; gap: 0; padding: 14px clamp(12px, 3vw, 28px) 18px; padding-inline: max(14px, calc((100% - 820px) / 2)); overflow-y: auto; overscroll-behavior: contain; scroll-behavior: smooth; }
+html body #im-shell .im-date { position: sticky; top: 6px; z-index: 2; align-self: center; margin: 14px 0 10px; padding: 5px 14px; border-radius: 14px; background: color-mix(in srgb, var(--im-panel) 82%, transparent); backdrop-filter: blur(10px); border: 1px solid color-mix(in srgb, var(--im-line) 70%, transparent); color: var(--im-muted); font-size: 12px; font-weight: 700; box-shadow: none; }
+html body #im-shell #im-older { align-self: center; margin: 4px 0 10px; height: 36px; padding: 0 16px; border: 0; border-radius: 18px; background: color-mix(in srgb, var(--im-acc) 14%, transparent); color: var(--im-acc); font-weight: 700; }
+
+/* bubbles */
+html body #im-shell .im-message { position: relative; display: flex; flex-wrap: wrap; align-items: flex-end; align-content: flex-start; gap: 2px 8px; max-width: min(78%, 560px); width: fit-content; min-width: 84px; margin: 0 0 8px; padding: 8px 12px 7px; border: 0; border-radius: 20px; background: var(--im-bubble-in); color: var(--im-text); box-shadow: 0 1px 2px #0000000f; align-self: flex-start; animation: imx-arrive .35s cubic-bezier(.2, .9, .3, 1) both; }
+html body #im-shell .im-message.mine { align-self: flex-end; background: var(--im-bubble-out); color: var(--im-on); }
+html body #im-shell .im-message > * { min-width: 0; }
+html body #im-shell .im-message > p { flex: 1 1 auto; margin: 0; font-size: 15px; line-height: 1.85; white-space: pre-wrap; overflow-wrap: anywhere; }
+html body #im-shell .im-message > :is(blockquote, .im-photo, .im-document, .im-voice-card, .im-report-card, .im-study-report) { flex: 1 0 100%; }
+html body #im-shell .im-message > footer { flex: 0 0 auto; display: inline-flex; align-items: center; gap: 4px; margin-inline-start: auto; padding-top: 2px; font-size: 11px; color: color-mix(in srgb, currentColor 62%, transparent); line-height: 1; }
+html body #im-shell .im-message footer time { font-variant-numeric: tabular-nums; }
+html body #im-shell .im-message .im-receipt { display: inline-grid; place-items: center; min-width: 16px; }
+html body #im-shell .im-message .im-receipt svg { width: 16px; height: 16px; }
+html body #im-shell .im-message.mine .im-receipt { color: color-mix(in srgb, var(--im-on) 80%, transparent); }
+html body #im-shell .im-message footer button[data-action="retry"] { height: 26px; padding: 0 10px; border: 0; border-radius: 13px; background: #fff3; color: inherit; font-size: 11px; font-weight: 700; }
+/* group shape: only the last bubble of a group gets the tail */
+html body #im-shell .im-message.g-first, html body #im-shell .im-message.g-mid { margin-bottom: 2px; }
+html body #im-shell .im-message:not(.mine).g-mid { border-top-left-radius: 7px; border-bottom-left-radius: 7px; }
+html body #im-shell .im-message:not(.mine).g-last { border-top-left-radius: 7px; }
+html body #im-shell .im-message:not(.mine).g-first { border-bottom-left-radius: 7px; }
+html body #im-shell .im-message.mine.g-mid { border-top-right-radius: 7px; border-bottom-right-radius: 7px; }
+html body #im-shell .im-message.mine.g-last { border-top-right-radius: 7px; }
+html body #im-shell .im-message.mine.g-first { border-bottom-right-radius: 7px; }
+html body #im-shell .im-message.g-last::after, html body #im-shell .im-message.g-solo::after { content: ''; position: absolute; bottom: 0; width: 12px; height: 14px; background: inherit; }
+html body #im-shell .im-message.mine.g-last::after, html body #im-shell .im-message.mine.g-solo::after { right: -7px; clip-path: path('M0 0 C0 8 4 12.5 12 14 H0 Z'); }
+html body #im-shell .im-message:not(.mine).g-last::after, html body #im-shell .im-message:not(.mine).g-solo::after { left: -7px; clip-path: path('M12 0 C12 8 8 12.5 0 14 H12 Z'); }
+html body #im-shell .im-message.g-last, html body #im-shell .im-message.g-solo { margin-bottom: 10px; }
+html body #im-shell .im-message.g-last:not(.mine), html body #im-shell .im-message.g-solo:not(.mine) { border-bottom-left-radius: 6px; }
+html body #im-shell .im-message.g-last.mine, html body #im-shell .im-message.g-solo.mine { border-bottom-right-radius: 6px; }
+/* reply quote */
+html body #im-shell .im-message blockquote { display: grid; gap: 1px; margin: 0 0 4px; padding: 6px 10px; border: 0; border-inline-start: 3px solid var(--im-acc); border-radius: 8px 12px 12px 8px; background: color-mix(in srgb, var(--im-acc) 12%, transparent); font-size: 13px; line-height: 1.5; cursor: pointer; }
+html body #im-shell .im-message blockquote strong { font-size: 12px; color: var(--im-acc); }
+html body #im-shell .im-message.mine blockquote { border-inline-start-color: var(--im-on); background: color-mix(in srgb, var(--im-on) 18%, transparent); }
+html body #im-shell .im-message.mine blockquote strong { color: var(--im-on); }
+html body #im-shell .im-message .im-photo img { display: block; width: 100%; max-height: 320px; object-fit: cover; border-radius: 14px; margin: 0 0 4px; }
+html body #im-shell .im-message .im-document { display: flex; align-items: center; gap: 10px; padding: 8px; border-radius: 14px; background: color-mix(in srgb, currentColor 9%, transparent); color: inherit; text-decoration: none; }
+html body #im-shell .im-message .im-document svg { width: 40px; height: 40px; padding: 9px; border-radius: 50%; background: color-mix(in srgb, currentColor 14%, transparent); }
+html body #im-shell .im-message .im-document span { display: grid; min-width: 0; font-size: 12px; }
+html body #im-shell .im-message .im-document strong { font-size: 13.5px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+html body #im-shell .im-message.is-flash { animation: imx-flash 1.2s ease; }
+/* per-message menu → hover chevron (desktop); phones use long-press / swipe */
+html body #im-shell .im-message .im-menu { position: absolute; top: 4px; inset-inline-start: calc(100% + 6px); opacity: 0; transition: opacity .15s; }
+html body #im-shell .im-message.mine .im-menu { inset-inline-start: auto; inset-inline-end: calc(100% + 6px); }
+html body #im-shell .im-message:hover .im-menu, html body #im-shell .im-message:focus-within .im-menu { opacity: 1; }
+html body #im-shell .im-message .im-menu summary { width: 30px; height: 30px; display: grid; place-items: center; list-style: none; border-radius: 50%; background: var(--im-panel); color: var(--im-muted); box-shadow: 0 1px 6px #0002; cursor: pointer; }
+html body #im-shell .im-message .im-menu summary::-webkit-details-marker { display: none; }
+html body #im-shell .im-message .im-menu summary svg { width: 18px; height: 18px; }
+html body #im-shell .im-message .im-menu > div { display: none !important; }
+@media (hover: none) { html body #im-shell .im-message .im-menu { display: none; } }
+
+/* welcome / empty */
+html body #im-shell .im-welcome { margin: auto; max-width: 340px; padding: 28px 22px; text-align: center; border-radius: 26px; background: color-mix(in srgb, var(--im-panel) 86%, transparent); backdrop-filter: blur(10px); border: 1px solid color-mix(in srgb, var(--im-line) 70%, transparent); }
+html body #im-shell .im-welcome > span { display: grid; place-items: center; width: 64px; height: 64px; margin: 0 auto 12px; border-radius: 50%; background: color-mix(in srgb, var(--im-acc) 16%, transparent); color: var(--im-acc); }
+html body #im-shell .im-welcome h2 { font-size: 18px; margin: 0 0 4px; }
+html body #im-shell .im-welcome p { margin: 0; font-size: 13.5px; color: var(--im-muted); }
+html body #im-shell .im-prompts { display: grid; gap: 8px; margin-top: 14px; }
+html body #im-shell .im-prompts button { min-height: 44px; padding: 0 14px; border: 1.5px solid var(--im-line); border-radius: 14px; background: transparent; color: var(--im-text); font-size: 13.5px; font-weight: 600; transition: border-color .2s, background .2s; }
+html body #im-shell .im-prompts button:hover { border-color: var(--im-acc); background: color-mix(in srgb, var(--im-acc) 8%, transparent); }
+
+/* ---------- composer ---------- */
+html body #im-compose-area { position: relative; display: flex; flex-direction: column; padding: 6px max(12px, calc((100% - 820px) / 2)) max(12px, env(safe-area-inset-bottom)); }
+html body #im-compose-area .im-safety { order: 5; margin: 6px 0 0; font-size: 10.5px; opacity: .7; }
+html body #im-feedback { padding: 2px 16px; min-height: 0; font-size: 12px; color: var(--im-muted); text-align: center; }
+html body #im-feedback:empty { display: none; }
+html body #im-extra-actions { order: -1; display: flex; justify-content: center; margin: 0; }
+html body #im-extra-actions > button { position: absolute !important; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); opacity: 0; pointer-events: none; }
+html body #im-extra-actions #im-connection { margin: 0 0 4px; padding: 3px 12px; border-radius: 12px; background: color-mix(in srgb, #e6a56e 18%, transparent); color: #c78342; font-size: 11.5px; font-weight: 700; }
+html body #im-extra-actions #im-connection:empty, html body #im-extra-actions #im-connection[data-ok="1"] { display: none; }
+html body #im-compose { display: flex; align-items: flex-end; gap: 2px; min-height: 52px; padding: 4px; border: 1px solid var(--im-line); border-radius: 28px; background: var(--im-panel); box-shadow: 0 6px 24px #1118270d; transition: border-color .2s, box-shadow .2s; }
+html body #im-compose:focus-within { border-color: color-mix(in srgb, var(--im-acc) 55%, var(--im-line)); box-shadow: 0 8px 28px color-mix(in srgb, var(--im-acc) 14%, transparent); }
+html body #im-compose .im-icon { width: 44px; height: 44px; border-radius: 50%; flex: none; color: var(--im-muted); background: transparent; border: 0; transition: background .2s, color .2s, transform .2s; }
+html body #im-compose .im-icon:hover { background: color-mix(in srgb, var(--im-acc) 12%, transparent); color: var(--im-acc); }
+html body #im-compose .im-icon:active { transform: scale(.9); }
+html body #im-compose #im-input { flex: 1; min-width: 0; min-height: 44px; max-height: 140px; padding: 11px 6px; border: 0; background: transparent; color: var(--im-text); font-size: 15.5px; line-height: 1.7; resize: none; outline: 0; box-shadow: none; }
+html body #im-compose #im-send, html body #im-compose #im-mic { width: 44px; height: 44px; flex: none; border: 0; border-radius: 50%; display: grid; place-items: center; background: var(--im-acc); color: var(--im-on); transition: transform .25s cubic-bezier(.3, 1.6, .5, 1), opacity .2s; }
+html body #im-compose #im-send svg { transform: scaleX(-1); }
+html body #im-compose #im-send:not(:disabled):hover, html body #im-compose #im-mic:hover { transform: scale(1.06); }
+html body #im-compose #im-send:active, html body #im-compose #im-mic:active { transform: scale(.88); }
+html body #im-compose #im-mic { background: transparent; color: var(--im-muted); }
+html body #im-compose #im-mic:hover { background: color-mix(in srgb, var(--im-acc) 12%, transparent); color: var(--im-acc); }
+html body #im-compose:has(#im-input:placeholder-shown) #im-send { display: none; }
+html body #im-compose:not(:has(#im-input:placeholder-shown)) #im-mic { display: none; }
+html body #im-context { display: flex; align-items: center; gap: 10px; margin: 0 8px 6px; padding: 8px 12px; border-radius: 16px; border-inline-start: 3px solid var(--im-acc); background: color-mix(in srgb, var(--im-acc) 10%, var(--im-panel)); font-size: 13px; animation: imx-arrive .25s ease both; }
+html body #im-context[hidden] { display: none; }
+html body #im-emojis { position: absolute; bottom: calc(100% - 4px); inset-inline-end: max(12px, calc((100% - 820px) / 2)); z-index: 6; display: grid; grid-template-columns: repeat(8, 40px); gap: 2px; padding: 10px; border-radius: 20px; background: var(--im-panel); border: 1px solid var(--im-line); box-shadow: 0 16px 40px #11182722; animation: imx-pop .22s cubic-bezier(.2, 1.2, .4, 1) both; transform-origin: bottom; }
+html body #im-emojis[hidden] { display: none; }
+html body #im-emojis button { width: 40px; height: 40px; border: 0; border-radius: 12px; background: transparent; font-size: 23px; cursor: pointer; transition: transform .15s, background .15s; }
+html body #im-emojis button:hover { background: color-mix(in srgb, var(--im-acc) 12%, transparent); transform: scale(1.18); }
+
+/* floating bits */
+.imx-menu { position: fixed; z-index: 200; min-width: 200px; padding: 6px; border-radius: 18px; background: color-mix(in srgb, var(--m-surface, #fff) 94%, transparent); -webkit-backdrop-filter: blur(16px); backdrop-filter: blur(16px); border: 1px solid var(--m-line, #0001); box-shadow: 0 18px 50px #0003; animation: imx-pop .18s cubic-bezier(.2, 1.2, .4, 1) both; transform-origin: top center; color: var(--m-ink, #17212b); direction: rtl; }
+.imx-menu button { display: flex; align-items: center; gap: 12px; width: 100%; min-height: 44px; padding: 0 14px; border: 0; border-radius: 12px; background: transparent; color: inherit; font: inherit; font-size: 14.5px; font-weight: 600; text-align: start; cursor: pointer; }
+.imx-menu button:hover, .imx-menu button:focus-visible { background: color-mix(in srgb, var(--m-accent, #6d4bc3) 12%, transparent); outline: 0; }
+.imx-menu button.danger { color: var(--m-bad, #d6455d); }
+.imx-menu .material-symbols-outlined { font-size: 21px; opacity: .85; }
+.imx-scrim { position: fixed; inset: 0; z-index: 199; }
+.imx-fab { position: absolute; z-index: 4; inset-inline-start: 18px; bottom: 96px; width: 46px; height: 46px; display: grid; place-items: center; border: 1px solid var(--im-line); border-radius: 50%; background: var(--im-panel); color: var(--im-text); box-shadow: 0 8px 22px #0002; opacity: 0; transform: translateY(12px) scale(.8); pointer-events: none; transition: opacity .2s, transform .3s cubic-bezier(.3, 1.5, .5, 1); cursor: pointer; }
+.imx-fab.on { opacity: 1; transform: none; pointer-events: auto; }
+.imx-fab svg { width: 22px; height: 22px; transform: rotate(-90deg); }
+.imx-fab b { position: absolute; top: -8px; inset-inline-end: -4px; min-width: 22px; height: 22px; padding: 0 6px; border-radius: 11px; background: var(--im-acc); color: var(--im-on); font-size: 12px; font-weight: 800; display: none; place-items: center; }
+.imx-fab b.on { display: grid; }
+.imx-swipe { position: fixed; z-index: 5; width: 34px; height: 34px; display: grid; place-items: center; border-radius: 50%; background: color-mix(in srgb, var(--im-acc, #6d4bc3) 18%, transparent); color: var(--im-acc, #6d4bc3); opacity: 0; transform: scale(.4); pointer-events: none; }
+.imx-swipe svg { width: 18px; height: 18px; }
+
+@keyframes imx-arrive { from { opacity: 0; transform: translateY(8px) scale(.97); } to { opacity: 1; transform: none; } }
+@keyframes imx-pop { from { opacity: 0; transform: scale(.85); } to { opacity: 1; transform: none; } }
+@keyframes imx-pulse { 50% { box-shadow: 0 0 0 7px color-mix(in srgb, var(--im-acc) 6%, transparent); } }
+@keyframes imx-flash { 0%, 100% { filter: none; } 30% { filter: brightness(1.18) saturate(1.3); } }
+
+/* ---------- phone ---------- */
+@media (max-width: 720px) {
+    html body #im-shell { grid-template-columns: minmax(0, 1fr); }
+    html body #im-shell .im-message { max-width: 86%; }
+    html body #im-shell .im-log { padding-inline: 12px; }
+    html body #im-compose-area { padding-inline: 10px; }
+    html body #im-emojis { grid-template-columns: repeat(7, 1fr); inset-inline: 12px; }
+    .imx-fab { bottom: 88px; }
+}
+@media (prefers-reduced-motion: reduce) { html body #im-shell *, .imx-menu, .imx-fab { animation: none !important; transition-duration: .01ms !important; } }

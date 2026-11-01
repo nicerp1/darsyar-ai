@@ -75,6 +75,6 @@ const StudyWorkspace=(()=>{
         if(details)details.open=true;
         try{Utils.printElement('stats-report-printable-area','گزارش زمان مطالعه درسیار');}finally{if(details)details.open=wasOpen;}
     }
-    return {duration,short,data,stats:(period)=>{stats(period);window.StudyFlow?.mountReport();},flashcards,box,cardState,focus,printStats};
+    return {duration,short,data,stats:(period)=>{stats(period);window.StudyFlow?.mountReport();document.dispatchEvent(new CustomEvent('stats:rendered'));},flashcards,box,cardState,focus,printStats};
 })();
 window.StudyWorkspace=StudyWorkspace;

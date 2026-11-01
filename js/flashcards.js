@@ -111,6 +111,7 @@ const Flashcards = (function () {
             if (actionButtons) actionButtons.style.display = 'none';
             if (emptyState) emptyState.style.display = 'block';
             if (countInfoEl) countInfoEl.textContent = 'کارت فعالی برای مرور وجود ندارد.';
+            document.dispatchEvent(new CustomEvent('flashcards:changed'));
             return;
         }
 
@@ -144,6 +145,7 @@ const Flashcards = (function () {
         if (countInfoEl && typeof Utils !== 'undefined') {
             countInfoEl.textContent = `کارت ${Utils.toPersianDigits(currentCardIndex + 1)} از ${Utils.toPersianDigits(reviewQueue.length)}`;
         }
+        document.dispatchEvent(new CustomEvent('flashcards:changed'));
     }
 
     function flipCard() {
@@ -159,6 +161,7 @@ const Flashcards = (function () {
         if (typeof Utils !== 'undefined') {
             Utils.playSound('click');
         }
+        document.dispatchEvent(new CustomEvent('flashcards:changed'));
     }
 
     function rateCard(rating) {
@@ -334,8 +337,13 @@ const Flashcards = (function () {
         if (button) { button.disabled = false; button.innerHTML = '<span class="material-symbols-outlined">auto_awesome</span> استخراج حرفه‌ای کارت‌ها'; }
     }
 
+    function getState() {
+        return { cards: Storage.get('flashcards', []), queue: reviewQueue, index: currentCardIndex, flipped: isFlipped, category: currentCategory, box: currentBoxFilter };
+    }
+
     return {
         init,
+        getState,
         filterCategory,
         filterBox,
         flipCard,

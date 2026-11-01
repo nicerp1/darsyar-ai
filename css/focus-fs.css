@@ -1,0 +1,84 @@
+/* ==========================================================================
+   Fullscreen focus mode — immersive redesign (phone + desktop). Markup stays; js/focus-fs.js adds the ring,
+   session dots, clock and idle auto-hide. Dark canvas on purpose: nothing competes with the timer.
+   ========================================================================== */
+html body .focus-fullscreen-overlay.focus-fullscreen-overlay {
+    --fs: var(--m-accent, var(--studio-accent, #8f6df0)); --fs-ink: #f4f1ff; --fs-mute: #a9a3c4;
+    padding: max(18px, env(safe-area-inset-top)) 20px max(22px, env(safe-area-inset-bottom)); color: var(--fs-ink); overflow: hidden; isolation: isolate;
+    background: radial-gradient(120% 80% at 50% 0%, color-mix(in srgb, var(--fs) 22%, #0a0916) 0%, #0a0916 55%, #07060f 100%);
+}
+html body .focus-fullscreen-overlay.focus-fullscreen-overlay[data-mode="shortBreak"], html body .focus-fullscreen-overlay.focus-fullscreen-overlay[data-mode="longBreak"] { --fs: #3fc79a; }
+html body .focus-fullscreen-overlay.focus-fullscreen-overlay::before { content: ''; position: absolute; z-index: -1; left: 50%; top: 46%; width: min(120vw, 900px); aspect-ratio: 1; transform: translate(-50%, -50%);
+    background: radial-gradient(closest-side, color-mix(in srgb, var(--fs) 26%, transparent), transparent 70%); opacity: .55; transition: opacity .8s, background .8s; }
+html body .focus-fullscreen-overlay.focus-fullscreen-overlay[data-state="running"]::before { opacity: .9; animation: fsx-breathe 5s ease-in-out infinite; }
+html body .focus-fullscreen-overlay.focus-fullscreen-overlay.active { animation: fsx-in .5s cubic-bezier(.2, .9, .3, 1); }
+
+html body .focus-fullscreen-overlay.focus-fullscreen-overlay .focus-static-card { position: relative; width: min(560px, 100%); min-height: min(760px, calc(100dvh - 60px)); justify-content: space-between; gap: 14px; padding: 56px 0 8px; color: inherit; align-items: center; }
+html body .focus-fullscreen-overlay.focus-fullscreen-overlay .focus-static-icon { display: none; }
+
+/* top chrome */
+html body .focus-fullscreen-overlay.focus-fullscreen-overlay .btn-exit-focus { top: max(18px, env(safe-area-inset-top)); left: 18px; min-height: 44px; padding: 0 16px; gap: 8px; border: 1px solid #ffffff1f; background: #ffffff12; color: var(--fs-ink); font-size: 13px; font-weight: 700; backdrop-filter: blur(10px); transition: opacity .5s, background .2s, transform .2s; }
+html body .focus-fullscreen-overlay.focus-fullscreen-overlay .btn-exit-focus:hover { background: #ffffff22; color: var(--fs-ink); border-color: #ffffff33; }
+html body .focus-fullscreen-overlay.focus-fullscreen-overlay .btn-exit-focus:active { transform: scale(.95); }
+.fsx-clock { position: absolute; top: max(18px, env(safe-area-inset-top)); right: 20px; height: 44px; display: flex; align-items: center; padding: 0 16px; border-radius: 22px; background: #ffffff0d; border: 1px solid #ffffff14; color: var(--fs-mute); font-size: 14px; font-weight: 700; font-variant-numeric: tabular-nums; letter-spacing: .5px; transition: opacity .5s; }
+html body .focus-fullscreen-overlay.focus-fullscreen-overlay .focus-static-label { width: fit-content !important; min-width: 0; justify-content: center; position: static; transform: none; align-self: center; width: auto; display: inline-flex; align-items: center; gap: 8px; height: 40px; padding: 0 6px 0 16px; border-radius: 20px; background: color-mix(in srgb, var(--fs) 16%, transparent); border: 1px solid color-mix(in srgb, var(--fs) 38%, transparent); color: var(--fs-ink); font-size: 13px; font-weight: 800; white-space: nowrap; transition: opacity .5s; }
+html body .focus-fullscreen-overlay.focus-fullscreen-overlay .focus-static-label > span { flex: none; }
+html body .focus-fullscreen-overlay.focus-fullscreen-overlay .focus-static-label i { width: 8px; height: 8px; border-radius: 50%; background: var(--fs); box-shadow: 0 0 10px var(--fs); }
+html body .focus-fullscreen-overlay.focus-fullscreen-overlay .focus-static-label button { width: 32px; height: 32px; display: grid; place-items: center; border: 0; border-radius: 50%; background: transparent; color: var(--fs-mute); cursor: pointer; transition: background .2s, color .2s; }
+html body .focus-fullscreen-overlay.focus-fullscreen-overlay .focus-static-label button:hover { background: #ffffff1a; color: var(--fs-ink); }
+html body .focus-fullscreen-overlay.focus-fullscreen-overlay .focus-static-label button svg { width: 18px; height: 18px; }
+
+/* task title */
+html body .focus-fullscreen-overlay.focus-fullscreen-overlay #focus-task-name { max-width: 100%; margin-top: 14px; font-size: clamp(20px, 5vw, 26px); font-weight: 800; line-height: 1.5; text-align: center; letter-spacing: -.3px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--fs-ink); }
+
+/* dial */
+html body .focus-fullscreen-overlay.focus-fullscreen-overlay .focus-static-dial { position: relative; display: grid; place-content: center; justify-items: center; gap: 4px; width: min(78vw, 360px, 38dvh); aspect-ratio: 1; margin: 0 auto; border: 0; border-radius: 50%; background: transparent; }
+.fsx-ring { position: absolute; inset: -14px; width: calc(100% + 28px); height: calc(100% + 28px); transform: rotate(-90deg) scaleY(-1); pointer-events: none; overflow: visible; }
+.fsx-ring circle { fill: none; }
+.fsx-ring .ticks { stroke: #ffffff26; stroke-width: 2; stroke-dasharray: 1.6 12.43; }
+.fsx-ring .bg { stroke: #ffffff12; stroke-width: 6; }
+.fsx-ring .fg { stroke: var(--fs); stroke-width: 6; stroke-linecap: round; stroke-dasharray: 754 754; stroke-dashoffset: 754; transition: stroke-dashoffset 1s linear, stroke .6s; filter: drop-shadow(0 0 10px color-mix(in srgb, var(--fs) 70%, transparent)); }
+html body .focus-fullscreen-overlay.focus-fullscreen-overlay .focus-static-dial small { font-size: 12px; color: var(--fs-mute); letter-spacing: .3px; }
+html body .focus-fullscreen-overlay.focus-fullscreen-overlay .focus-static-time { font-size: clamp(64px, 19vw, 104px); font-weight: 800; letter-spacing: -2px; line-height: 1.05; color: var(--fs-ink); font-variant-numeric: tabular-nums; direction: ltr; text-shadow: 0 0 40px color-mix(in srgb, var(--fs) 35%, transparent); }
+html body .focus-fullscreen-overlay.focus-fullscreen-overlay .focus-static-dial > span { max-width: 22ch; font-size: 12px; line-height: 1.7; color: var(--fs-mute); text-align: center; opacity: .85; }
+.fsx-cycle { display: flex; align-items: center; justify-content: center; gap: 8px; min-height: 12px; }
+.fsx-cycle i { width: 9px; height: 9px; border-radius: 50%; background: #ffffff26; transition: background .4s, transform .4s cubic-bezier(.3, 1.6, .5, 1), box-shadow .4s; }
+.fsx-cycle i.on { background: var(--fs); transform: scale(1.2); box-shadow: 0 0 10px color-mix(in srgb, var(--fs) 70%, transparent); }
+
+/* task picker */
+html body .focus-fullscreen-overlay.focus-fullscreen-overlay .focus-static-task-picker { position: relative; display: flex; align-items: center; gap: 10px; max-width: 100%; min-height: 48px; padding: 0 14px 0 8px; border-radius: 24px; border: 1px solid #ffffff1f; background: #ffffff0f; color: var(--fs-ink); backdrop-filter: blur(10px); transition: opacity .5s, border-color .2s; }
+html body .focus-fullscreen-overlay.focus-fullscreen-overlay .focus-static-task-picker:hover, html body .focus-fullscreen-overlay.focus-fullscreen-overlay .focus-static-task-picker:focus-within { border-color: color-mix(in srgb, var(--fs) 60%, #fff3); }
+html body .focus-fullscreen-overlay.focus-fullscreen-overlay .focus-static-task-picker > span { font-size: 11.5px; color: var(--fs-mute); white-space: nowrap; padding-inline-start: 6px; }
+html body .focus-fullscreen-overlay.focus-fullscreen-overlay .focus-static-task-picker select { min-width: 0; max-width: min(56vw, 300px); height: 44px; border: 0; background: transparent; color: var(--fs-ink); font: inherit; font-size: 14px; font-weight: 700; outline: 0; cursor: pointer; text-overflow: ellipsis; }
+html body .focus-fullscreen-overlay.focus-fullscreen-overlay .focus-static-task-picker select option { color: #14121f; background: #fff; }
+
+/* controls */
+html body .focus-fullscreen-overlay.focus-fullscreen-overlay .focus-static-actions { display: flex; align-items: center; justify-content: center; gap: 16px; width: 100%; }
+html body .focus-fullscreen-overlay.focus-fullscreen-overlay .focus-static-reset { width: 56px; height: 56px; display: grid; place-items: center; border-radius: 50%; border: 1px solid #ffffff22; background: #ffffff12; color: var(--fs-ink); cursor: pointer; transition: background .2s, transform .2s cubic-bezier(.3, 1.5, .5, 1), opacity .5s; }
+html body .focus-fullscreen-overlay.focus-fullscreen-overlay .focus-static-reset:hover { background: #ffffff22; }
+html body .focus-fullscreen-overlay.focus-fullscreen-overlay .focus-static-reset:active { transform: scale(.9); }
+html body .focus-fullscreen-overlay.focus-fullscreen-overlay #fs-btn-pomo-play { white-space: nowrap; min-width: 210px; height: 64px; display: inline-flex; align-items: center; justify-content: center; gap: 10px; padding: 0 30px; border: 0; border-radius: 32px; background: var(--fs); color: #0d0b1a; font-size: 17px; font-weight: 800; cursor: pointer; box-shadow: 0 16px 36px color-mix(in srgb, var(--fs) 40%, transparent); transition: transform .25s cubic-bezier(.3, 1.5, .5, 1), box-shadow .3s, background .5s; }
+html body .focus-fullscreen-overlay.focus-fullscreen-overlay #fs-btn-pomo-play:hover { transform: translateY(-2px); }
+html body .focus-fullscreen-overlay.focus-fullscreen-overlay #fs-btn-pomo-play:active { transform: scale(.95); }
+html body .focus-fullscreen-overlay.focus-fullscreen-overlay[data-state="running"] #fs-btn-pomo-play { box-shadow: 0 0 0 7px color-mix(in srgb, var(--fs) 22%, transparent), 0 16px 36px color-mix(in srgb, var(--fs) 40%, transparent); }
+html body .focus-fullscreen-overlay.focus-fullscreen-overlay #fs-btn-pomo-play .material-symbols-outlined { font-size: 30px; font-variation-settings: 'FILL' 1; }
+html body .focus-fullscreen-overlay.focus-fullscreen-overlay :focus-visible { outline: 2px solid var(--fs-ink); outline-offset: 3px; }
+.focus-static-card > * { flex-shrink: 0; }
+.focus-static-card > .focus-static-dial { flex-shrink: 1; }
+.fsx-hint { font-size: 11.5px; color: #8e88a8; text-align: center; transition: opacity .5s; }
+
+/* calm mode: while running and untouched, only the timer stays */
+html body .focus-fullscreen-overlay.focus-fullscreen-overlay.fsx-idle { cursor: none; }
+html body .focus-fullscreen-overlay.focus-fullscreen-overlay.fsx-idle :is(.btn-exit-focus, .fsx-clock, .focus-static-label, .focus-static-task-picker, .focus-static-reset, .fsx-hint) { opacity: 0; pointer-events: none; }
+html body .focus-fullscreen-overlay.focus-fullscreen-overlay.fsx-idle #fs-btn-pomo-play { opacity: .55; }
+
+@keyframes fsx-in { from { opacity: 0; transform: scale(1.02); } to { opacity: 1; transform: none; } }
+@keyframes fsx-breathe { 50% { opacity: .55; transform: translate(-50%, -50%) scale(1.06); } }
+@media (max-width: 720px) {
+    html body .focus-fullscreen-overlay.focus-fullscreen-overlay .btn-exit-focus { padding: 0; width: 44px; font-size: 0; justify-content: center; }
+    html body .focus-fullscreen-overlay.focus-fullscreen-overlay .focus-static-card { padding-top: 62px; min-height: calc(100dvh - 40px); }
+    html body .focus-fullscreen-overlay.focus-fullscreen-overlay #fs-btn-pomo-play { min-width: 176px; }
+    .fsx-hint { display: none; }
+}
+@media (max-height: 640px) { html body .focus-fullscreen-overlay.focus-fullscreen-overlay .focus-static-dial > span, .fsx-hint { display: none; } html body .focus-fullscreen-overlay.focus-fullscreen-overlay .focus-static-card { gap: 10px; } }
+@media (prefers-reduced-motion: reduce) { html body .focus-fullscreen-overlay.focus-fullscreen-overlay, html body .focus-fullscreen-overlay.focus-fullscreen-overlay *, html body .focus-fullscreen-overlay.focus-fullscreen-overlay::before { animation: none !important; transition-duration: .01ms !important; } }

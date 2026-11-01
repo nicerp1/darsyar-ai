@@ -39,6 +39,12 @@ const Stats = (function () {
         }
         renderStatsKPIs();
         renderCharts();
+        document.dispatchEvent(new CustomEvent('stats:rendered'));
+    }
+
+    function getData() {
+        const history = realStudyData();
+        return { history, reports: (Storage.get('manual_reports', []) || []).filter(item => item?.date), focus: (Storage.get('focus_records', []) || []).filter(item => item?.endedAt && item.seconds > 0), streak: calculateStreak(history) };
     }
 
     function setRange(value) {
@@ -161,6 +167,7 @@ const Stats = (function () {
 
     return {
         init,
+        getData,
         setRange,
         exportPDFReport
     };

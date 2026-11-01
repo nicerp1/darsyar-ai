@@ -19,6 +19,7 @@ const Gamification = (function () {
         const fill = document.getElementById('game-level-progress-fill'); if (fill) fill.style.width = `${percent}%`;
         const side = document.getElementById('sidebar-user-level'); if (side) side.textContent = `سطح ${pd(level)}`;
         const sideBar = document.getElementById('sidebar-xp-bar'); if (sideBar) sideBar.style.width = `${percent}%`;
+        document.dispatchEvent(new CustomEvent('league:rendered'));
     }
     function personCard(person, actions = '') {
         return `<article class="social-person-card"><span class="social-avatar">${ProfileStudio.avatarHTML(person.avatar)}</span><div><strong>${esc(person.name)}</strong><small>@${esc(person.username)}${person.grade ? ` · ${esc(person.grade)}` : ''}</small><em>${pd(person.xp)} امتیاز · ${esc(levelTitle(person.level))}</em></div>${actions}</article>`;
@@ -36,6 +37,7 @@ const Gamification = (function () {
         friends?.querySelectorAll('.social-avatar').forEach((node,index)=>Community.bind(node,model.friends[index]));
         const requests = document.getElementById('friend-requests');
         if (requests) { requests.classList.toggle('hidden', !model.requests.length); requests.innerHTML = model.requests.map(item => personCard(item, `<div class="social-actions"><button type="button" onclick="Gamification.friendAction('accept','${esc(item.username)}')">پذیرش</button><button type="button" class="secondary" onclick="Gamification.friendAction('reject','${esc(item.username)}')">رد</button></div>`)).join(''); }
+        document.dispatchEvent(new CustomEvent('league:rendered'));
     }
     async function init() {
         renderLevelProgress();
@@ -59,6 +61,6 @@ const Gamification = (function () {
         try { await request({ method:'POST', body:JSON.stringify({ action, username }) }); await init(); Utils.showToast(action === 'accept' ? 'دوست جدید اضافه شد.' : 'فهرست دوستان به‌روزرسانی شد.', 'success'); }
         catch (error) { Utils.showToast(error.message, 'error'); }
     }
-    return { init, renderLevelProgress, saveSettings, sendRequest, friendAction };
+    return { getModel: () => model, init, renderLevelProgress, saveSettings, sendRequest, friendAction };
 })();
 window.Gamification = Gamification;
