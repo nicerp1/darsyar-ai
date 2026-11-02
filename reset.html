@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <meta name="referrer" content="no-referrer">
+    <meta name="robots" content="noindex, nofollow">
+    <meta name="theme-color" content="#2B0454">
+    <title>تعیین رمز تازه | درسیار</title>
+    <link rel="stylesheet" href="fonts/kalameh.css">
+    <link rel="stylesheet" href="css/password-reset.css">
+    <script defer src="js/password-reset.js"></script>
+</head>
+<body class="reset-page">
+    <main class="reset-card">
+        <img src="icons/icon-192.png" alt="نشان درسیار" width="64" height="64">
+        <span class="reset-eyebrow">درسیار · امنیت حساب</span>
+        <h1>رمز تازه‌ات را تعیین کن</h1>
+        <p>این لینک یک‌بارمصرف است و ۱۵ دقیقه اعتبار دارد. رمز تازه را فقط در همین صفحه وارد کن و لینک را با دیگران به اشتراک نگذار.</p>
+        <form id="reset-form" hidden>
+            <div class="reset-account">حساب کاربری: <strong id="reset-username"></strong></div>
+            <label for="reset-password">رمز عبور تازه</label>
+            <input id="reset-password" type="password" autocomplete="new-password" minlength="8" maxlength="128" required placeholder="حداقل ۸ نویسه">
+            <label for="reset-confirmation">تکرار رمز عبور تازه</label>
+            <input id="reset-confirmation" type="password" autocomplete="new-password" minlength="8" maxlength="128" required placeholder="رمز تازه را دوباره وارد کن">
+            <button id="reset-submit" type="submit">ذخیره رمز تازه</button>
+        </form>
+        <p id="reset-message" class="reset-message" role="status" aria-live="polite"></p>
+        <a href="/">بازگشت به ورود</a>
+    </main>
+</body>
+</html>

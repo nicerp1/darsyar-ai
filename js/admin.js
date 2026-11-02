@@ -12,6 +12,7 @@ const Admin = (function () {
         const owner = accountType === 'admin';
         document.getElementById('advisor-link-card')?.classList.toggle('hidden', owner);
         document.getElementById('admin-system-settings')?.classList.toggle('hidden', !owner);
+        document.getElementById('admin-password-recovery')?.classList.toggle('hidden', !owner);
         document.getElementById('advisor-unlink-student')?.classList.toggle('hidden', owner);
         document.getElementById('admin-delete-student')?.classList.toggle('hidden', !owner);
         document.getElementById('admin-plan-control')?.classList.toggle('hidden', !owner || !App.isFeatureEnabled('subscription'));
@@ -102,6 +103,32 @@ const Admin = (function () {
     function openStudentSchedule() { if (selectedUsername) Schedule.openForStudent(selectedUsername); }
     function openStudentChat() { if (!selectedUsername) return; Communications.selectStudent(selectedUsername); Communications.open('chat'); }
     function saveSystemSettings() { const settings = Storage.getSettings(); settings.aiModel = document.getElementById('admin-ai-model')?.value || 'gapgpt-qwen-3.5'; Storage.saveSettings(settings); Utils.showToast('مدل هوش مصنوعی ذخیره شد.', 'success'); }
+    async function createPasswordResetLink() {
+        if (Storage.getCurrentUser()?.username !== 'kiankaki') return;
+        const username = document.getElementById('admin-recovery-username')?.value.trim().toLowerCase();
+        const passwordInput = document.getElementById('admin-recovery-password');
+        const button = document.getElementById('admin-recovery-submit');
+        const result = document.getElementById('admin-recovery-result');
+        const error = document.getElementById('admin-recovery-error');
+        result?.classList.add('hidden'); if (error) error.textContent = '';
+        if (button) { button.disabled = true; button.textContent = 'در حال ساخت لینک…'; }
+        try {
+            const payload = await request('/api/password-reset', { method: 'POST', body: JSON.stringify({ action: 'create', username, adminPassword: passwordInput.value }) });
+            const fragment = new URLSearchParams({ username: payload.username, token: payload.token });
+            const origin = window.DarsyarPlatform?.native ? window.DarsyarPlatform.apiOrigin : window.location.origin;
+            document.getElementById('admin-recovery-link').value = `${origin}/reset.html#${fragment}`;
+            document.getElementById('admin-recovery-expiry').textContent = `اعتبار تا ${new Date(payload.expiresAt).toLocaleString('fa-IR')}`;
+            result.classList.remove('hidden');
+            Utils.showToast('لینک بازیابی ساخته شد؛ پس از احراز هویت کاربر آن را ارسال کنید.', 'success');
+        } catch (failure) { if (error) error.textContent = failure.message; }
+        finally { passwordInput.value = ''; if (button) { button.disabled = false; button.textContent = 'ساخت لینک یک‌بارمصرف'; } }
+    }
+    async function copyPasswordResetLink() {
+        const field = document.getElementById('admin-recovery-link');
+        if (!field?.value) return;
+        try { await navigator.clipboard.writeText(field.value); Utils.showToast('لینک کپی شد.', 'success'); }
+        catch { field.focus(); field.select(); Utils.showToast('کپی خودکار ممکن نشد؛ لینک انتخاب شده است.', 'info'); }
+    }
     async function changeSelectedPlan(plan) {
         if (accountType !== 'admin' || !selectedPayload || !['free','silver','gold'].includes(plan)) return;
         try { await request('/api/users', { method: 'PUT', body: JSON.stringify({ user: { ...selectedPayload.student, plan } }) }); selectedPayload.student.plan = plan; const match = students.find(item => item.username === selectedUsername); if (match) match.plan = plan; renderStudentDetail(); Utils.showToast('اشتراک دانش‌آموز تغییر کرد.', 'success'); } catch (error) { Utils.showToast(error.message, 'error'); }
@@ -110,6 +137,6 @@ const Admin = (function () {
         if (accountType !== 'admin' || !selectedUsername) return; const username = selectedUsername, typed = prompt(`برای حذف دائمی، نام کاربری ${username} را وارد کنید:`); if (typed?.trim().toLowerCase() !== username) return Utils.showToast('حذف لغو شد.', 'warning'); if (!confirm(`تمام اطلاعات @${username} برای همیشه حذف شود؟`)) return;
         try { await request('/api/admin-students', { method: 'DELETE', body: JSON.stringify({ action: 'deleteStudent', username, confirmation: typed }) }); students = students.filter(item => item.username !== username); clearSelection(); applyFilters(); renderPriority(); renderStats(); Storage.saveUsers(students); Utils.showToast('حساب و داده‌های دانش‌آموز حذف شد.', 'success'); } catch (error) { Utils.showToast(error.message, 'error'); }
     }
-    return { init, refreshOverview, applyFilters, selectStudent, linkStudent, unlinkSelectedStudent, savePrivateNote, openStudentSchedule, openStudentChat, saveSystemSettings, changeSelectedPlan, deleteSelectedStudent };
+    return { init, refreshOverview, applyFilters, selectStudent, linkStudent, unlinkSelectedStudent, savePrivateNote, openStudentSchedule, openStudentChat, saveSystemSettings, changeSelectedPlan, deleteSelectedStudent, createPasswordResetLink, copyPasswordResetLink };
 })();
 window.Admin = Admin;

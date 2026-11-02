@@ -49,6 +49,7 @@
     <link rel="stylesheet" href="css/league-ui.css">
     <link rel="stylesheet" href="css/header-ui.css">
     <link rel="stylesheet" href="css/native-shell.css">
+    <link rel="stylesheet" href="css/password-reset.css">
     <link rel="manifest" href="manifest.json">
     <link rel="icon" type="image/png" sizes="64x64" href="icons/icon-64.png?v=2">
     <link rel="apple-touch-icon" sizes="192x192" href="icons/icon-192.png?v=2">
@@ -1003,6 +1004,17 @@
                     </div>
 
                     <section id="admin-system-settings" class="counselor-card counselor-system hidden"><div class="counselor-card-heading"><div><span class="material-symbols-outlined" aria-hidden="true">tune</span><h4>تنظیمات هوش مصنوعی پلتفرم</h4></div></div><div><select id="admin-ai-model" class="form-control"><option value="gapgpt-qwen-3.5">gapgpt-qwen-3.5</option><option value="gapgpt-llama-3">gapgpt-llama-3</option><option value="gapgpt-deepseek">gapgpt-deepseek</option></select><button class="btn-gold" onclick="Admin.saveSystemSettings()">ذخیره مدل</button></div></section>
+                    <section id="admin-password-recovery" class="counselor-card admin-recovery hidden" aria-labelledby="admin-recovery-title">
+                        <div class="counselor-card-heading"><div><span class="material-symbols-outlined" aria-hidden="true">key</span><h4 id="admin-recovery-title">لینک تعیین رمز تازه</h4></div></div>
+                        <p>ابتدا هویت صاحب حساب را بررسی کنید. لینک فقط یک‌بار و تا ۱۵ دقیقه معتبر است؛ لینک قبلی همان کاربر با ساخت لینک تازه باطل می‌شود.</p>
+                        <form id="admin-recovery-form" onsubmit="event.preventDefault(); Admin.createPasswordResetLink()">
+                            <label for="admin-recovery-username">نام کاربری</label><input id="admin-recovery-username" class="form-control" autocomplete="off" required pattern="[a-zA-Z0-9_.-]{3,32}" placeholder="نام کاربری دانش‌آموز یا مشاور">
+                            <label for="admin-recovery-password">رمز حساب مدیر</label><input id="admin-recovery-password" class="form-control" type="password" autocomplete="current-password" required placeholder="برای تأیید عملیات">
+                            <button id="admin-recovery-submit" class="btn-primary" type="submit">ساخت لینک یک‌بارمصرف</button>
+                        </form>
+                        <div id="admin-recovery-result" class="admin-recovery-result hidden" role="status"><label for="admin-recovery-link">لینک را فقط برای صاحب تأییدشدهٔ حساب بفرستید</label><textarea id="admin-recovery-link" readonly rows="2" dir="ltr"></textarea><button type="button" class="btn-primary" onclick="Admin.copyPasswordResetLink()">کپی لینک</button><small id="admin-recovery-expiry"></small></div>
+                        <p id="admin-recovery-error" class="admin-recovery-error" role="alert"></p>
+                    </section>
                 </section>
 
                 <!-- 13. USER PROFILE VIEW -->
