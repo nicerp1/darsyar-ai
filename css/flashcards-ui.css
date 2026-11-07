@@ -139,3 +139,12 @@
     .fcx-add:hover, .fcx-icon:hover { transform: translateY(-1px); }
 }
 @media (prefers-reduced-motion: reduce) { .fcx *, .fcx *::before, .fcx *::after { animation: none !important; transition-duration: .01ms !important; } }
+
+/* Due-today / all-cards review selector (Leitner spacing) */
+.fcx-seg{position:relative;display:grid;grid-template-columns:1fr 1fr;gap:4px;min-height:48px;padding:5px;border:1px solid var(--m-line);border-radius:16px;background:var(--m-raised);isolation:isolate}
+.fcx-seg>i{position:absolute;z-index:-1;inset-block:5px;inset-inline-start:5px;width:calc(50% - 5px);border:1px solid color-mix(in srgb,var(--m-accent) 35%,var(--m-line));border-radius:12px;background:var(--m-surface);box-shadow:0 2px 8px color-mix(in srgb,var(--m-ink) 8%,transparent);transition:transform .28s var(--m-ease)}
+.fcx-seg[data-i="1"]>i{transform:translateX(-100%)}
+.fcx-seg button{position:relative;display:flex;align-items:center;justify-content:center;gap:6px;min-height:40px;padding:0 8px;border:0;border-radius:11px;color:var(--m-muted);background:transparent;font:700 12px var(--font-family);cursor:pointer;transition:color .2s}
+.fcx-seg button[aria-pressed="true"]{color:var(--m-ink)}.fcx-seg button .material-symbols-outlined{font-size:18px}
+.fcx-seg b{display:grid;place-items:center;min-width:21px;height:21px;padding:0 5px;border-radius:11px;color:var(--m-on-accent);background:var(--m-accent);font-size:10px}.fcx-seg b[hidden]{display:none}
+@media(prefers-reduced-motion:reduce){.fcx-seg>i{transition:none}}

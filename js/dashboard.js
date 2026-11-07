@@ -8,16 +8,19 @@ const Dashboard = (function () {
     let isEditMode = false;
 
     function init() {
-        if (window.WebStudio?.enabled()) { WebStudio.dashboard(); return; }
-        renderWebDashboard();
-        renderGreeting();
-        renderQuote();
-        renderKPIs();
-        renderDailyGoal();
-        renderQuickActions();
-        renderTrendChart();
-        renderExamReminders();
-        startCountdownTicker();
+        if (window.WebStudio?.enabled()) WebStudio.dashboard();
+        else {
+            renderWebDashboard();
+            renderGreeting();
+            renderQuote();
+            renderKPIs();
+            renderDailyGoal();
+            renderQuickActions();
+            renderTrendChart();
+            renderExamReminders();
+            startCountdownTicker();
+        }
+        document.dispatchEvent(new CustomEvent('dashboard:rendered'));
     }
 
     function escapeHTML(value) {

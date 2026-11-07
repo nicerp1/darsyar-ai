@@ -29,6 +29,10 @@
         </header>
         <div class="fcx-layout">
             <section class="fcx-main">
+                <div class="fcx-seg" id="fcx-seg" role="group" aria-label="نوع مرور" data-i="0"><i aria-hidden="true"></i>
+                    <button type="button" data-due="due" aria-pressed="true">${ico('today')}<span>مرور امروز</span><b id="fcx-due-n"></b></button>
+                    <button type="button" data-due="all" aria-pressed="false">${ico('style')}<span>همه کارت‌ها</span></button>
+                </div>
                 <div class="fcx-chips" id="fcx-chips" role="group" aria-label="دروس"></div>
                 <div class="fcx-progress"><div class="fcx-track"><i id="fcx-bar"></i></div><span id="fcx-count"></span></div>
                 <div class="fcx-stage" id="fcx-stage">
@@ -63,6 +67,9 @@
         const counts = [0, 0, 0, 0, 0, 0]; cards.forEach(c => { counts[Math.min(5, Math.max(1, c.box || 1))]++; });
         const total = cards.length, mastery = total ? Math.round(cards.reduce((a, c) => a + ((c.box || 1) - 1), 0) / (4 * total) * 100) : 0;
 
+        $('#fcx-seg').dataset.i = st.dueOnly ? '0' : '1'; $('#fcx-due-n').textContent = st.due ? pd(st.due) : ''; $('#fcx-due-n').hidden = !st.due;
+        root.querySelectorAll('#fcx-seg [data-due]').forEach(button => button.setAttribute('aria-pressed', String((button.dataset.due === 'due') === st.dueOnly)));
+
         // mastery
         $('#fcx-ring .v').style.strokeDashoffset = String(100 - mastery); $('#fcx-mp').textContent = `${pd(mastery)}٪`;
         $('#fcx-mt').textContent = total ? `${pd(total)} کارت · ${pd(counts[5])} در جعبه تسلط` : 'هنوز کارتی نساخته‌ای';
@@ -81,6 +88,14 @@
         const has = queue.length > 0, card = queue[index];
         $('#fcx-card').hidden = !has; $('#fcx-empty').hidden = has; $('#fcx-rate').hidden = !has; $('#fcx-keys').hidden = !has;
         $('.fcx-progress').hidden = !has;
+        if (!has) {
+            if (!total) $('#fcx-empty').innerHTML = `${ico('style')}<h3>اینجا هنوز کارتی نیست</h3><p>یک کارت بساز یا با هوش مصنوعی از متن درسی کارت بگیر.</p><button type="button" class="fcx-add" data-act="add">${ico('add')}<span>ساخت اولین کارت</span></button>`;
+            else if (st.dueOnly) {
+                const next = st.nextDue;
+                const nextText = next ? ` نوبت بعدی ${new Intl.DateTimeFormat('fa-IR-u-ca-persian', { day: 'numeric', month: 'long' }).format(new Date(`${next.date}T12:00:00`))} است و ${pd(next.count)} کارت برای مرور دارد.` : '';
+                $('#fcx-empty').innerHTML = `${ico('task_alt')}<h3>مرور امروز تمام شد</h3><p>آفرین؛ کارت‌های موعد امروز را مرور کردی.${nextText}</p><button type="button" class="fcx-add" data-act="all">${ico('style')}<span>مرور همه‌ی کارت‌ها</span></button>`;
+            } else $('#fcx-empty').innerHTML = `${ico('filter_alt_off')}<h3>کارتی با این فیلتر نیست</h3><p>فیلتر درس یا جعبه را تغییر بده تا کارت‌های بیشتری ببینی.</p>`;
+        }
         if (has) {
             const el = $('#fcx-card');
             $('#fcx-bar').style.width = `${(index + 1) / queue.length * 100}%`;
@@ -104,14 +119,16 @@
     }
 
     function onClick(e) {
-        const t = e.target.closest('[data-act],[data-rate],[data-box],[data-cat]'); if (!t || !root.contains(t)) return;
+        const t = e.target.closest('[data-act],[data-rate],[data-box],[data-cat],[data-due]'); if (!t || !root.contains(t)) return;
         const F = window.Flashcards;
+        if (t.dataset.due) return F?.setDueOnly(t.dataset.due === 'due');
         if (t.dataset.rate) return F?.rateCard(t.dataset.rate);
         if (t.dataset.box) return F?.filterBox(t.dataset.box === 'all' ? 'all' : Number(t.dataset.box));
         if (t.dataset.cat) return F?.filterCategory(t.dataset.cat);
         if (t.dataset.act === 'flip') return F?.flipCard();
         if (t.dataset.act === 'add') return F?.openAddModal();
         if (t.dataset.act === 'ai') return F?.openAIModal();
+        if (t.dataset.act === 'all') return F?.setDueOnly(false);
     }
     function onKey(e) {
         if (!root?.isConnected || !root.offsetParent || e.ctrlKey || e.metaKey || e.altKey || /^(INPUT|TEXTAREA|SELECT)$/.test(e.target.tagName) || e.target.isContentEditable || document.querySelector('.modal-overlay.active, .modal.active')) return;

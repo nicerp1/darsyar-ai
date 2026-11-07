@@ -9,6 +9,19 @@ const Flashcards = (function () {
     let currentCardIndex = 0;
     let isFlipped = false;
 
+    const BOX_INTERVALS = [1, 2, 4, 7, 15];
+    let dueOnly = true;
+    function todayKey() { const now = new Date(); return new Date(now.getTime() - now.getTimezoneOffset() * 60000).toISOString().slice(0, 10); }
+    function addDays(key, days) { const date = new Date(`${key}T12:00:00`); date.setDate(date.getDate() + days); return new Date(date.getTime() - date.getTimezoneOffset() * 60000).toISOString().slice(0, 10); }
+    function isDue(card) { return !card.nextReview || card.nextReview <= todayKey(); }
+    function dueCount() { return (Storage.get('flashcards', []) || []).filter(isDue).length; }
+    function nextDueInfo() {
+        const later = (Storage.get('flashcards', []) || []).filter(card => card.nextReview && card.nextReview > todayKey()).sort((a, b) => a.nextReview.localeCompare(b.nextReview));
+        if (!later.length) return null;
+        return { date: later[0].nextReview, count: later.filter(card => card.nextReview === later[0].nextReview).length };
+    }
+    function setDueOnly(value) { dueOnly = !!value; loadReviewQueue(); renderCurrentCard(); }
+
     function init() {
         if (window.WebStudio?.enabled()) window.StudyWorkspace?.flashcards();
         renderLeitnerBoxCounts();
@@ -86,6 +99,8 @@ const Flashcards = (function () {
         if (currentBoxFilter !== 'all') {
             cards = cards.filter(c => c.box === parseInt(currentBoxFilter));
         }
+
+        if (dueOnly) cards = cards.filter(isDue).sort((a, b) => String(a.nextReview || '').localeCompare(String(b.nextReview || '')) || (a.box || 1) - (b.box || 1));
 
         reviewQueue = cards;
         currentCardIndex = 0;
@@ -195,6 +210,10 @@ const Flashcards = (function () {
                     Utils.showToast(`عالی بود! کارت به جعبه ${Utils.toPersianDigits(cardInStorage.box)} منتقل شد (+۱۵ XP).`, 'success');
                 }
             }
+
+            const reviewedOn = todayKey(), activeBox = Math.min(5, Math.max(1, Number(cardInStorage.box) || 1));
+            cardInStorage.lastReviewed = reviewedOn;
+            cardInStorage.nextReview = rating === 'wrong' ? reviewedOn : addDays(reviewedOn, BOX_INTERVALS[activeBox - 1]);
 
             Storage.set('flashcards', allCards);
         }
@@ -338,12 +357,14 @@ const Flashcards = (function () {
     }
 
     function getState() {
-        return { cards: Storage.get('flashcards', []), queue: reviewQueue, index: currentCardIndex, flipped: isFlipped, category: currentCategory, box: currentBoxFilter };
+        return { dueOnly, due: dueCount(), nextDue: nextDueInfo(), cards: Storage.get('flashcards', []), queue: reviewQueue, index: currentCardIndex, flipped: isFlipped, category: currentCategory, box: currentBoxFilter };
     }
 
     return {
         init,
         getState,
+        setDueOnly,
+        dueCount,
         filterCategory,
         filterBox,
         flipCard,
