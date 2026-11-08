@@ -48,6 +48,9 @@ const Gamification = (function () {
         try { model = await request(); render(); document.querySelectorAll('#friend-requests .social-avatar').forEach((node,i)=>Community.bind(node,model.requests[i])); } catch (error) { loadError = error.message || 'لیگ بارگذاری نشد. اتصال اینترنت را بررسی کن.'; document.dispatchEvent(new CustomEvent('league:rendered')); Utils.showToast(loadError, 'error'); }
         finally { if (shell) shell.classList.remove('is-loading'); }
     }
+    document.addEventListener('league:activity', event => {
+        if (Number(event.detail?.awarded) > 0 && document.getElementById('view-gamification')?.classList.contains('active')) init();
+    });
     async function saveSettings() {
         const button = document.getElementById('league-save'); if (button) button.disabled = true;
         try { await request({ method:'POST', body:JSON.stringify({ action:'settings', leagueVisible:document.getElementById('league-visible')?.checked, showGrade:document.getElementById('league-show-grade')?.checked, bio:document.getElementById('league-bio')?.value }) }); Utils.showToast('تنظیمات پروفایل لیگ ذخیره شد.', 'success'); await init(); }

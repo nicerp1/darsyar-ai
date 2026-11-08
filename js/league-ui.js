@@ -73,7 +73,7 @@
             return;
         }
         const list = model.leaderboard || [];
-        if (!list.length) { box.innerHTML = `<div class="lgx-empty">${ico('groups')}<p>هنوز کسی با رضایت خودش وارد لیگ نشده است.</p></div>`; return; }
+        if (!list.length) { box.innerHTML = `<div class="lgx-empty">${ico('groups')}<p>هنوز کسی با رضایت خودش وارد لیگ نشده است.</p><button type="button" class="lgx-retry" data-act="join">تنظیم حضور من در لیگ</button></div>`; return; }
         const top = list.slice(0, 3), rest = list.slice(3), best = Math.max(1, ...list.map(i => i.seasonPoints || 0));
         const pod = (it, pos) => it ? `<article class="lgx-pod p${pos}${it.isMe ? ' is-me' : ''}" style="--d:${pos === 1 ? 0 : pos === 2 ? 1 : 2}">${pos === 1 ? `<span class="lgx-crown">${ico('workspace_premium')}</span>` : ''}<span class="lgx-av" data-profile="${esc(it.username)}">${avatar(it.avatar)}</span><strong>${esc(it.name)}${it.isMe ? ' (تو)' : ''}</strong><small>${pd(it.seasonPoints || 0)} امتیاز</small><div class="lgx-step"><b>${pd(pos)}</b></div></article>` : '';
         const podium = top.length >= 3 ? `<div class="lgx-podium">${pod(top[1], 2)}${pod(top[0], 1)}${pod(top[2], 3)}</div>` : '';
@@ -133,6 +133,7 @@
         const G = window.Gamification;
         if (b.dataset.tab) return setTab(b.dataset.tab);
         if (b.dataset.act === 'retry') return G?.init();
+        if (b.dataset.act === 'join') { setTab('settings'); $('#lgx-visible')?.focus(); return; }
         if (b.dataset.fa) return G?.friendAction(b.dataset.fa, b.dataset.u);
         if (b.dataset.rm) {                                // two-step remove: first tap arms the button
             if (armed === b) { armed = null; return G?.friendAction('remove', b.dataset.rm); }
