@@ -50,7 +50,7 @@ module.exports = async (req, res) => {
                 const socialByName = new Map(settings.map(row => [row.username, row.value]));
                 profiles.forEach(profile => { people[profile.username] = present(profile, socialByName.get(profile.username) || {}); });
             }
-            const leaderboard = (await visibleStudents()).sort((a, b) => b.seasonPoints - a.seasonPoints || a.username.localeCompare(b.username)).slice(0, 50).map((item, index) => ({ ...item, rank: index + 1, isFriend: friends.includes(item.username), isMe: item.username === actor.username }));
+            const leaderboard = (await visibleStudents()).sort((a, b) => b.seasonPoints - a.seasonPoints || a.username.localeCompare(b.username)).map((item, index) => ({ ...item, rank: index + 1, isFriend: friends.includes(item.username), isMe: item.username === actor.username }));
             return res.status(200).json({ profile: present(actor, social), settings: { leagueVisible: social.leagueVisible === true, showGrade: social.showGrade !== false, bio: String(social.bio || '') }, friends: friends.map(username => people[username]).filter(Boolean), requests: requests.map(username => people[username]).filter(Boolean), leaderboard, season: { title: 'لیگ ماهانه مطالعه', prize: 'یک ماه اشتراک ویژه برای ۳ نفر اول', verificationRequired: true } });
         }
         if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });

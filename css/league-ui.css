@@ -83,6 +83,8 @@
     .lgx-retry { min-height: 44px; padding: 8px 18px; border: 0; border-radius: 12px; background: var(--m-accent); color: var(--m-on-accent); font-weight: 700; }
 
     /* rows */
+    .lgx-board-heading { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin: 12px 2px 6px !important; color: var(--m-ink); font-size: 14px; font-weight: 800; }
+    .lgx-board-heading small { color: var(--m-muted); font-size: 11px; font-weight: 600; }
     .lgx-rows { display: grid; gap: 6px; }
     .lgx-row { display: grid; grid-template-columns: 30px auto minmax(0, 1fr) auto; align-items: center; gap: 12px; padding: 10px 12px; border-radius: 18px; border: 1px solid transparent; animation: lgx-rise .45s var(--m-ease) both; animation-delay: calc(var(--i) * 45ms + 350ms); transition: background .2s; }
     .lgx-row:hover { background: color-mix(in srgb, var(--m-ink) 4%, transparent); }

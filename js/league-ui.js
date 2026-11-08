@@ -74,11 +74,11 @@
         }
         const list = model.leaderboard || [];
         if (!list.length) { box.innerHTML = `<div class="lgx-empty">${ico('groups')}<p>هنوز کسی با رضایت خودش وارد لیگ نشده است.</p><button type="button" class="lgx-retry" data-act="join">تنظیم حضور من در لیگ</button></div>`; return; }
-        const top = list.slice(0, 3), rest = list.slice(3), best = Math.max(1, ...list.map(i => i.seasonPoints || 0));
+        const top = list.slice(0, 3), best = Math.max(1, ...list.map(i => i.seasonPoints || 0));
         const pod = (it, pos) => it ? `<article class="lgx-pod p${pos}${it.isMe ? ' is-me' : ''}" style="--d:${pos === 1 ? 0 : pos === 2 ? 1 : 2}">${pos === 1 ? `<span class="lgx-crown">${ico('workspace_premium')}</span>` : ''}<span class="lgx-av" data-profile="${esc(it.username)}">${avatar(it.avatar)}</span><strong>${esc(it.name)}${it.isMe ? ' (تو)' : ''}</strong><small>${pd(it.seasonPoints || 0)} امتیاز</small><div class="lgx-step"><b>${pd(pos)}</b></div></article>` : '';
         const podium = top.length >= 3 ? `<div class="lgx-podium">${pod(top[1], 2)}${pod(top[0], 1)}${pod(top[2], 3)}</div>` : '';
-        const rows = (top.length >= 3 ? rest : list).map((it, i) => `<article class="lgx-row${it.isMe ? ' is-me' : ''}" style="--i:${i}"><b class="lgx-rank">${pd(it.rank)}</b><span class="lgx-av" data-profile="${esc(it.username)}">${avatar(it.avatar)}</span><div class="lgx-who"><strong>${esc(it.name)}${it.isMe ? '<em>تو</em>' : ''}${it.isFriend ? '<em class="f">دوست</em>' : ''}</strong><small>${lvl(it.level)}</small><i class="lgx-meter"><u style="width:${Math.round((it.seasonPoints || 0) / best * 100)}%"></u></i></div><span class="lgx-pts"><b>${pd(it.seasonPoints || 0)}</b><small>امتیاز</small></span></article>`).join('');
-        box.innerHTML = podium + `<div class="lgx-rows">${rows}</div>`;
+        const rows = list.map((it, i) => `<article class="lgx-row${it.isMe ? ' is-me' : ''}" style="--i:${i}"><b class="lgx-rank">${pd(it.rank)}</b><span class="lgx-av" data-profile="${esc(it.username)}">${avatar(it.avatar)}</span><div class="lgx-who"><strong>${esc(it.name)}${it.isMe ? '<em>تو</em>' : ''}${it.isFriend ? '<em class="f">دوست</em>' : ''}</strong><small>${lvl(it.level)}</small><i class="lgx-meter"><u style="width:${Math.round((it.seasonPoints || 0) / best * 100)}%"></u></i></div><span class="lgx-pts"><b>${pd(it.seasonPoints || 0)}</b><small>امتیاز</small></span></article>`).join('');
+        box.innerHTML = `${podium}<h4 class="lgx-board-heading">رتبه‌بندی کامل لیگ <small>${pd(list.length)} نفر</small></h4><div class="lgx-rows">${rows}</div>`;
         box.querySelectorAll('[data-profile]').forEach(node => {
             const person = list.find(item => item.username === node.dataset.profile);
             if (person) window.Community?.bind?.(node, person);
