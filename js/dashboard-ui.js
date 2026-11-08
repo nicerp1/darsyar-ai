@@ -67,29 +67,6 @@
             <nav class="ds-tools" aria-label="دسترسی سریع">${[['timer','تمرکز','pomodoro'],['calendar_month','برنامه','schedule'],['style','فلش‌کارت','flashcards'],['leaderboard','لیگ','gamification'],['forum','گفت‌وگو','chat'],['monitoring','آمار','stats']].map(([glyph,label,route]) => `<button type="button" data-go="${route}">${icon(glyph)}<span>${label}</span></button>`).join('')}</nav>`;
     }
 
-    function shareStory() {
-        const m = getModel(), canvas = document.createElement('canvas');
-        canvas.width = 1080; canvas.height = 1920;
-        const ctx = canvas.getContext('2d');
-        const bg = ctx.createLinearGradient(0, 0, 1080, 1920); bg.addColorStop(0, '#201b3d'); bg.addColorStop(.55, '#34274e'); bg.addColorStop(1, '#56344d');
-        ctx.fillStyle = bg; ctx.fillRect(0, 0, 1080, 1920);
-        ctx.fillStyle = 'rgba(255,255,255,.05)'; ctx.beginPath(); ctx.arc(980, 250, 390, 0, Math.PI * 2); ctx.fill();
-        ctx.strokeStyle = 'rgba(255,255,255,.14)'; ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(950, 300, 300, 0, Math.PI * 2); ctx.stroke();
-        ctx.direction = 'rtl'; ctx.textAlign = 'right'; ctx.fillStyle = '#e6d8ff'; ctx.font = '600 32px Kalameh, sans-serif'; ctx.fillText('درسیار · گزارش مطالعه‌ی من', 940, 180);
-        ctx.fillStyle = '#fff'; ctx.font = '800 72px Kalameh, sans-serif'; ctx.fillText('یک هفته‌ی رو به جلو', 940, 470);
-        ctx.fillStyle = '#ffd0b5'; ctx.font = '800 118px Kalameh, sans-serif'; ctx.fillText(duration(m.week.reduce((sum, day) => sum + day.hours, 0)), 940, 690);
-        ctx.fillStyle = '#ede9f5'; ctx.font = '500 38px Kalameh, sans-serif'; ctx.fillText(`استریک مطالعه: ${fa(m.streak)} روز`, 940, 790);
-        ctx.fillStyle = 'rgba(255,255,255,.1)'; ctx.beginPath(); ctx.roundRect(90, 930, 900, 560, 40); ctx.fill();
-        const bars = m.week, peak = Math.max(.5, ...bars.map(day => day.hours));
-        bars.forEach((day, index) => { const x = 160 + index * 125, height = Math.max(8, day.hours / peak * 300); ctx.fillStyle = index === 6 ? '#ffc19e' : '#b9a4ed'; ctx.beginPath(); ctx.roundRect(x, 1350 - height, 64, height, 28); ctx.fill(); ctx.fillStyle = '#eee9f6'; ctx.font = '500 28px Kalameh, sans-serif'; ctx.textAlign = 'center'; ctx.fillText(dayNames[(day.date.getDay() + 1) % 7], x + 32, 1410); });
-        ctx.textAlign = 'right'; ctx.fillStyle = '#e8e1f2'; ctx.font = '500 34px Kalameh, sans-serif';
-        const quote = m.quote?.text || 'پیشرفت از قدم‌های کوچک و پیوسته ساخته می‌شود.';
-        const words = quote.split(/\s+/), lines = []; let line = '';
-        words.forEach(word => { const test = line ? `${line} ${word}` : word; if (ctx.measureText(test).width > 820 && line) { lines.push(line); line = word; } else line = test; });
-        if (line) lines.push(line); lines.slice(0, 2).forEach((text, index) => ctx.fillText(`«${text}»`, 940, 1630 + index * 54));
-        return new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
-    }
-
     async function onClick(event) {
         const button = event.target.closest('[data-go],[data-act],[data-focus]'); if (!button || !root.contains(button)) return;
         if (button.dataset.go) return window.App?.navigate(button.dataset.go);
@@ -97,14 +74,7 @@
         if (button.dataset.act === 'goal') return window.Dashboard?.openEditGoalModal();
         if (button.dataset.act === 'addtask') return window.Schedule?.openEditTaskModal(indexToday(), -1);
         if (button.dataset.act === 'report') { if (window.WebStudio?.report) return WebStudio.report(); return window.App?.navigate('stats'); }
-        if (button.dataset.act === 'story') {
-            try {
-                const blob = await shareStory(); if (!blob) throw new Error('امکان ساخت تصویر فراهم نشد.');
-                const file = new File([blob], 'darsyar-study-story.png', { type: 'image/png' });
-                if (navigator.share && navigator.canShare?.({ files: [file] })) await navigator.share({ files: [file], title: 'گزارش مطالعه درسیار' });
-                else { const url = URL.createObjectURL(blob), link = document.createElement('a'); link.href = url; link.download = file.name; link.click(); setTimeout(() => URL.revokeObjectURL(url), 1500); window.Utils?.showToast('استوری مطالعه دانلود شد؛ می‌توانی آن را منتشر کنی.', 'success'); }
-            } catch (error) { if (error.name !== 'AbortError') window.Utils?.showToast(error.message || 'ساخت استوری انجام نشد.', 'error'); }
-        }
+        if (button.dataset.act === 'story') return window.ShareCard?.open();
     }
     document.addEventListener('dashboard:rendered', paint);
 })();
