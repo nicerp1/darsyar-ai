@@ -1,8 +1,8 @@
 {
   "appId": "ir.darsyar.app",
-  "appName": "درسیار",
+  "appName": "روند",
   "webDir": "www",
   "server": { "androidScheme": "https", "hostname": "localhost", "cleartext": false },
-  "android": { "allowMixedContent": false, "backgroundColor": "#2B0454" },
-  "plugins": { "CapacitorHttp": { "enabled": true }, "SplashScreen": { "launchShowDuration": 1100, "launchAutoHide": true, "backgroundColor": "#2B0454", "showSpinner": false }, "StatusBar": { "style": "LIGHT", "overlaysWebView": true, "backgroundColor": "#00000000" } }
+  "android": { "allowMixedContent": false, "backgroundColor": "#17142B" },
+  "plugins": { "CapacitorHttp": { "enabled": true }, "SplashScreen": { "launchShowDuration": 1100, "launchAutoHide": true, "backgroundColor": "#17142B", "showSpinner": false }, "StatusBar": { "style": "LIGHT", "overlaysWebView": true, "backgroundColor": "#00000000" } }
 }

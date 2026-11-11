@@ -48,7 +48,7 @@
         const pct = Math.min(100, Math.round(m.todayHours / m.goal * 100));
         const max = Math.max(.5, ...m.week.map(day => day.hours));
         const quoteText = m.quote?.text ? `«${m.quote.text}»` : 'پیشرفت از قدم‌های کوچک و پیوسته ساخته می‌شود.';
-        const quoteAuthor = m.quote?.author ? `— ${m.quote.author}` : 'درسیار';
+        const quoteAuthor = m.quote?.author ? `— ${m.quote.author}` : 'روند';
         root.innerHTML = `
             <section class="ds-hero">
                 <div class="ds-hero-heading"><div><span class="ds-eyebrow">${esc(dayLabel.format(new Date()))}</span><h1>${esc(m.user.name || m.user.username || 'مسیر مطالعه‌ی تو')}</h1></div><span class="ds-streak">${icon('local_fire_department')}<b>${fa(m.streak)}</b><small>روز پیوسته</small></span></div>

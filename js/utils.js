@@ -366,7 +366,7 @@ const Utils = (function () {
     }
 
     // Print element helper
-    function printElement(elementId, title = 'درسیار | StudyMate Pro') {
+    function printElement(elementId, title = 'روند | گزارش مطالعه') {
         const el = document.getElementById(elementId);
         if (!el) return;
 

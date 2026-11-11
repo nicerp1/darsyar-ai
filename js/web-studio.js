@@ -79,7 +79,7 @@ const WebStudio = (() => {
         document.querySelector('[onclick="App.toggleTheme()"]')?.setAttribute('aria-label', 'تغییر تم روشن و تاریک');
         const header = document.querySelector('.top-header');
         const mobileBrand = document.createElement('div'); mobileBrand.className = 'studio-mobile-brand';
-        mobileBrand.innerHTML = '<img src="icons/icon-64.png?v=2" width="31" height="31" alt=""><span>درسیار</span>';
+        mobileBrand.innerHTML = '<img src="icons/ravand-64.png?v=1" width="31" height="31" alt=""><span>روند</span>';
         header?.insertBefore(mobileBrand, header.querySelector('.header-left'));
         const mobileNav = document.createElement('nav'); mobileNav.className = 'studio-mobile-nav'; mobileNav.setAttribute('aria-label','پیمایش اصلی');
         mobileNav.innerHTML = [['dashboard','home','خانه'],['stats','chart','آمار'],['pomodoro','timer','تمرکز'],['schedule','calendar','برنامه'],['profile','user','پروفایل']].map(([route,glyph,label])=>`<button type="button" data-mobile-route="${route}" aria-label="${label}" onclick="App.navigate('${route}')">${icon(glyph)}<span>${label}</span></button>`).join('');
@@ -91,7 +91,7 @@ const WebStudio = (() => {
             if (active) button.setAttribute('aria-current','page');
         });
         const crumb = document.createElement('div'); crumb.className = 'studio-breadcrumb';
-        crumb.innerHTML = `<span>فضای یادگیری من</span><b aria-hidden="true">/</b><strong id="studio-page-name">${window.DarsyarPlatform?.native?'درسیار':'امروزِ تو'}</strong>`;
+        crumb.innerHTML = `<span>فضای یادگیری من</span><b aria-hidden="true">/</b><strong id="studio-page-name">${window.DarsyarPlatform?.native?'روند':'امروزِ تو'}</strong>`;
         header?.insertBefore(crumb, header.querySelector('.header-left'));
         const page = document.createElement('section'); page.id = 'view-chat'; page.className = 'view-section';
         page.innerHTML = `<header class="studio-page-heading"><div><span class="studio-eyebrow">همراه مسیرت</span><h1>یک گفت‌وگوی خوب، یک قدم جلوتر.</h1><p>پیام‌ها، بازخوردها و یادداشت‌هایت؛ همه در یک فضای آرام.</p></div>${icon('chat','studio-heading-icon')}</header><div class="studio-chat-layout"><aside class="studio-chat-aside"><span class="studio-eyebrow">فضای ارتباط</span><div class="studio-contact-symbol">${icon('people')}</div><h2 id="studio-chat-peer"></h2><p id="studio-chat-hint"></p><div class="studio-chat-shortcuts"><button type="button" onclick="Communications.switchTab('chat')">${icon('chat')}گفت‌وگو${icon('arrow')}</button><button type="button" onclick="Communications.switchTab('notes')">${icon('note')}یادداشت‌های شخصی${icon('arrow')}</button><button type="button" onclick="App.navigate('ai-assistant')">${icon('spark')}دستیار هوشمند${icon('arrow')}</button></div><div class="studio-privacy">${icon('shield')}<p>اطلاعات خصوصی و رمز عبورت را در گفت‌وگو ارسال نکن.</p></div></aside><div id="studio-chat-host"></div></div>`;
@@ -150,7 +150,7 @@ const WebStudio = (() => {
         });
         if(name==='chat'&&window.Messenger){clearTransition();return;}
         const view = document.getElementById(`view-${name}`);
-        const crumb = document.getElementById('studio-page-name'); if (crumb) crumb.textContent = window.DarsyarPlatform?.native ? 'درسیار' : (viewLabels[name] || 'درسیار');
+        const crumb = document.getElementById('studio-page-name'); if (crumb) crumb.textContent = window.DarsyarPlatform?.native ? 'روند' : (viewLabels[name] || 'روند');
         document.querySelectorAll('.sidebar .nav-item').forEach(item => item.setAttribute('aria-current', item.classList.contains('active') ? 'page' : 'false'));
         if (!view || reduced() || !view.animate || name === previous) return;
         const navs = [...document.querySelectorAll('.sidebar .nav-item')];

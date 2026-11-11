@@ -286,7 +286,7 @@ const Pomodoro = (function () {
         }
 
         // Title update for tab awareness
-        document.title = timerState === 'running' ? `(${formatted}) درسیار - تایمر پومودورو` : 'درسیار | StudyMate Pro';
+        document.title = timerState === 'running' ? `(${formatted}) روند - تایمر پومودورو` : 'روند | همراه مسیر یادگیری';
         window.WebStudio?.timerState(timerState, currentMode);
     }
 

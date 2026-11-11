@@ -30,7 +30,7 @@ const Exams = (function () {
                     </div>
                     <h3 style="font-size: 16px; font-weight: 700; margin-bottom: 8px; color: var(--text-main);">${e.title}</h3>
                     <p style="font-size: 12.5px; color: var(--text-muted); line-height: 1.5; margin-bottom: 16px;">
-                        طراح: ${e.author || 'اساتید درسیار'} | مدت زمان پاسخ‌گویی: ${pd(e.durationMinutes)} دقیقه
+                        طراح: ${e.author || 'اساتید روند'} | مدت زمان پاسخ‌گویی: ${pd(e.durationMinutes)} دقیقه
                     </p>
                 </div>
                 <button class="btn-primary" style="width: 100%;" onclick="Exams.startExam('${e.id}')">

@@ -51,7 +51,7 @@ module.exports = async (req, res) => {
             return res.status(200).json({ ok: true, blocked });
         }
         const state = await getChatState(username);
-        if (state.chat_blocked) return res.status(403).json({ error: 'این گفت‌وگو متوقف شده است. برای ادامه با پشتیبانی درسیار تماس بگیرید.' });
+        if (state.chat_blocked) return res.status(403).json({ error: 'این گفت‌وگو متوقف شده است. برای ادامه با پشتیبانی روند تماس بگیرید.' });
         const text = String(req.body?.text || '').trim().slice(0, 1000);
         if (!text) return res.status(400).json({ error: 'متن پیام خالی است.' });
         const messages = (await getMessages(username)).slice(-199);

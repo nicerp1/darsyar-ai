@@ -152,7 +152,7 @@ const AIWriting = (function () {
 
     function printEssay() {
         if (typeof Utils !== 'undefined') {
-            Utils.printElement('essay-output-content', 'انشای درسیار');
+            Utils.printElement('essay-output-content', 'انشای روند');
         }
     }
 

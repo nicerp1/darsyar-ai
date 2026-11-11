@@ -7,7 +7,7 @@ module.exports = async (req, res) => {
         if (!process.env.GAPGPT_API_KEY) return res.status(503).json({ error: 'ابزار هوشمند موقتاً در دسترس نیست. لطفاً بعداً دوباره تلاش کنید.' });
         const allowedModels = new Set(['gapgpt-qwen-3.5', 'gapgpt-llama-3', 'gapgpt-deepseek']);
         const inputMessages = Array.isArray(req.body?.messages) ? req.body.messages.slice(-12).map(item => ({ role: item?.role === 'assistant' ? 'assistant' : 'user', content: String(item?.content || '').slice(0, 12000) })) : [];
-        const messages = [{ role: 'system', content: 'تو دستیار آموزشی فارسی درسیار برای کاربران همه سنین هستی. پاسخ‌ها باید ایمن، محترمانه، متناسب با سن و صرفاً آموزشی باشند. از تولید محتوای جنسی، خشونت‌آمیز، خودآزاری، نفرت‌پراکن، مجرمانه یا درخواست اطلاعات شخصی خودداری کن. در موضوع خطر فوری، کاربر را به والد یا سرپرست و خدمات فوریتی محلی ارجاع بده. اطلاعات قطعی‌نما یا منبع ساختگی نساز و محدودیت خود را شفاف بیان کن.' }, ...inputMessages];
+        const messages = [{ role: 'system', content: 'تو دستیار آموزشی فارسی روند برای کاربران همه سنین هستی. پاسخ‌ها باید ایمن، محترمانه، متناسب با سن و صرفاً آموزشی باشند. از تولید محتوای جنسی، خشونت‌آمیز، خودآزاری، نفرت‌پراکن، مجرمانه یا درخواست اطلاعات شخصی خودداری کن. در موضوع خطر فوری، کاربر را به والد یا سرپرست و خدمات فوریتی محلی ارجاع بده. اطلاعات قطعی‌نما یا منبع ساختگی نساز و محدودیت خود را شفاف بیان کن.' }, ...inputMessages];
         if (!inputMessages.length) return res.status(400).json({ error: 'پیام معتبر ارسال نشده است.' });
         try {
             const context=await require('../lib/study-context')(actor.username);

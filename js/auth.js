@@ -23,8 +23,8 @@ const Auth = (function () {
         const intro = currentTab === 'login' ? 'ادامه‌ی مسیرت از همین‌جا شروع می‌شود.' : (registerStep === 1 ? 'برای شروع، چند مشخصات کوتاه ازت می‌گیریم.' : registerStep === 2 ? 'این موارد برای امن و شفاف بودن تجربه ضروری‌اند.' : 'یک نام کاربری و رمز امن انتخاب کن.');
         authContainer.innerHTML = `
             <main class="auth-shell">
-                <section class="auth-story" aria-label="درباره درسیار">
-                    <div class="auth-story-brand"><img src="icons/icon-192.png?v=2" alt="" width="48" height="48"><span><strong>درسیار</strong><small>همراه مسیر یادگیری</small></span></div>
+                <section class="auth-story" aria-label="درباره روند">
+                    <div class="auth-story-brand"><img src="icons/ravand-192.png?v=1" alt="" width="48" height="48"><span><strong>روند</strong><small>همراه مسیر یادگیری</small></span></div>
                     <div class="auth-story-content">
                         <span class="auth-eyebrow"><i></i> مسیر خودت را بساز</span>
                         <h1>هر روز،<br><em>یک قدم جلوتر.</em></h1>
@@ -34,7 +34,7 @@ const Auth = (function () {
                     <div class="auth-story-footer"><span class="auth-orbit" aria-hidden="true"><i></i><i></i><i></i></span><span>مسیر یادگیری،<br><strong>به سبک تو.</strong></span></div>
                 </section>
                 <section class="auth-panel" aria-labelledby="auth-heading">
-                    <div class="auth-mobile-brand"><img src="icons/icon-192.png?v=2" alt="" width="42" height="42"><strong>درسیار</strong></div>
+                    <div class="auth-mobile-brand"><img src="icons/ravand-192.png?v=1" alt="" width="42" height="42"><strong>روند</strong></div>
                     <div class="auth-panel-heading"><span class="auth-kicker">فضای یادگیری شخصی</span><h2 id="auth-heading">${heading}</h2><p>${intro}</p></div>
                     <div class="auth-tabs" role="tablist" aria-label="نوع دسترسی">
                         <button type="button" role="tab" aria-selected="${currentTab === 'login'}" class="auth-tab-btn ${currentTab === 'login' ? 'active' : ''}" onclick="Auth.switchTab('login')">ورود</button>
@@ -57,7 +57,7 @@ const Auth = (function () {
                         ` : ''}
                         ${currentTab === 'register' && registerStep === 2 ? `<div class="auth-consent-fields">
                             <div class="form-group"><label class="form-label" for="auth-age-group">رده سنی</label><select id="auth-age-group" class="form-control" onchange="Auth.updateConsentFields()"><option value="adult" ${registerDraft.ageGroup === 'adult' ? 'selected' : ''}>۱۸ سال یا بیشتر</option><option value="under18" ${registerDraft.ageGroup === 'under18' ? 'selected' : ''}>کمتر از ۱۸ سال</option></select></div>
-                            <label class="auth-check"><input id="auth-legal-accepted" type="checkbox" ${registerDraft.legalAccepted ? 'checked' : ''}><span>قوانین و <a href="privacy.html" target="_blank" rel="noopener">حریم خصوصی درسیار</a> را خوانده‌ام و می‌پذیرم.</span></label>
+                            <label class="auth-check"><input id="auth-legal-accepted" type="checkbox" ${registerDraft.legalAccepted ? 'checked' : ''}><span>قوانین و <a href="privacy.html" target="_blank" rel="noopener">حریم خصوصی روند</a> را خوانده‌ام و می‌پذیرم.</span></label>
                             <label id="auth-parental-consent-row" class="auth-check ${registerDraft.ageGroup === 'under18' ? '' : 'hidden'}"><input id="auth-parental-consent" type="checkbox" ${registerDraft.parentalConsent ? 'checked' : ''}><span>والد یا سرپرست قانونی با ساخت حساب و پردازش داده‌ها موافق است.</span></label>
                             <div class="auth-submit-row"><button type="button" class="auth-back-button" onclick="Auth.goToRegisterStep(1)" aria-label="بازگشت"><span class="material-symbols-outlined" aria-hidden="true">arrow_forward</span></button><button type="submit" class="auth-primary-button">ادامه <span class="material-symbols-outlined" aria-hidden="true">arrow_back</span></button></div>
                         </div>` : ''}
@@ -65,11 +65,11 @@ const Auth = (function () {
                         ${(currentTab === 'login' && loginMethod === 'username') || (currentTab === 'register' && registerStep === 3) ? `
                             <div class="auth-field"><label class="form-label" for="auth-username">نام کاربری</label><div class="auth-input-wrap"><span class="material-symbols-outlined" aria-hidden="true">person</span><input type="text" id="auth-username" class="form-control" placeholder="نام کاربری‌ات را وارد کن" required autocomplete="username" autocapitalize="none"></div></div>
                             <div class="auth-field"><label class="form-label" for="auth-password">رمز عبور${currentTab === 'register' ? '؛ حداقل ۸ نویسه' : ''}</label><div class="auth-input-wrap"><span class="material-symbols-outlined" aria-hidden="true">lock</span><input type="password" id="auth-password" class="form-control" placeholder="رمز عبور" required minlength="${currentTab === 'register' ? '8' : '1'}" autocomplete="${currentTab === 'login' ? 'current-password' : 'new-password'}"><button type="button" onclick="Auth.togglePassword()" aria-label="نمایش یا پنهان کردن رمز عبور"><span class="material-symbols-outlined" id="auth-password-icon" aria-hidden="true">visibility</span></button></div></div>
-                            ${currentTab === 'login' ? '<button class="auth-forgot" type="button" onclick="Utils.showToast(\'برای بازیابی رمز با پشتیبانی درسیار تماس بگیرید.\', \'info\')">رمز عبور را فراموش کرده‌ای؟</button>' : ''}
-                            <div class="auth-submit-row">${currentTab === 'register' ? '<button type="button" class="auth-back-button" onclick="Auth.goToRegisterStep(2)" aria-label="بازگشت"><span class="material-symbols-outlined" aria-hidden="true">arrow_forward</span></button>' : ''}<button type="submit" id="btn-auth-submit" class="auth-primary-button"><span class="material-symbols-outlined" aria-hidden="true">${currentTab === 'login' ? 'login' : 'person_add'}</span>${currentTab === 'login' ? 'ورود به درسیار' : 'ایجاد حساب'}</button></div>
+                            ${currentTab === 'login' ? '<button class="auth-forgot" type="button" onclick="Utils.showToast(\'برای بازیابی رمز با پشتیبانی روند تماس بگیرید.\', \'info\')">رمز عبور را فراموش کرده‌ای؟</button>' : ''}
+                            <div class="auth-submit-row">${currentTab === 'register' ? '<button type="button" class="auth-back-button" onclick="Auth.goToRegisterStep(2)" aria-label="بازگشت"><span class="material-symbols-outlined" aria-hidden="true">arrow_forward</span></button>' : ''}<button type="submit" id="btn-auth-submit" class="auth-primary-button"><span class="material-symbols-outlined" aria-hidden="true">${currentTab === 'login' ? 'login' : 'person_add'}</span>${currentTab === 'login' ? 'ورود به روند' : 'ایجاد حساب'}</button></div>
                         ` : ''}
                     </form>
-                    <p class="auth-legal-note">با ادامه، استفاده از درسیار تابع <a href="privacy.html" target="_blank" rel="noopener">قوانین و حریم خصوصی</a> است.</p>
+                    <p class="auth-legal-note">با ادامه، استفاده از روند تابع <a href="privacy.html" target="_blank" rel="noopener">قوانین و حریم خصوصی</a> است.</p>
                 </section>
             </main>`;
     }

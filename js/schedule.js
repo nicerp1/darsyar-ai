@@ -131,7 +131,7 @@ const Schedule = (function () {
     }
     async function removeManualReport(id) { if (!confirm('این گزارش حذف شود؟')) return; try { await Storage.saveConfirmed('manual_reports', (Storage.get('manual_reports',[])||[]).filter(item => item.id !== id)); renderReports(); } catch(error) { Utils.showToast(error.message,'error'); } }
     function openForStudent(username) { requestedTarget = username; App.navigate('schedule'); toggleAdminDrawer(true); }
-    function printSchedule() { Utils?.printElement('schedule-printable-area', adminTarget ? `برنامه ${adminTarget.name || adminTarget.username}` : 'برنامه مطالعاتی هفتگی درسیار'); }
+    function printSchedule() { Utils?.printElement('schedule-printable-area', adminTarget ? `برنامه ${adminTarget.name || adminTarget.username}` : 'برنامه مطالعاتی هفتگی روند'); }
     const getState = () => ({ days: current(), manager: Boolean(adminTarget), target: adminTarget });
     return { getState, init, toggleAdminDrawer, selectAdminStudent, openEditTaskModal, saveTaskSubmit, deleteCurrentTask, launchPomoForTask, updateReportDuration, saveManualReport, removeManualReport, openForStudent, printSchedule };
 })();

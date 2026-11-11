@@ -3,9 +3,10 @@ from PIL import Image, ImageDraw
 
 
 ROOT = Path(__file__).resolve().parents[1]
-SOURCE = ROOT / "assets/brand/darsyar-logo.png"
-MARK = ROOT / "assets/brand/darsyar-mark.png"
-PURPLE = (43, 4, 84, 255)
+SOURCE = ROOT / "assets/brand/ravand-profile.png"
+MARK = ROOT / "assets/brand/ravand-mark.png"
+ICON_BG = (247, 244, 255, 255)
+SPLASH_BG = (23, 20, 43, 255)
 
 
 def contain(image: Image.Image, size: tuple[int, int], ratio: float = 1.0) -> Image.Image:
@@ -24,13 +25,13 @@ def save_png(image: Image.Image, path: Path) -> None:
 
 master = Image.open(SOURCE).convert("RGBA")
 master = contain(master, (1024, 1024))
-save_png(master, ROOT / "assets/brand/darsyar-logo.png")
+save_png(master, SOURCE)
 mark = Image.open(MARK).convert("RGBA")
 mark = contain(mark, (1024, 1024))
 save_png(mark, MARK)
 
 for size in (64, 192, 512):
-    save_png(master.resize((size, size), Image.Resampling.LANCZOS), ROOT / f"icons/icon-{size}.png")
+    save_png(master.resize((size, size), Image.Resampling.LANCZOS), ROOT / f"icons/ravand-{size}.png")
 
 densities = {
     "mdpi": (48, 108),
@@ -46,7 +47,7 @@ for density, (launcher_size, foreground_size) in densities.items():
 
     round_mask = Image.new("L", (launcher_size, launcher_size), 0)
     ImageDraw.Draw(round_mask).ellipse((0, 0, launcher_size - 1, launcher_size - 1), fill=255)
-    round_icon = Image.new("RGBA", (launcher_size, launcher_size), PURPLE)
+    round_icon = Image.new("RGBA", (launcher_size, launcher_size), ICON_BG)
     round_icon.alpha_composite(launcher)
     round_icon.putalpha(round_mask)
     save_png(round_icon, folder / "ic_launcher_round.png")
@@ -57,9 +58,9 @@ for density, (launcher_size, foreground_size) in densities.items():
 for splash_path in (ROOT / "android/app/src/main/res").glob("drawable*/splash.png"):
     with Image.open(splash_path) as current:
         size = current.size
-    splash = Image.new("RGBA", size, PURPLE)
+    splash = Image.new("RGBA", size, SPLASH_BG)
     splash_mark = contain(mark, size, 0.26)
     splash.alpha_composite(splash_mark)
     save_png(splash.convert("RGB"), splash_path)
 
-print("Brand assets generated successfully.")
+print("Ravand brand assets generated successfully.")

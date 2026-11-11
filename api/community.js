@@ -3,7 +3,7 @@ const {notify} = require('./_notifications');
 const androidReleaseNotice={
     id:'news_111bbab6-8ccd-42bf-a943-a5e96874405f',
     type:'news',
-    title:'نسخه جدید اپلیکیشن اندروید درسیار آماده است. برای دریافت و نصب، این اعلان را باز کنید.',
+    title:'نسخه جدید اپلیکیشن اندروید روند آماده است. برای دریافت و نصب، این اعلان را باز کنید.',
     target:'https://github.com/nicerp1/darsyar-ai/releases/latest/download/darsyar.apk',
     createdAt:'2026-11-01T16:45:00.000Z'
 };

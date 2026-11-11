@@ -32,7 +32,7 @@ assert.doesNotMatch(index, /stats-exam-history|تاریخچه آزمون‌ها�
 assert.doesNotMatch(stats, /3\.5|12\.5, 9\.0|weekHours \* 4\.2/);
 assert.match(mobile, /classList\.add\('native-shell'\)/);
 assert.doesNotMatch(mobile, /classList\.add\('capacitor-app'\)|android-bottom-nav|android-dashboard/);
-assert.match(studio, /window\.DarsyarPlatform\?\.native\s*\?\s*'درسیار'/);
+assert.match(studio, /window\.DarsyarPlatform\?\.native\s*\?\s*'روند'/);
 assert.match(app, /const mobileWeb = matchMedia\('\(max-width: 720px\)'\)\.matches/);
 assert.match(index, /css\/native-shell\.css/);
 assert.match(nativeCss, /safe-area-inset-top/);

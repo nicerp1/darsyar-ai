@@ -161,7 +161,7 @@ const Stats = (function () {
     function exportPDFReport() {
         if (window.WebStudio?.enabled() && window.StudyWorkspace) return StudyWorkspace.printStats();
         if (typeof Utils !== 'undefined') {
-            Utils.printElement('stats-report-printable-area', 'کارنامه و گزارش تحلیلی درسیار');
+            Utils.printElement('stats-report-printable-area', 'کارنامه و گزارش تحلیلی روند');
         }
     }
 

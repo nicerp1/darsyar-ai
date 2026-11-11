@@ -126,7 +126,7 @@ const AIResearch = (function () {
         // Built-in academic research generator
         return `# 📑 گزارش پژوهشی و مقاله علمی: «${topic}»
 
-**سطح علمی:** ${level} | **روش استناد:** ${style} | **سامانه:** درسیار (StudyMate Pro)
+**سطح علمی:** ${level} | **روش استناد:** ${style} | **سامانه:** روند
 
 ---
 
@@ -181,7 +181,7 @@ $$\\text{Performance Index} = \\alpha \\cdot \\text{Efficiency} + (1-\\alpha) \\
 
     function printPaper() {
         if (typeof Utils !== 'undefined') {
-            Utils.printElement('research-output-content', 'مقاله علمی پژوهشی درسیار');
+            Utils.printElement('research-output-content', 'مقاله علمی پژوهشی روند');
         }
     }
 

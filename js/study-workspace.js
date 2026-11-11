@@ -73,7 +73,7 @@ const StudyWorkspace=(()=>{
     function printStats(){
         const details=document.querySelector('.sw-time-details'),wasOpen=details?.open;
         if(details)details.open=true;
-        try{Utils.printElement('stats-report-printable-area','گزارش زمان مطالعه درسیار');}finally{if(details)details.open=wasOpen;}
+        try{Utils.printElement('stats-report-printable-area','گزارش زمان مطالعه روند');}finally{if(details)details.open=wasOpen;}
     }
     return {duration,short,data,stats:(period)=>{stats(period);window.StudyFlow?.mountReport();document.dispatchEvent(new CustomEvent('stats:rendered'));},flashcards,box,cardState,focus,printStats};
 })();

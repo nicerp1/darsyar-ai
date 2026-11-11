@@ -52,7 +52,7 @@
         let glow = c.createRadialGradient(W * .85, 260, 0, W * .85, 260, 640); glow.addColorStop(0, P.glow + '66'); glow.addColorStop(1, P.glow + '00'); c.fillStyle = glow; c.fillRect(0, 0, W, H);
         glow = c.createRadialGradient(W * .1, H * .82, 0, W * .1, H * .82, 700); glow.addColorStop(0, P.glow + '33'); glow.addColorStop(1, P.glow + '00'); c.fillStyle = glow; c.fillRect(0, 0, W, H);
         c.strokeStyle = '#ffffff10'; c.lineWidth = 2; for (let i = 0; i < 6; i++) { c.beginPath(); c.arc(W * .5, H * .38, 280 + i * 120, 0, Math.PI * 2); c.stroke(); }
-        roundedRect(c, 80, 96, 180, 64, 32); c.fillStyle = '#ffffff1f'; c.fill(); text('درسیار', 170, 142, 34, 800, P.ink);
+        roundedRect(c, 80, 96, 180, 64, 32); c.fillStyle = '#ffffff1f'; c.fill(); text('روند', 170, 142, 34, 800, P.ink);
         const f = new Intl.DateTimeFormat('fa-IR-u-ca-persian', { day: 'numeric', month: 'long' });
         text(`${f.format(data.days[0].d)} تا ${f.format(data.days[6].d)}`, W - 80, 142, 32, 600, P.ink + 'cc', 'right');
         text('هفته‌ی مطالعه‌ی من', W / 2, 330, 58, 800, P.ink); text(data.name, W / 2, 410, 40, 600, P.ink + 'bb');
@@ -64,7 +64,7 @@
         data.days.forEach((row, i) => { const x = bx + (6 - i) * (col + gap), h = Math.max(row.h ? 18 : 8, row.h / max * bh), y = by + bh - h, best = row === data.best && row.h > 0; roundedRect(c, x, y, col, h, Math.min(24, h / 2)); c.fillStyle = best ? P.accent : row.h ? '#ffffffcc' : '#ffffff2e'; c.fill(); if (row.h > 0) text(num(row.h), x + col / 2, y - 18, 28, 700, best ? P.accent : P.ink + 'dd'); text(DAY_S[(row.d.getDay() + 1) % 7], x + col / 2, by + bh + 64, 34, 700, P.ink + 'aa'); });
         const tiles = [[pd(data.streak), 'روز پیاپی', '🔥'], [num(data.avg), 'ساعت در روز', '⏱️'], [data.plan == null ? '—' : pd(data.plan) + '٪', 'پایبندی به برنامه', '✅']], tw = (W - 160 - 56) / 3;
         tiles.forEach(([value, label, emoji], i) => { const x = 80 + (2 - i) * (tw + 28), y = 1530; roundedRect(c, x, y, tw, 230, 40); c.fillStyle = '#ffffff1a'; c.fill(); text(emoji, x + tw / 2, y + 66, 44, 600, P.ink); text(value, x + tw / 2, y + 140, 62, 800, P.ink); text(label, x + tw / 2, y + 194, 28, 600, P.ink + 'aa'); });
-        text('قدم به قدم، با درسیار', W / 2, 1852, 34, 700, P.ink + '99');
+        text('قدم به قدم، با روند', W / 2, 1852, 34, 700, P.ink + '99');
     }
     function build() {
         overlay = document.createElement('div'); overlay.className = 'shx'; overlay.setAttribute('role', 'dialog'); overlay.setAttribute('aria-modal', 'true'); overlay.setAttribute('aria-label', 'کارت اشتراک هفتگی');
@@ -77,7 +77,7 @@
     const note = message => { const el = overlay.querySelector('#shx-note'); el.textContent = message; clearTimeout(note.timer); note.timer = setTimeout(() => { el.textContent = ''; }, 3200); };
     const fileName = () => `darsyar-week-${new Date().toISOString().slice(0, 10)}.png`;
     async function save() { const image = await toBlob(); if (!image) return note('ساخت تصویر ممکن نشد.'); if (hooks.save) { await hooks.save(image, fileName()); return note('تصویر ذخیره شد.'); } const link = document.createElement('a'); link.href = URL.createObjectURL(image); link.download = fileName(); document.body.append(link); link.click(); link.remove(); setTimeout(() => URL.revokeObjectURL(link.href), 4000); note('تصویر ذخیره شد.'); }
-    async function share() { const image = await toBlob(); if (!image) return note('ساخت تصویر ممکن نشد.'); const file = new File([image], 'darsyar-week.png', { type: 'image/png' }); if (hooks.share) { try { await hooks.share(image, file); return; } catch (error) { if (error?.name === 'AbortError') return; } } else if (navigator.canShare?.({ files: [file] }) && navigator.share) { try { await navigator.share({ files: [file], title: 'هفته‌ی مطالعه‌ی من', text: 'هفته‌ی مطالعه‌ی من در درسیار' }); return; } catch (error) { if (error?.name === 'AbortError') return; } } await save(); note('اشتراک مستقیم ممکن نیست؛ تصویر ذخیره شد.'); }
+    async function share() { const image = await toBlob(); if (!image) return note('ساخت تصویر ممکن نشد.'); const file = new File([image], 'darsyar-week.png', { type: 'image/png' }); if (hooks.share) { try { await hooks.share(image, file); return; } catch (error) { if (error?.name === 'AbortError') return; } } else if (navigator.canShare?.({ files: [file] }) && navigator.share) { try { await navigator.share({ files: [file], title: 'هفته‌ی مطالعه‌ی من', text: 'هفته‌ی مطالعه‌ی من در روند' }); return; } catch (error) { if (error?.name === 'AbortError') return; } } await save(); note('اشتراک مستقیم ممکن نیست؛ تصویر ذخیره شد.'); }
     function close() { overlay?.classList.remove('on'); document.documentElement.classList.remove('shx-lock'); setTimeout(() => lastFocus?.focus?.(), 0); }
     async function open() { lastFocus = document.activeElement; if (!overlay) build(); data = gather(); try { await document.fonts?.ready; await document.fonts?.load?.(`800 40px ${getComputedStyle(document.body).fontFamily}`); } catch (_) { /* use fallback font */ } draw(); overlay.classList.add('on'); document.documentElement.classList.add('shx-lock'); overlay.querySelector('.shx-primary').focus({ preventScroll: true }); }
     window.ShareCard = { open, close, configure: options => Object.assign(hooks, options || {}) };

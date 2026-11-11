@@ -8,7 +8,7 @@
     const button = document.getElementById('reset-submit');
     const show = (message, kind = '') => { status.textContent = message; status.dataset.kind = kind; };
     if (!/^[a-z0-9_.-]{3,32}$/.test(username) || !/^[a-f0-9]{64}$/.test(token)) {
-        show('لینک بازیابی معتبر نیست. برای دریافت لینک تازه با پشتیبانی درسیار تماس بگیر.', 'error');
+        show('لینک بازیابی معتبر نیست. برای دریافت لینک تازه با پشتیبانی روند تماس بگیر.', 'error');
         return;
     }
     document.getElementById('reset-username').textContent = `@${username}`;
