@@ -9,12 +9,12 @@
   "orientation": "portrait-primary",
   "icons": [
     {
-      "src": "icons/ravand-192.png?v=1",
+      "src": "icons/ravand-192.png?v=2",
       "sizes": "192x192",
       "type": "image/png"
     },
     {
-      "src": "icons/ravand-512.png?v=1",
+      "src": "icons/ravand-512.png?v=2",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any maskable"

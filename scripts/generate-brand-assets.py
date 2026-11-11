@@ -3,7 +3,7 @@ from PIL import Image, ImageDraw
 
 
 ROOT = Path(__file__).resolve().parents[1]
-SOURCE = ROOT / "assets/brand/ravand-profile.png"
+SOURCE = ROOT / "assets/brand/ravand-logo.png"
 MARK = ROOT / "assets/brand/ravand-mark.png"
 ICON_BG = (247, 244, 255, 255)
 SPLASH_BG = (23, 20, 43, 255)

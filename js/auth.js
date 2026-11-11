@@ -24,7 +24,7 @@ const Auth = (function () {
         authContainer.innerHTML = `
             <main class="auth-shell">
                 <section class="auth-story" aria-label="درباره روند">
-                    <div class="auth-story-brand"><img src="icons/ravand-192.png?v=1" alt="" width="48" height="48"><span><strong>روند</strong><small>همراه مسیر یادگیری</small></span></div>
+                    <div class="auth-story-brand"><img src="icons/ravand-192.png?v=2" alt="" width="48" height="48"><span><strong>روند</strong><small>همراه مسیر یادگیری</small></span></div>
                     <div class="auth-story-content">
                         <span class="auth-eyebrow"><i></i> مسیر خودت را بساز</span>
                         <h1>هر روز،<br><em>یک قدم جلوتر.</em></h1>
@@ -34,7 +34,7 @@ const Auth = (function () {
                     <div class="auth-story-footer"><span class="auth-orbit" aria-hidden="true"><i></i><i></i><i></i></span><span>مسیر یادگیری،<br><strong>به سبک تو.</strong></span></div>
                 </section>
                 <section class="auth-panel" aria-labelledby="auth-heading">
-                    <div class="auth-mobile-brand"><img src="icons/ravand-192.png?v=1" alt="" width="42" height="42"><strong>روند</strong></div>
+                    <div class="auth-mobile-brand"><img src="icons/ravand-192.png?v=2" alt="" width="42" height="42"><strong>روند</strong></div>
                     <div class="auth-panel-heading"><span class="auth-kicker">فضای یادگیری شخصی</span><h2 id="auth-heading">${heading}</h2><p>${intro}</p></div>
                     <div class="auth-tabs" role="tablist" aria-label="نوع دسترسی">
                         <button type="button" role="tab" aria-selected="${currentTab === 'login'}" class="auth-tab-btn ${currentTab === 'login' ? 'active' : ''}" onclick="Auth.switchTab('login')">ورود</button>
