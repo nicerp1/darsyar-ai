@@ -21,7 +21,7 @@
     const dateOf = i => { const d = new Date(); d.setDate(d.getDate() + i - today()); return d; };
     const dur = m => { const h = Math.floor(m / 60), r = m % 60; return h ? (r ? `${pd(h)} ساعت و ${pd(r)} دقیقه` : `${pd(h)} ساعت`) : `${pd(r)} دقیقه`; };
 
-    let root, data = null, sel = today(), mode = 'day', dir = 0, seen = new Map(), firstPaint = true;
+    let root, data = null, sel = today(), mode = 'table', dir = 0, seen = new Map(), firstPaint = true;
     const $ = (s, r = root) => r.querySelector(s);
 
     function mount() {
@@ -42,6 +42,7 @@
             <i class="scm-thumb" aria-hidden="true"></i>
             <button type="button" role="tab" data-mode="day" aria-selected="true">${ico('today')}روز</button>
             <button type="button" role="tab" data-mode="week" aria-selected="false">${ico('calendar_view_week')}هفته</button>
+            <button type="button" role="tab" data-mode="table" aria-selected="false">${ico('grid_on')}جدول</button>
         </div>
         <div class="scm-strip" id="scm-strip" role="tablist" aria-label="روزهای هفته">
             ${DAY_S.map((s, i) => `<button type="button" role="tab" data-day="${i}"><small>${s}</small><b></b><i><u></u></i></button>`).join('')}
@@ -54,9 +55,23 @@
             </section>
             <div class="scm-list" id="scm-list"></div>
         </div>
-        <div class="scm-week" id="scm-week" hidden></div>`;
+        <div class="scm-week" id="scm-week" hidden></div>
+        <section id="scm-table" hidden aria-label="جدول برنامه هفتگی"></section>`;
         anchor.before(root);
         root.addEventListener('click', onClick);
+        const dialog = document.createElement('dialog');
+        dialog.id = 'scm-detail'; dialog.className = 'scm-detail';
+        dialog.setAttribute('aria-labelledby', 'scm-detail-title');
+        document.body.append(dialog);
+        dialog.addEventListener('click', e => {
+            if (e.target === dialog || e.target.closest('[data-detail-close]')) dialog.close();
+            const action = e.target.closest('[data-detail-action]');
+            if (!action) return;
+            const d = Number(dialog.dataset.day), t = Number(dialog.dataset.task);
+            dialog.close();
+            if (action.dataset.detailAction === 'edit') Schedule.openEditTaskModal(d, t);
+            else Schedule.launchPomoForTask(d, t);
+        });
         bindSwipe($('#scm-day'));
         return true;
     }
@@ -85,7 +100,10 @@
         $('.scm-seg').dataset.mode = mode;
         root.querySelectorAll('.scm-seg [data-mode]').forEach(b => b.setAttribute('aria-selected', String(b.dataset.mode === mode)));
         $('#scm-day').hidden = mode !== 'day'; $('#scm-week').hidden = mode !== 'week'; $('#scm-strip').classList.toggle('is-off', mode !== 'day');
-        mode === 'day' ? paintDay(rows[sel], animate) : paintWeek(rows);
+        $('#scm-table').hidden = mode !== 'table';
+        if (mode === 'day') paintDay(rows[sel], animate);
+        else if (mode === 'week') paintWeek(rows);
+        else paintTable(rows);
         firstPaint = false;
     }
 
@@ -137,6 +155,27 @@
         }).join('');
     }
 
+    function paintTable(rows) {
+        const count = Math.max(1, ...data.days.map(day => day.tasks.length));
+        const total = rows.reduce((sum, row) => sum + row.minutes, 0);
+        $('#scm-table').innerHTML = `<div class="scm-table-heading"><div><span class="scm-eyebrow">نقشه هفته تو</span><h3>یک هفته، یک نگاه</h3><p>روی هر درس بزن و جزئیاتش را ببین.</p></div><span class="scm-table-total">${ico('schedule')}${dur(total)} مطالعه</span></div>
+        <div class="scm-table-scroll" tabindex="0" role="region" aria-label="جدول هفتگی؛ برای دیدن همه روزها افقی حرکت کنید"><table class="scm-timetable"><caption>برنامه هفتگی · زمان‌ها مدت مطالعه هستند</caption><thead><tr><th scope="col">نوبت</th>${data.days.map((day, d) => `<th scope="col" class="${d === today() ? 'is-today' : ''}"><strong>${DAY_L[d]}</strong><small>${faFull.format(dateOf(d))}${d === today() ? ' · امروز' : ''}</small><span>${dur(rows[d].minutes)}</span></th>`).join('')}</tr></thead><tbody>${Array.from({length: count}, (_, t) => `<tr><th scope="row"><span>${pd(t + 1)}</span><small>نوبت مطالعه</small></th>${data.days.map((day, d) => {
+            const task = day.tasks[t];
+            if (!task) return `<td><button type="button" class="scm-table-empty" data-act="table-add" data-d="${d}" aria-label="افزودن درس به ${DAY_L[d]}">${ico('add')}<span>وقت آزاد</span></button></td>`;
+            const status = STATUS[task.status] || STATUS.pending;
+            return `<td><button type="button" class="scm-table-course" data-act="detail" data-d="${d}" data-t="${t}" style="--course:${esc(task.color)}" aria-label="جزئیات ${esc(task.subject)}، ${DAY_L[d]}، ${dur(task.durationMinutes)}"><span class="scm-course-status">${ico(task.status === 'completed' ? 'check_circle' : 'menu_book')}${status[0]}</span><strong>${esc(task.subject)}</strong><span class="scm-course-time">${ico('schedule')}${dur(task.durationMinutes)}</span><small>${esc(task.note || 'مشاهده جزئیات درس')}${ico('arrow_back')}</small></button></td>`;
+        }).join('')}</tr>`).join('')}</tbody></table></div><p class="scm-table-hint">${ico('info')}هر ردیف یک نوبت مطالعه است؛ زمان هر کارت، مدت پیشنهادی مطالعه همان درس است.</p>`;
+    }
+
+    function showDetail(d, t) {
+        const task = data.days[d]?.tasks[t];
+        if (!task) return;
+        const dialog = document.getElementById('scm-detail');
+        dialog.dataset.day = d; dialog.dataset.task = t;
+        dialog.innerHTML = `<header><span class="scm-eyebrow">${DAY_L[d]} · نوبت ${pd(t + 1)}</span><button type="button" data-detail-close aria-label="بستن جزئیات">${ico('close')}</button></header><h2 id="scm-detail-title">${esc(task.subject)}</h2><div class="scm-detail-meta"><span>${ico('schedule')}${dur(task.durationMinutes)}</span><span>${(STATUS[task.status] || STATUS.pending)[0]}</span></div><h3>توضیحات درس</h3><p class="scm-detail-note">${esc(task.note || 'هنوز توضیحی برای این درس ثبت نشده است.')}</p><footer><button type="button" data-detail-action="edit">${ico('edit')}ویرایش درس</button>${data.manager ? '' : `<button type="button" class="is-primary" data-detail-action="focus">${ico('play_arrow')}شروع تمرکز</button>`}</footer>`;
+        dialog.showModal();
+    }
+
     function go(i, animate = true) {
         if (i < 0 || i > 6 || (i === sel && mode === 'day')) return;
         dir = i > sel ? 1 : -1; sel = i; mode = 'day'; paint(animate);
@@ -155,6 +194,8 @@
         if (el.dataset.day != null) return go(Number(el.dataset.day));
         if (el.dataset.pick != null) { dir = 0; sel = Number(el.dataset.pick); mode = 'day'; return paint(true); }
         if (el.dataset.mode) { if (mode !== el.dataset.mode) { mode = el.dataset.mode; dir = 0; paint(true); } return; }
+        if (el.dataset.act === 'detail') return showDetail(Number(el.dataset.d), Number(el.dataset.t));
+        if (el.dataset.act === 'table-add') return window.Schedule?.openEditTaskModal(Number(el.dataset.d), -1);
         const card = el.closest('.scm-task'), d = Number(card?.dataset.d ?? sel), t = Number(card?.dataset.t);
         switch (el.dataset.act) {
             case 'add': return window.Schedule?.openEditTaskModal(sel, -1);
