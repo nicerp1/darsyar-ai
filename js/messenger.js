@@ -40,14 +40,14 @@ const Messenger=(()=>{
     let requestedPeer;
     let settings={}, reactions={}, presenceState={}, unreadSince='', deliveredAt='', presenceSent=0, olderPending=false;
     let upload=null;
-    const state=()=>({user,peer,person,threads,messages:[...legacy,...messages],blocked,ownBlock,settings,reactions,presence:presenceState,unreadSince,readAt,deliveredAt,hasMore});
+    const state=()=>({user,peer,person,threads,messages:[...legacy,...messages],blocked,ownBlock,canReport,settings,reactions,presence:presenceState,unreadSince,readAt,deliveredAt,hasMore});
     function sessionMeta(p,initial=false){
         settings=p.settings||{}; reactions=p.reactions||{}; presenceState=p.presence||{};
         deliveredAt=p.deliveredAt||'';
         if(initial)unreadSince=p.ownReadAt||((threads.find(t=>t.peer===peer)?.unread)?'0000':'');
     }
     function presence(typing){
-        if(!active||document.hidden||!peer||peer.startsWith('~')||blocked||Date.now()-presenceSent<(typing?2400:20000))return;
+        if(!active||document.hidden||!$('im-log')?.clientHeight||!peer||peer.startsWith('~')||blocked||Date.now()-presenceSent<(typing?2400:20000))return;
         presenceSent=Date.now();void request({action:'presence',peer,typing}).catch(()=>{});
     }
     const readReceipts=new Map();
@@ -60,7 +60,7 @@ const Messenger=(()=>{
         eventStream?.close();eventStream=null;streamReady=false;
         if(!active||document.hidden||typeof EventSource==='undefined')return;
         const version=epoch,source=new EventSource('/api/chat?messenger=1&action=events');eventStream=source;
-        source.onopen=()=>{if(eventStream===source){streamReady=true;extras()?.connection('متصل');}};
+        source.onopen=()=>{if(eventStream===source){streamReady=true;extras()?.connection('');}};
         source.addEventListener('changed',()=>{if(version!==epoch||!active||eventStream!==source)return;void refresh();void refreshList();});
         source.onerror=()=>{if(eventStream===source){streamReady=false;setTimeout(()=>{if(eventStream===source&&!streamReady)extras()?.connection('در حال اتصال دوباره…');},3000);}};
         source.addEventListener('unavailable',()=>{streamReady=false;});
@@ -80,11 +80,8 @@ const Messenger=(()=>{
         // Keep the old notes drawer intact for the notes shortcut and old clients.
         const previous=view.querySelector('#communications-drawer');if(previous){document.body.append(previous);previous.classList.remove('open');previous.setAttribute('aria-hidden','true');}
         view.innerHTML=desk().layout();
-        $('im-exit').onclick=()=>App.navigate('dashboard');$('im-back').onclick=()=>$('im-shell').classList.remove('im-mobile-chat');
-        $('im-new').onclick=()=>{$('im-lookup').hidden=!$('im-lookup').hidden;if(!$('im-lookup').hidden)$('im-username').focus();};
+        $('im-exit').onclick=()=>App.navigate('dashboard');
         $('im-search').oninput=renderThreads;
-        $('im-lookup').onsubmit=async e=>{e.preventDefault();const target=$('im-username').value.trim().replace(/^@/,'').toLowerCase();$('im-lookup-status').textContent='در حال پیدا کردن کاربر…';const ok=await select(target);$('im-lookup-status').textContent=ok?'':$('im-feedback').textContent;if(ok){$('im-lookup').hidden=true;$('im-username').value='';}};
-        $('im-person').onclick=()=>{if(person&&!peer.startsWith('~'))Community.profile(peer);};
         $('im-mute').onclick=async()=>{const target=peer,seq=sequence,t=threads.find(x=>x.peer===target),next=!t?.muted;try{await request({action:'mute',peer:target,muted:next});if(seq!==sequence||target!==peer)return;t.muted=next;renderThreads();renderHeader();feedback(next?'اعلان‌های این گفتگو بی‌صدا شد.':'اعلان‌های این گفتگو فعال شد.');}catch(e){feedback(e.message);}};
         $('im-block').onclick=async()=>{if(!confirm(ownBlock?'مسدودسازی این گفتگو برداشته شود؟':'این کاربر دیگر نتواند به شما پیام بدهد؟'))return;try{await request({action:'block',peer,blocked:!ownBlock});await select(peer);}catch(e){feedback(e.message);}};
         $('im-input').oninput=()=>{draft().text=$('im-input').value;draft().id=null;rememberDraft(peer,draft().text);$('im-input').style.height='auto';$('im-input').style.height=Math.min(140,$('im-input').scrollHeight)+'px';};
@@ -93,7 +90,7 @@ const Messenger=(()=>{
         $('im-attach').onclick=()=>$('im-file').click();
         $('im-file').onchange=e=>{const files=[...e.target.files];e.target.value='';void attach(files);};
         desk().mount({state,renderThreads,esc,avatar,select,createGroup,preferences,presence,fileURL,message:id=>[...messages,...legacy].find(m=>m.id===id),feedback,search,globalSearch,findLoaded,older,messageAction,modify,forward,attach,read:()=>markRead()});
-        $('im-back').onclick=()=>{desk().close();$('im-shell').classList.remove('im-mobile-chat');$('im-search').focus();};
+        $('im-back').onclick=()=>{stopPlayback();desk().close();$('im-shell').classList.remove('im-mobile-chat');($('im-threads').querySelector('[aria-current="true"]')||$('im-new')).focus();};
     }
     function mountExtras(){extras()?.mount({state:()=>({user,peer,blocked,canReport,canReview}),request,sendFile:async(file,target)=>{if(peer!==target||blocked)return false;file.clientId=file.clientId||crypto.randomUUID();if(outbox.has(file.clientId))return await send(false,file.clientId);draft().file=file;draft().id=file.clientId;return await send();},submitReport:async(data,target)=>{if(peer!==target)throw Error('گفتگو تغییر کرده است.');const version=epoch,p=await request({action:'studyReport',peer:target,...data});if(version!==epoch)throw Error('حساب تغییر کرده است.');if(p.data)Storage.applyServerData(p.data);if(peer===target){messages=[...new Map([...messages,p.message].map(m=>[m.id,m])).values()];renderMessages(true);}void refreshList();return p;},review:async(id,feedbackText,target)=>{const version=epoch,p=await request({action:'reviewStudyReport',peer:target,id,feedback:feedbackText});if(version!==epoch)return;if(peer===target){messages=messages.map(m=>m.id===id?p.message:m);renderMessages();}}});}
     function stopPlayback(){document.querySelectorAll('#im-log audio').forEach(audio=>{if(!audio.paused)audio.pause();});}
@@ -129,20 +126,22 @@ const Messenger=(()=>{
         document.body.classList.add('im-open');active=true;layout();mountExtras();
         clearInterval(poll);
         const version=epoch;
-        if(target||peer){void refreshList();await select(target||peer);}
+        if(target||peer){void refreshList();await select(target||peer,{showConversation:Boolean(target)});}
         else{
             const cached=await cacheReadThreads();
             if(!active||version!==epoch)return;
             if(cached){threads=cached;renderThreads();void refreshList();}
             else await refreshList();
-            if(!active||version!==epoch)return;
-            if(!selecting&&!peer)await select(threads.find(t=>t.pinned&&!t.person?.group)?.peer||'~saved');
         }
         if(!active||version!==epoch)return;
         connectEvents();
-        poll=setInterval(()=>{if(active&&!document.hidden&&(!streamReady||Date.now()-lastSync>8000))refresh();},1500);
+        poll=setInterval(()=>{
+            if(!active||document.hidden)return;
+            if(peer&&(!streamReady||Date.now()-lastSync>8000))void refresh();
+            else if(!peer&&Date.now()-lastListRefresh>15000)void refreshList();
+        },1500);
     }
-    function leave(){stopPlayback();extras()?.close();desk()?.close();active=false;sequence++;clearInterval(poll);poll=null;eventStream?.close();eventStream=null;streamReady=false;document.body.classList.remove('im-open');}
+    function leave(){stopPlayback();extras()?.close();desk()?.close();$('im-shell')?.classList.remove('im-mobile-chat');active=false;sequence++;clearInterval(poll);poll=null;eventStream?.close();eventStream=null;streamReady=false;document.body.classList.remove('im-open');}
     function logout(){
         leave();
         upload?.abort();
@@ -151,25 +150,26 @@ const Messenger=(()=>{
         try{for(let i=localStorage.length-1;i>=0;i--){const key=localStorage.key(i);if(key?.startsWith(prefix))localStorage.removeItem(key);}}catch{}
         syncUser();$('view-chat')?.querySelector('#im-shell')?.remove();
     }
-    async function refreshList(){const version=epoch;try{const p=await request(null,'&action=list');if(version!==epoch)return;threads=p.threads||[];renderThreads();void cacheWriteThreads(threads);}catch(e){if(active)feedback(e.message);}}
+    async function refreshList(){const version=epoch;lastListRefresh=Date.now();try{const p=await request(null,'&action=list');if(version!==epoch)return;threads=p.threads||[];renderThreads();void cacheWriteThreads(threads);}catch(e){if(active)feedback(e.message);}}
     function renderThreads(){if($('im-threads'))desk().threads(threads);}
-    function applySnapshot(target,p,seq,fromCache=false){if(seq!==sequence)return false;peer=target===user?'~saved':target;person={...p.peer,username:peer};messages=[...new Map([...Array.from(outbox.values()).filter(e=>e.target===peer).map(e=>({id:e.id,sender:user,text:e.snapshot.text||(e.snapshot.file?.voice?'پیام صوتی':'فایل پیوست'),createdAt:e.createdAt||(e.createdAt=new Date().toISOString()),pending:!e.failed,failed:e.failed})),...(p.messages||[])].map(m=>[m.id,m])).values()].sort((a,b)=>a.createdAt.localeCompare(b.createdAt));legacy=p.legacy||[];canReport=Boolean(p.canReport);canReview=Boolean(p.canReview);hasMore=Boolean(p.hasMore);messageCursor=p.cursor||p.messageCursor||null;olderCursor=p.olderCursor||null;blocked=Boolean(p.blocked);ownBlock=Boolean(p.ownBlock);readAt=p.readAt||'';aiRetry=null;if(peer==='~saved')person.name='پیام‌های ذخیره‌شده';let thread=threads.find(t=>t.peer===peer);if(!thread){thread={peer,person,preview:''};threads.push(thread);}thread.person=person;thread.muted=Boolean(p.muted??thread.muted);sessionMeta(p,true);renderThreads();renderHeader();desk().header();renderMessages(true);restoreDraft();$('im-shell').classList.add('im-mobile-chat');selecting=false;if(!fromCache)presence(false);feedback(fromCache?'نسخهٔ ذخیره‌شده · در حال همگام‌سازی…':blocked?'این گفتگو مسدود است.':peer==='~ai'?'پاسخ‌های این دستیار کوتاه‌اند؛ برای توضیح مفصل از صفحهٔ دستیار استفاده کن.':'');if(!fromCache)updateReceipts();return true;}
-    async function select(target){
+    function applySnapshot(target,p,seq,fromCache=false){if(seq!==sequence)return false;peer=target===user?'~saved':target;person={...p.peer,username:peer};messages=[...new Map([...Array.from(outbox.values()).filter(e=>e.target===peer).map(e=>({id:e.id,sender:user,text:e.snapshot.text||(e.snapshot.file?.voice?'پیام صوتی':'فایل پیوست'),createdAt:e.createdAt||(e.createdAt=new Date().toISOString()),pending:!e.failed,failed:e.failed})),...(p.messages||[])].map(m=>[m.id,m])).values()].sort((a,b)=>a.createdAt.localeCompare(b.createdAt));legacy=p.legacy||[];canReport=Boolean(p.canReport);canReview=Boolean(p.canReview);hasMore=Boolean(p.hasMore);messageCursor=p.cursor||p.messageCursor||null;olderCursor=p.olderCursor||null;blocked=Boolean(p.blocked);ownBlock=Boolean(p.ownBlock);readAt=p.readAt||'';aiRetry=null;if(peer==='~saved')person.name='پیام‌های ذخیره‌شده';let thread=threads.find(t=>t.peer===peer);if(!thread){thread={peer,person,preview:''};threads.push(thread);}thread.person=person;thread.muted=Boolean(p.muted??thread.muted);sessionMeta(p,true);renderThreads();renderHeader();desk().header();$('im-shell').classList.add('desk-has-chat');renderMessages(true);restoreDraft();selecting=false;if(!fromCache)presence(false);feedback(fromCache?'نسخهٔ ذخیره‌شده · در حال همگام‌سازی…':blocked?'این گفتگو مسدود است.':peer==='~ai'?'پاسخ‌های این دستیار کوتاه‌اند؛ برای توضیح مفصل از صفحهٔ دستیار استفاده کن.':'');if(!fromCache)updateReceipts();return true;}
+    async function select(target,{showConversation=true,preserveDialog=false}={}){
         if(!syncUser()||!$('im-shell'))return false;
         if(target!==peer)upload?.abort();
-        stopPlayback();extras()?.close();desk().close();
+        stopPlayback();extras()?.close();if(!preserveDialog)desk().close();
         const version=epoch,seq=++sequence,previous=peer;
         selecting=true;
-        if(target!==previous){desk().loading();$('im-shell').classList.add('im-mobile-chat');}
+        if(target!==previous)desk().loading();
         feedback('در حال دریافت گفتگو…');
         $('im-send').disabled=$('im-input').disabled=$('im-attach').disabled=true;
         let cached;
         try{
             cached=await cacheRead(target);
             if(seq!==sequence||version!==epoch||!active)return false;
-            if(cached){applySnapshot(target,cached,seq,true);selecting=true;}
+            if(cached){if(showConversation)$('im-shell').classList.add('im-mobile-chat');applySnapshot(target,cached,seq,true);selecting=true;}
             const p=await request(null,'&peer='+encodeURIComponent(target));
             if(seq!==sequence||version!==epoch||!active)return false;
+            if(showConversation&&!cached)$('im-shell').classList.add('im-mobile-chat');
             applySnapshot(target,p,seq);void cacheWrite(peer,p);return true;
         }catch(error){
             if(seq===sequence&&version===epoch){
@@ -240,7 +240,7 @@ const Messenger=(()=>{
             renderThreads();
         }catch{if(readReceipts.get(key)===at)readReceipts.set(key,previous);}
     }
-    async function refresh(){if(refreshing){refreshAgain=true;return;}if(selecting||!peer)return;refreshing=true;const seq=sequence,target=peer;try{const after=messageCursor?`&afterAt=${encodeURIComponent(messageCursor.at)}&afterKey=${encodeURIComponent(messageCursor.key)}`:'';const p=await request(null,`&peer=${encodeURIComponent(target)}&light=1${after}`);if(!active||seq!==sequence)return;lastSync=Date.now();extras()?.connection(streamReady?'متصل':'همگام‌سازی خودکار');messageCursor=p.cursor||messageCursor;const before=JSON.stringify([messages,reactions,deliveredAt]);sessionMeta(p);desk().header();presence(false);messages=[...new Map([...messages,...p.messages].map(m=>[m.id,m])).values()].sort((a,b)=>a.createdAt.localeCompare(b.createdAt));const changed=before!==JSON.stringify([messages,reactions,deliveredAt])||readAt!==p.readAt;readAt=p.readAt;blocked=p.blocked;ownBlock=p.ownBlock;restoreDraftControls();extras()?.update();void cacheWrite(target,{peer:person,messages,legacy,canReport,canReview,hasMore,messageCursor,blocked,ownBlock,readAt,settings,reactions,deliveredAt,muted:threads.find(t=>t.peer===target)?.muted});if(changed){renderMessages();updateReceipts();}if(p.moreChanges)setTimeout(()=>{if(active&&seq===sequence)refresh();},0);if(Date.now()-lastListRefresh>15000){lastListRefresh=Date.now();void refreshList();}}catch(e){if(active&&seq===sequence)feedback(e.message);}finally{refreshing=false;if(refreshAgain){refreshAgain=false;setTimeout(()=>{if(active)refresh();},0);}}}
+    async function refresh(){if(refreshing){refreshAgain=true;return;}if(selecting||!peer)return;refreshing=true;const seq=sequence,target=peer;try{const after=messageCursor?`&afterAt=${encodeURIComponent(messageCursor.at)}&afterKey=${encodeURIComponent(messageCursor.key)}`:'';const p=await request(null,`&peer=${encodeURIComponent(target)}&light=1${after}`);if(!active||seq!==sequence)return;lastSync=Date.now();extras()?.connection('');messageCursor=p.cursor||messageCursor;const before=JSON.stringify([messages,reactions,deliveredAt]);sessionMeta(p);desk().header();presence(false);messages=[...new Map([...messages,...p.messages].map(m=>[m.id,m])).values()].sort((a,b)=>a.createdAt.localeCompare(b.createdAt));const changed=before!==JSON.stringify([messages,reactions,deliveredAt])||readAt!==p.readAt;readAt=p.readAt;blocked=p.blocked;ownBlock=p.ownBlock;restoreDraftControls();extras()?.update();void cacheWrite(target,{peer:person,messages,legacy,canReport,canReview,hasMore,messageCursor,blocked,ownBlock,readAt,settings,reactions,deliveredAt,muted:threads.find(t=>t.peer===target)?.muted});if(changed){renderMessages();updateReceipts();}if(p.moreChanges)setTimeout(()=>{if(active&&seq===sequence)refresh();},0);if(Date.now()-lastListRefresh>15000){lastListRefresh=Date.now();void refreshList();}}catch(e){if(active&&seq===sequence)feedback(e.message);}finally{refreshing=false;if(refreshAgain){refreshAgain=false;setTimeout(()=>{if(active)refresh();},0);}}}
     const fileData=blob=>new Promise((resolve,reject)=>{
         const reader=new FileReader();
         reader.onload=()=>resolve(String(reader.result).split(',')[1]);

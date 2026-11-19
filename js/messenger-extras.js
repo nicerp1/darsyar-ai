@@ -5,7 +5,7 @@ const MessengerExtras=(()=>{
     const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
     const ascii=v=>String(v).replace(/[۰-۹]/g,c=>'۰۱۲۳۴۵۶۷۸۹'.indexOf(c)).replace(/[٠-٩]/g,c=>'٠١٢٣٤٥٦٧٨٩'.indexOf(c));
     const fa=v=>Number(v).toLocaleString('fa-IR');
-    const icon=path=>`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="${path}"/></svg>`;
+    const icon=path=>`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="${path}"/></svg>`;
     const soundDuration=audio=>Number.isFinite(audio.duration)&&audio.duration>0?audio.duration:Number(audio.dataset.duration)||0;
     const soundTime=sec=>fa(Math.floor(sec/60))+':'+String(Math.floor(sec%60)).padStart(2,'0').replace(/\d/g,d=>'۰۱۲۳۴۵۶۷۸۹'[d]);
     function voiceButton(audio,playing){
@@ -15,12 +15,15 @@ const MessengerExtras=(()=>{
         button.setAttribute('aria-label',playing?'توقف موقت ویس':'پخش ویس');
     }
     function mount(bridge){
-        api=bridge;if(document.getElementById('im-extra-actions'))return;
-        const actions=document.createElement('div');actions.id='im-extra-actions';
-        actions.innerHTML=`<button type="button" id="im-voice">${icon('M9 5a3 3 0 0 1 6 0v7a3 3 0 0 1-6 0ZM5 10v2a7 7 0 0 0 14 0v-2M12 19v3M8 22h8')}پیام صوتی</button><button type="button" id="im-study-report">${icon('M6 3h12v19H6ZM9 8h6M9 12h6M9 16h4')}گزارش مطالعه</button><span id="im-connection" role="status"></span>`;
-        document.getElementById('im-compose').before(actions);
-        actions.querySelector('#im-voice').onclick=startVoice;actions.querySelector('#im-study-report').onclick=openReport;
-        bindHold(actions.querySelector('#im-voice'));
+        api=bridge;if(document.getElementById('im-voice'))return;
+        const mic=document.createElement('button');
+        mic.id='im-voice';mic.className='im-icon';mic.type='button';mic.title='پیام صوتی';mic.setAttribute('aria-label',mic.title);
+        mic.innerHTML=icon('M9 5a3 3 0 0 1 6 0v7a3 3 0 0 1-6 0ZM5 10v2a7 7 0 0 0 14 0v-2M12 19v3M8 22h8');
+        document.getElementById('im-send').before(mic);
+        const status=document.createElement('div');status.id='im-connection';status.setAttribute('role','status');
+        document.getElementById('im-compose').before(status);
+        mic.onclick=startVoice;
+        bindHold(mic);
         const log=document.getElementById('im-log');
         log.addEventListener('click',async event=>{
             const button=event.target.closest('[data-voice-play]');if(!button)return;
@@ -60,9 +63,18 @@ const MessengerExtras=(()=>{
         document.getElementById('im-log').addEventListener('click',e=>{const button=e.target.closest('[data-review-study]');if(button)review(button.dataset.reviewStudy);});
         update();
     }
-    function update(){if(!api)return;const s=api.state();const mic=document.getElementById('im-voice'),report=document.getElementById('im-study-report');if(mic)mic.disabled=s.blocked||s.peer==='~ai'||!s.peer;if(report){report.hidden=!s.canReport;report.disabled=s.blocked;}}
+    function update(){const mic=document.getElementById('im-voice');if(!api||!mic)return;const s=api.state();mic.hidden=s.peer==='~ai';mic.disabled=s.blocked||!s.peer;}
     function connection(text){const node=document.getElementById('im-connection');if(node&&node.textContent!==text)node.textContent=text;}
-    function modal(title){close();dialog=document.createElement('dialog');dialog.className='im-extra-dialog';dialog.setAttribute('aria-label',title);dialog.innerHTML=`<header><h2>${esc(title)}</h2><button type="button" aria-label="بستن">×</button></header><div class="im-extra-content"></div>`;document.body.append(dialog);dialog.querySelector('header button').onclick=close;dialog.addEventListener('cancel',e=>{e.preventDefault();close();});dialog.showModal();return dialog.querySelector('.im-extra-content');}
+    function modal(title){
+        close();
+        dialog=document.createElement('dialog');dialog.className='desk-dialog im-extra-dialog';dialog.setAttribute('aria-label',title);
+        dialog.innerHTML=`<header><h2>${esc(title)}</h2><button type="button" class="im-icon" aria-label="بستن">${icon('M6 6l12 12M18 6 6 18')}</button></header><div class="desk-dialog-body im-extra-content"></div>`;
+        document.getElementById('im-shell').append(dialog);
+        dialog.querySelector('header button').onclick=close;
+        dialog.addEventListener('cancel',event=>{event.preventDefault();close();});
+        dialog.showModal();
+        return dialog.querySelector('.im-extra-content');
+    }
     function stopTracks(){
         stream?.getTracks().forEach(t=>t.stop());stream=null;clearInterval(tick);tick=null;
         cancelAnimationFrame(frame);frame=null;
@@ -201,6 +213,6 @@ const MessengerExtras=(()=>{
             <div class="rond-voice-info"><time data-voice-time>${soundTime(0)} / ${soundTime(length)}</time><select data-audio-rate aria-label="سرعت پخش"><option value="1">۱×</option><option value="1.5">۱٫۵×</option><option value="2">۲×</option></select></div></div><small data-voice-status role="status" dir="rtl"></small></div>`;
     }
     function review(id){const context=api.state(),body=modal('بازخورد گزارش'),token=recordingToken;body.innerHTML='<form><label>یادداشت برای دانش‌آموز<textarea name="feedback" rows="4" maxlength="1000" placeholder="نکته یا قدم بعدی را بنویس…"></textarea></label><p role="alert"></p><button class="im-primary" type="submit">بررسی شد؛ ارسال بازخورد</button></form>';body.querySelector('form').onsubmit=async e=>{e.preventDefault();const f=e.currentTarget,b=f.querySelector('button');b.disabled=true;try{await api.review(id,f.elements.feedback.value,context.peer);if(token===recordingToken)close();}catch(error){if(token!==recordingToken)return;f.querySelector('p').textContent=error.message;b.disabled=false;}};}
-    return {mount,update,connection,close,reportHTML,voiceHTML};
+    return {mount,update,connection,close,openReport,reportHTML,voiceHTML};
 })();
 window.MessengerExtras=MessengerExtras;
