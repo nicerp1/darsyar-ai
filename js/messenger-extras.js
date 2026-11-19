@@ -1,6 +1,7 @@
 /* Voice and structured study reports; recordings stay in memory until sent. */
 const MessengerExtras=(()=>{
     let api,recorder,stream,tick,recordingToken=0,previewURL=null,voice=null,dialog=null;
+    let meter, frame, hold;
     const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
     const ascii=v=>String(v).replace(/[۰-۹]/g,c=>'۰۱۲۳۴۵۶۷۸۹'.indexOf(c)).replace(/[٠-٩]/g,c=>'٠١٢٣٤٥٦٧٨٩'.indexOf(c));
     const fa=v=>Number(v).toLocaleString('fa-IR');
@@ -11,6 +12,30 @@ const MessengerExtras=(()=>{
         actions.innerHTML=`<button type="button" id="im-voice">${icon('M9 5a3 3 0 0 1 6 0v7a3 3 0 0 1-6 0ZM5 10v2a7 7 0 0 0 14 0v-2M12 19v3M8 22h8')}پیام صوتی</button><button type="button" id="im-study-report">${icon('M6 3h12v19H6ZM9 8h6M9 12h6M9 16h4')}گزارش مطالعه</button><span id="im-connection" role="status"></span>`;
         document.getElementById('im-compose').before(actions);
         actions.querySelector('#im-voice').onclick=startVoice;actions.querySelector('#im-study-report').onclick=openReport;
+        bindHold(actions.querySelector('#im-voice'));
+        const log=document.getElementById('im-log');
+        log.addEventListener('play',event=>{
+            if(!event.target.matches('audio'))return;
+            log.querySelectorAll('audio').forEach(audio=>{if(audio!==event.target)audio.pause();});
+        },true);
+        log.addEventListener('ended',event=>{
+            const entry=event.target.closest('[data-message]');
+            const next=entry?.nextElementSibling?.querySelector('audio');
+            if(next)void next.play().catch(()=>{});
+        },true);
+        log.addEventListener('timeupdate',event=>{
+            const audio=event.target,seek=audio.closest('.im-voice-card')?.querySelector('[data-voice-seek]');
+            if(!seek||!Number.isFinite(audio.duration)||audio.duration<=0)return;
+            seek.value=audio.currentTime/audio.duration*100;
+            seek.parentElement.style.setProperty('--played',seek.value+'%');
+        },true);
+        log.addEventListener('input',event=>{
+            if(!event.target.matches('[data-voice-seek]'))return;
+            const audio=event.target.closest('.im-voice-card').querySelector('audio'), fraction=Number(event.target.value)/100;
+            const seek=()=>{const length=Number.isFinite(audio.duration)?audio.duration:Number(audio.dataset.duration);if(length>0)audio.currentTime=length*fraction;};
+            if(audio.readyState)seek();
+            else{audio.addEventListener('loadedmetadata',seek,{once:true});audio.load();}
+        });
         document.getElementById('im-log').addEventListener('change',e=>{if(e.target.matches('[data-audio-rate]'))e.target.closest('.im-voice-card').querySelector('audio').playbackRate=Number(e.target.value);});
         document.getElementById('im-log').addEventListener('click',e=>{const button=e.target.closest('[data-review-study]');if(button)review(button.dataset.reviewStudy);});
         update();
@@ -18,11 +43,75 @@ const MessengerExtras=(()=>{
     function update(){if(!api)return;const s=api.state();const mic=document.getElementById('im-voice'),report=document.getElementById('im-study-report');if(mic)mic.disabled=s.blocked||s.peer==='~ai'||!s.peer;if(report){report.hidden=!s.canReport;report.disabled=s.blocked;}}
     function connection(text){const node=document.getElementById('im-connection');if(node&&node.textContent!==text)node.textContent=text;}
     function modal(title){close();dialog=document.createElement('dialog');dialog.className='im-extra-dialog';dialog.setAttribute('aria-label',title);dialog.innerHTML=`<header><h2>${esc(title)}</h2><button type="button" aria-label="بستن">×</button></header><div class="im-extra-content"></div>`;document.body.append(dialog);dialog.querySelector('header button').onclick=close;dialog.addEventListener('cancel',e=>{e.preventDefault();close();});dialog.showModal();return dialog.querySelector('.im-extra-content');}
-    function stopTracks(){stream?.getTracks().forEach(t=>t.stop());stream=null;clearInterval(tick);tick=null;}
+    function stopTracks(){
+        stream?.getTracks().forEach(t=>t.stop());stream=null;clearInterval(tick);tick=null;
+        cancelAnimationFrame(frame);frame=null;
+        if(meter){void meter.close().catch(()=>{});meter=null;}
+    }
     function close(){recordingToken++;if(recorder&&recorder.state!=='inactive')recorder.stop();recorder=null;stopTracks();if(previewURL)URL.revokeObjectURL(previewURL);previewURL=null;voice=null;if(dialog){dialog.close();dialog.remove();dialog=null;}}
+    function bindHold(button){
+        let timer,press,suppressClick=false;
+        button.addEventListener('pointerdown',event=>{
+            if(event.button!==0||button.disabled)return;
+            press={pointer:event.pointerId,x:event.clientX,y:event.clientY,held:false,locked:false};
+            timer=setTimeout(()=>{
+                if(!press)return;
+                press.held=true;suppressClick=true;hold=press;
+                void startVoice();
+            },270);
+        });
+        const move=event=>{
+            if(!press?.held||press.pointer!==event.pointerId||press.locked)return;
+            if(press.y-event.clientY>60){press.locked=true;const hint=document.getElementById('im-voice-gesture');if(hint)hint.textContent='ضبط قفل شد';}
+            else if(Math.abs(event.clientX-press.x)>85){press.locked=true;close();}
+        };
+        const release=event=>{
+            if(press?.pointer!==event.pointerId)return;
+            clearTimeout(timer);
+            if(press.held&&!press.locked){if(event.type==='pointercancel')close();else if(press.finish)press.finish();else press.released=true;}
+            press=null;
+            setTimeout(()=>{suppressClick=false;},0);
+        };
+        button.addEventListener('click',event=>{if(suppressClick)event.stopImmediatePropagation();},true);
+        window.addEventListener('pointermove',move,{passive:true});
+        window.addEventListener('pointerup',release);
+        window.addEventListener('pointercancel',release);
+        logCleanup(button,move,release);
+    }
+    function logCleanup(button,move,release){
+        const observer=new MutationObserver(()=>{
+            if(button.isConnected)return;
+            window.removeEventListener('pointermove',move);window.removeEventListener('pointerup',release);window.removeEventListener('pointercancel',release);
+            observer.disconnect();
+        });
+        observer.observe(document.getElementById('view-chat'),{childList:true});
+    }
+    function levelsFor(stream,output,samples){
+        const Context=window.AudioContext||window.webkitAudioContext;
+        if(!Context)return;
+        try{
+            meter=new Context();const analyser=meter.createAnalyser();
+            meter.createMediaStreamSource(stream).connect(analyser);analyser.fftSize=256;
+            void meter.resume().catch(()=>{});
+            const data=new Uint8Array(analyser.fftSize);
+            let last=0;
+            const paint=now=>{
+                if(!meter)return;
+                if(now-last>48){
+                    last=now;analyser.getByteTimeDomainData(data);
+                    const rms=Math.sqrt(data.reduce((sum,v)=>sum+((v-128)/128)**2,0)/data.length);
+                    samples.push(Math.min(100,Math.round(rms*260)));
+                    const bars=output.children;
+                    for(let i=0;i<bars.length;i++)bars[i].style.transform='scaleY('+Math.max(.08,(samples.at(i-bars.length)||0)/100)+')';
+                }
+                frame=requestAnimationFrame(paint);
+            };
+            frame=requestAnimationFrame(paint);
+        }catch{}
+    }
     async function startVoice(){
         const context=api.state();if(context.blocked||context.peer==='~ai')return;
-        const body=modal('پیام صوتی');const token=recordingToken;
+        const gesture=hold;hold=null;const body=modal('پیام صوتی');const token=recordingToken;
         if(!navigator.mediaDevices?.getUserMedia||typeof MediaRecorder==='undefined'){body.textContent='مرورگر شما ضبط صدا را پشتیبانی نمی‌کند. از مرورگر به‌روز و اتصال HTTPS استفاده کن.';return;}
         body.innerHTML='<p role="status">برای شروع ضبط، دسترسی میکروفن را تأیید کن.</p>';
         try{
@@ -31,9 +120,11 @@ const MessengerExtras=(()=>{
             stream=tracks;
             const mime=['audio/webm;codecs=opus','audio/ogg;codecs=opus','audio/mp4'].find(t=>MediaRecorder.isTypeSupported(t));
             recorder=new MediaRecorder(stream,{...(mime?{mimeType:mime}:{}),audioBitsPerSecond:48000});
-            const chunks=[],started=Date.now();let duration=0,bytes=0;
-            body.innerHTML='<div class="im-recording"><span class="im-record-dot"></span><strong id="im-record-time">۰۰:۰۰</strong><p>در حال ضبط · حداکثر ۳ دقیقه</p></div><button type="button" class="im-primary" id="im-stop-voice">توقف و گوش‌دادن</button><button type="button" id="im-cancel-voice">لغو ضبط</button>';
+            const chunks=[],samples=[],started=Date.now();let duration=0,bytes=0;
+            body.innerHTML='<div class="im-recording"><span class="im-record-dot"></span><strong id="im-record-time">۰۰:۰۰</strong><div class="desk-meter" aria-hidden="true">'+'<i></i>'.repeat(32)+'</div><p id="im-voice-gesture">'+(gesture?'بالا برای قفل، به طرفین برای لغو':'در حال ضبط · حداکثر ۳ دقیقه')+'</p></div><button type="button" class="im-primary" id="im-stop-voice">توقف و گوش‌دادن</button><button type="button" id="im-cancel-voice">لغو ضبط</button>';
             const finish=()=>{if(recorder?.state==='recording'){duration=Math.min(180,(Date.now()-started)/1000);recorder.stop();stopTracks();}};
+            if(gesture)gesture.finish=finish;
+            levelsFor(tracks,body.querySelector('.desk-meter'),samples);
             recorder.ondataavailable=e=>{if(e.data.size){chunks.push(e.data);bytes+=e.data.size;if(bytes>1900000)finish();}};
             recorder.onerror=()=>{if(token!==recordingToken)return;stopTracks();body.innerHTML='<p role="alert">ضبط صدا ناموفق بود؛ پنجره را ببند و دوباره تلاش کن.</p>';};
             recorder.onstop=async()=>{
@@ -41,13 +132,20 @@ const MessengerExtras=(()=>{
                 const type=recorder.mimeType||mime||'audio/webm',blob=new Blob(chunks,{type});
                 if(!blob.size||blob.size>2*1024*1024){body.textContent='فایل صوتی خالی یا بزرگ‌تر از ۲ مگابایت است؛ دوباره ضبط کن.';return;}
                 previewURL=URL.createObjectURL(blob);const extension=type.includes('mp4')?'m4a':type.includes('ogg')?'ogg':'webm';
-                const data=await base64(blob);if(token!==recordingToken)return;
-                voice={name:`voice-${Date.now()}.${extension}`,data,voice:true,duration:Math.max(1,duration)};
+                let data;
+                try{data=await base64(blob);}catch{if(token===recordingToken)body.textContent='آماده‌سازی پیام صوتی ناموفق بود.';return;}
+                if(token!==recordingToken)return;
+                const waveform=Array.from({length:48},(_,i)=>{
+                    const start=Math.floor(samples.length*i/48),end=Math.floor(samples.length*(i+1)/48);
+                    return Math.max(0,...samples.slice(start,Math.max(start+1,end)));
+                });
+                voice={name:`voice-${Date.now()}.${extension}`,data,voice:true,duration:Math.max(1,duration),waveform};
                 body.innerHTML=`<p>قبل از ارسال گوش بده · ${fa(Math.ceil(duration))} ثانیه</p><audio controls preload="metadata" src="${previewURL}"></audio><div class="im-extra-buttons"><button type="button" class="im-primary" id="im-confirm-voice">ارسال ویس</button><button type="button" id="im-discard-voice">حذف و لغو</button></div><p id="im-voice-status" role="status"></p>`;
                 body.querySelector('#im-discard-voice').onclick=close;
                 body.querySelector('#im-confirm-voice').onclick=async e=>{e.target.disabled=true;body.querySelector('#im-voice-status').textContent='در حال ارسال…';const ok=await api.sendFile(voice,context.peer);if(token!==recordingToken)return;if(ok)close();else{e.target.disabled=false;body.querySelector('#im-voice-status').textContent='ارسال نشد؛ ویس برای تلاش دوباره آماده است.';}};
             };
             recorder.start(1000);tick=setInterval(()=>{const elapsed=Math.min(180,Math.floor((Date.now()-started)/1000));const timer=document.getElementById('im-record-time');if(timer)timer.textContent=`${String(Math.floor(elapsed/60)).padStart(2,'0')}:${String(elapsed%60).padStart(2,'0')}`;if(elapsed>=180)finish();},250);
+            if(gesture?.released&&!gesture.locked)finish();
             body.querySelector('#im-stop-voice').onclick=finish;body.querySelector('#im-cancel-voice').onclick=close;
         }catch(error){stopTracks();if(token===recordingToken)body.textContent=error.name==='NotAllowedError'?'اجازهٔ میکروفن داده نشد. دسترسی میکروفن را در تنظیمات مرورگر فعال کن.':'میکروفن در دسترس نیست؛ اتصال و برنامه‌های دیگر را بررسی کن.';}
     }
@@ -73,7 +171,12 @@ const MessengerExtras=(()=>{
         }catch(error){if(token===recordingToken)body.textContent=error.message;}
     }
     function reportHTML(message){const r=message.studyReport;if(!r)return '';const status={completed:'کامل',partial:'ناقص',missed:'انجام‌نشده'}[r.status]||'ثبت شده';const seconds=Math.round(r.seconds??Number(r.minutes||0)*60);return `<section class="im-study-card"><small>گزارش مطالعه · ${esc(r.source==='timer'?'زمان تایمر':'گزارش دستی')}</small><h3>${esc(r.subject)}</h3><div class="im-study-metrics"><strong>${fa(Math.floor(seconds/60))}<small>دقیقه${seconds%60?` و ${fa(seconds%60)} ثانیه`:''}</small></strong><span>${status}</span></div><p>${esc(r.date?new Date(r.date+'T12:00:00').toLocaleDateString('fa-IR'):'')}${r.start?` · ${esc(r.start)} تا ${esc(r.end)}`:''}</p>${r.testCount!=null?`<p>${fa(r.testCount)} تست</p>`:''}${r.notes?`<p dir="auto">${esc(r.notes)}</p>`:''}${r.review?`<div class="im-study-review"><strong>بررسی‌شده توسط مشاور</strong><p dir="auto">${esc(r.review.feedback||'گزارشت بررسی شد؛ به مسیرت ادامه بده.')}</p></div>`:'<small>هنوز بررسی نشده</small>'}${api?.state().canReview?`<button type="button" data-review-study="${esc(message.id)}">${r.review?'ویرایش بازخورد':'بررسی و بازخورد'}</button>`:''}</section>`;}
-    function voiceHTML(file,url){return `<div class="im-voice-card"><small>پیام صوتی · ${fa(file.duration||0)} ثانیه</small><audio controls preload="none" src="${esc(url)}" aria-label="پیام صوتی"></audio><label>سرعت پخش<select data-audio-rate><option value="1">۱×</option><option value="1.5">۱٫۵×</option><option value="2">۲×</option></select></label></div>`;}
+    function voiceHTML(file,url){
+        const bars=(file.waveform||[]).slice(0,48).map(v=>'<i style="transform:scaleY('+Math.max(.08,Math.min(1,Number(v)/100||0))+')"></i>').join('');
+        return `<div class="im-voice-card"><small>پیام صوتی · ${fa(file.duration||0)} ثانیه</small><audio controls preload="none" src="${esc(url)}" data-duration="${Number(file.duration)||0}" aria-label="پیام صوتی"></audio>
+            ${bars?'<div class="desk-voice-wave" dir="ltr"><div class="desk-meter" aria-hidden="true">'+bars+'</div><input data-voice-seek type="range" min="0" max="100" value="0" step=".1" aria-label="موقعیت پخش"></div>':''}
+            <label>سرعت پخش<select data-audio-rate><option value="1">۱×</option><option value="1.25">۱٫۲۵×</option><option value="1.5">۱٫۵×</option><option value="1.75">۱٫۷۵×</option><option value="2">۲×</option></select></label></div>`;
+    }
     function review(id){const context=api.state(),body=modal('بازخورد گزارش'),token=recordingToken;body.innerHTML='<form><label>یادداشت برای دانش‌آموز<textarea name="feedback" rows="4" maxlength="1000" placeholder="نکته یا قدم بعدی را بنویس…"></textarea></label><p role="alert"></p><button class="im-primary" type="submit">بررسی شد؛ ارسال بازخورد</button></form>';body.querySelector('form').onsubmit=async e=>{e.preventDefault();const f=e.currentTarget,b=f.querySelector('button');b.disabled=true;try{await api.review(id,f.elements.feedback.value,context.peer);if(token===recordingToken)close();}catch(error){if(token!==recordingToken)return;f.querySelector('p').textContent=error.message;b.disabled=false;}};}
     return {mount,update,connection,close,reportHTML,voiceHTML};
 })();
