@@ -132,7 +132,6 @@ const App = (function () {
         if(['ai-writing','ai-research'].includes(viewName))viewName='ai-assistant';
         if(viewName!=='chat')window.Messenger?.leave();
         const previousView = currentView;
-        if (viewName === 'chat' && !window.WebStudio?.enabled()) { Communications.open('chat'); return; }
         if (!isFeatureEnabled(viewName)) viewName = 'dashboard';
         if (viewName === 'admin' && !Storage.isManager()) {
             currentView = 'dashboard';
@@ -146,7 +145,7 @@ const App = (function () {
             document.body.classList.toggle('aw-chat-open',fullChat);
             document.querySelectorAll('#sidebar,.top-header').forEach(element=>{element.inert=fullChat;});
         }
-        if (window.WebStudio?.enabled()) Communications.close();
+        if (viewName==='chat'||window.WebStudio?.enabled()) Communications.close();
 
         // Hide all views
         document.querySelectorAll('.view-section').forEach(section => {
@@ -217,8 +216,7 @@ const App = (function () {
                 if (typeof Profile !== 'undefined') Profile.init();
                 break;
             case 'chat':
-                if(window.Messenger && window.WebStudio?.enabled())Messenger.enter();
-                else if (typeof Communications !== 'undefined') Communications.showPage();
+                if(window.Messenger)void Messenger.enter();
                 break;
         }
 

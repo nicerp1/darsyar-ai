@@ -24,7 +24,7 @@ const Communications = (function () {
     }
 
     function open(tab = 'chat') {
-        if (window.WebStudio?.enabled() && tab !== 'notes') { activeTab='chat'; Messenger.open(selectedStudent || undefined); return; }
+        if (tab !== 'notes' && window.Messenger) { activeTab='chat'; Messenger.open(selectedStudent || undefined); return; }
         if(window.WebStudio?.enabled() && tab==='notes'){
             const drawer=document.getElementById('communications-drawer');document.body.append(drawer);
             if(!document.getElementById('notes-drawer-close')){const b=document.createElement('button');b.id='notes-drawer-close';b.type='button';b.className='modal-close-btn';b.textContent='×';b.setAttribute('aria-label','بستن یادداشت‌ها');b.onclick=close;drawer.querySelector('.communications-header').append(b);}
@@ -52,7 +52,7 @@ const Communications = (function () {
     }
 
     async function switchTab(tab) {
-        if(tab==='chat'&&window.WebStudio?.enabled()&&window.Messenger){close();Messenger.open(selectedStudent||undefined);return;}
+        if(tab==='chat'&&window.Messenger){close();Messenger.open(selectedStudent||undefined);return;}
         activeTab = tab === 'notes' ? 'notes' : 'chat';
         document.getElementById('communications-chat-panel')?.classList.toggle('hidden', activeTab !== 'chat');
         document.getElementById('communications-notes-panel')?.classList.toggle('hidden', activeTab !== 'notes');

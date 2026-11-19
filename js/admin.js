@@ -101,7 +101,7 @@ const Admin = (function () {
         try { const payload = await request('/api/admin-students', { method: 'PATCH', body: JSON.stringify({ action: 'saveNote', username: selectedUsername, note: document.getElementById('admin-private-note').value }) }); document.getElementById('admin-note-updated').textContent = `همین حالا توسط ${Storage.getCurrentUser().name || Storage.getCurrentUser().username}`; selectedPayload.data.admin_note = { text: payload.note, updatedAt: new Date().toISOString() }; Utils.showToast('یادداشت ذخیره شد.', 'success'); } catch (error) { Utils.showToast(error.message, 'error'); } finally { if (button) button.disabled = false; }
     }
     function openStudentSchedule() { if (selectedUsername) Schedule.openForStudent(selectedUsername); }
-    function openStudentChat() { if (!selectedUsername) return; Communications.selectStudent(selectedUsername); Communications.open('chat'); }
+    function openStudentChat() { if (selectedUsername) window.Messenger?.open(selectedUsername); }
     function saveSystemSettings() { const settings = Storage.getSettings(); settings.aiModel = document.getElementById('admin-ai-model')?.value || 'gapgpt-qwen-3.5'; Storage.saveSettings(settings); Utils.showToast('مدل هوش مصنوعی ذخیره شد.', 'success'); }
     async function createPasswordResetLink() {
         if (Storage.getCurrentUser()?.username !== 'kiankaki') return;

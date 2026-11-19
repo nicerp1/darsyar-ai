@@ -6,6 +6,14 @@ const MessengerExtras=(()=>{
     const ascii=v=>String(v).replace(/[۰-۹]/g,c=>'۰۱۲۳۴۵۶۷۸۹'.indexOf(c)).replace(/[٠-٩]/g,c=>'٠١٢٣٤٥٦٧٨٩'.indexOf(c));
     const fa=v=>Number(v).toLocaleString('fa-IR');
     const icon=path=>`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="${path}"/></svg>`;
+    const soundDuration=audio=>Number.isFinite(audio.duration)&&audio.duration>0?audio.duration:Number(audio.dataset.duration)||0;
+    const soundTime=sec=>fa(Math.floor(sec/60))+':'+String(Math.floor(sec%60)).padStart(2,'0').replace(/\d/g,d=>'۰۱۲۳۴۵۶۷۸۹'[d]);
+    function voiceButton(audio,playing){
+        const button=audio.closest('.im-voice-card')?.querySelector('[data-voice-play]');
+        if(!button)return;
+        button.innerHTML=playing?icon('M9 5v14M15 5v14'):'<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M9 5v14l11-7Z"/></svg>';
+        button.setAttribute('aria-label',playing?'توقف موقت ویس':'پخش ویس');
+    }
     function mount(bridge){
         api=bridge;if(document.getElementById('im-extra-actions'))return;
         const actions=document.createElement('div');actions.id='im-extra-actions';
@@ -14,25 +22,37 @@ const MessengerExtras=(()=>{
         actions.querySelector('#im-voice').onclick=startVoice;actions.querySelector('#im-study-report').onclick=openReport;
         bindHold(actions.querySelector('#im-voice'));
         const log=document.getElementById('im-log');
+        log.addEventListener('click',async event=>{
+            const button=event.target.closest('[data-voice-play]');if(!button)return;
+            const card=button.closest('.im-voice-card'), audio=card.querySelector('audio'),status=card.querySelector('[data-voice-status]');
+            if(!audio.paused){audio.pause();return;}
+            status.textContent='';
+            try{await audio.play();}
+            catch{status.textContent='ویس پخش نشد. دوباره امتحان کنید.';}
+        });
         log.addEventListener('play',event=>{
             if(!event.target.matches('audio'))return;
             log.querySelectorAll('audio').forEach(audio=>{if(audio!==event.target)audio.pause();});
+            voiceButton(event.target,true);
         },true);
+        log.addEventListener('pause',event=>voiceButton(event.target,false),true);
         log.addEventListener('ended',event=>{
+            voiceButton(event.target,false);
             const entry=event.target.closest('[data-message]');
             const next=entry?.nextElementSibling?.querySelector('audio');
             if(next)void next.play().catch(()=>{});
         },true);
         log.addEventListener('timeupdate',event=>{
-            const audio=event.target,seek=audio.closest('.im-voice-card')?.querySelector('[data-voice-seek]');
-            if(!seek||!Number.isFinite(audio.duration)||audio.duration<=0)return;
-            seek.value=audio.currentTime/audio.duration*100;
+            const audio=event.target,card=audio.closest('.im-voice-card'),seek=card?.querySelector('[data-voice-seek]'),duration=soundDuration(audio);
+            if(!seek||duration<=0)return;
+            seek.value=audio.currentTime/duration*100;
             seek.parentElement.style.setProperty('--played',seek.value+'%');
+            card.querySelector('[data-voice-time]').textContent=soundTime(audio.currentTime)+' / '+soundTime(duration);
         },true);
         log.addEventListener('input',event=>{
             if(!event.target.matches('[data-voice-seek]'))return;
             const audio=event.target.closest('.im-voice-card').querySelector('audio'), fraction=Number(event.target.value)/100;
-            const seek=()=>{const length=Number.isFinite(audio.duration)?audio.duration:Number(audio.dataset.duration);if(length>0)audio.currentTime=length*fraction;};
+            const seek=()=>{const length=soundDuration(audio);if(length>0)audio.currentTime=length*fraction;};
             if(audio.readyState)seek();
             else{audio.addEventListener('loadedmetadata',seek,{once:true});audio.load();}
         });
@@ -172,10 +192,13 @@ const MessengerExtras=(()=>{
     }
     function reportHTML(message){const r=message.studyReport;if(!r)return '';const status={completed:'کامل',partial:'ناقص',missed:'انجام‌نشده'}[r.status]||'ثبت شده';const seconds=Math.round(r.seconds??Number(r.minutes||0)*60);return `<section class="im-study-card"><small>گزارش مطالعه · ${esc(r.source==='timer'?'زمان تایمر':'گزارش دستی')}</small><h3>${esc(r.subject)}</h3><div class="im-study-metrics"><strong>${fa(Math.floor(seconds/60))}<small>دقیقه${seconds%60?` و ${fa(seconds%60)} ثانیه`:''}</small></strong><span>${status}</span></div><p>${esc(r.date?new Date(r.date+'T12:00:00').toLocaleDateString('fa-IR'):'')}${r.start?` · ${esc(r.start)} تا ${esc(r.end)}`:''}</p>${r.testCount!=null?`<p>${fa(r.testCount)} تست</p>`:''}${r.notes?`<p dir="auto">${esc(r.notes)}</p>`:''}${r.review?`<div class="im-study-review"><strong>بررسی‌شده توسط مشاور</strong><p dir="auto">${esc(r.review.feedback||'گزارشت بررسی شد؛ به مسیرت ادامه بده.')}</p></div>`:'<small>هنوز بررسی نشده</small>'}${api?.state().canReview?`<button type="button" data-review-study="${esc(message.id)}">${r.review?'ویرایش بازخورد':'بررسی و بازخورد'}</button>`:''}</section>`;}
     function voiceHTML(file,url){
-        const bars=(file.waveform||[]).slice(0,48).map(v=>'<i style="transform:scaleY('+Math.max(.08,Math.min(1,Number(v)/100||0))+')"></i>').join('');
-        return `<div class="im-voice-card"><small>پیام صوتی · ${fa(file.duration||0)} ثانیه</small><audio controls preload="none" src="${esc(url)}" data-duration="${Number(file.duration)||0}" aria-label="پیام صوتی"></audio>
-            ${bars?'<div class="desk-voice-wave" dir="ltr"><div class="desk-meter" aria-hidden="true">'+bars+'</div><input data-voice-seek type="range" min="0" max="100" value="0" step=".1" aria-label="موقعیت پخش"></div>':''}
-            <label>سرعت پخش<select data-audio-rate><option value="1">۱×</option><option value="1.25">۱٫۲۵×</option><option value="1.5">۱٫۵×</option><option value="1.75">۱٫۷۵×</option><option value="2">۲×</option></select></label></div>`;
+        const samples=Array.isArray(file.waveform)&&file.waveform.length?file.waveform.slice(0,48):Array(38).fill(12);
+        const bars=samples.map((v,i)=>'<i style="--level:'+Math.max(.08,Math.min(1,Number(v)/100||0))+';--at:'+(100*i/samples.length)+'%"></i>').join('');
+        const length=Number(file.duration)||0;
+        return `<div class="im-voice-card rond-voice" dir="ltr"><audio hidden preload="none" src="${esc(url)}" data-duration="${length}"></audio>
+            <button type="button" class="rond-play" data-voice-play aria-label="پخش ویس"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M9 5v14l11-7Z"/></svg></button>
+            <div class="rond-voice-main"><div class="desk-voice-wave"><div class="desk-meter" aria-hidden="true">${bars}</div><input data-voice-seek type="range" min="0" max="100" value="0" step=".1" aria-label="موقعیت پخش"></div>
+            <div class="rond-voice-info"><time data-voice-time>${soundTime(0)} / ${soundTime(length)}</time><select data-audio-rate aria-label="سرعت پخش"><option value="1">۱×</option><option value="1.5">۱٫۵×</option><option value="2">۲×</option></select></div></div><small data-voice-status role="status" dir="rtl"></small></div>`;
     }
     function review(id){const context=api.state(),body=modal('بازخورد گزارش'),token=recordingToken;body.innerHTML='<form><label>یادداشت برای دانش‌آموز<textarea name="feedback" rows="4" maxlength="1000" placeholder="نکته یا قدم بعدی را بنویس…"></textarea></label><p role="alert"></p><button class="im-primary" type="submit">بررسی شد؛ ارسال بازخورد</button></form>';body.querySelector('form').onsubmit=async e=>{e.preventDefault();const f=e.currentTarget,b=f.querySelector('button');b.disabled=true;try{await api.review(id,f.elements.feedback.value,context.peer);if(token===recordingToken)close();}catch(error){if(token!==recordingToken)return;f.querySelector('p').textContent=error.message;b.disabled=false;}};}
     return {mount,update,connection,close,reportHTML,voiceHTML};

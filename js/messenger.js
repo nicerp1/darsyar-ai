@@ -66,7 +66,7 @@ const Messenger=(()=>{
         source.addEventListener('unavailable',()=>{streamReady=false;});
     }
     document.addEventListener('visibilitychange',()=>{if(document.hidden){eventStream?.close();eventStream=null;streamReady=false;}else if(active){connectEvents();void refresh();}});
-    const avatar=p=>p?.username==='~saved'?`<span class="im-special saved">${icon('saved')}</span>`:p?.username==='~ai'?`<span class="im-special ai">${icon('spark')}</span>`:ProfileStudio.avatarHTML(p?.avatar);
+    const avatar=p=>p?.group?'<span class="im-special desk-group-avatar" aria-hidden="true">'+esc((p.name||'گ').slice(0,1))+'</span>':p?.username==='~saved'?`<span class="im-special saved">${icon('saved')}</span>`:p?.username==='~ai'?`<span class="im-special ai">${icon('spark')}</span>`:ProfileStudio.avatarHTML(p?.avatar);
     async function request(body,query=''){
         const controller=new AbortController(),timeout=setTimeout(()=>controller.abort(),body?45000:15000);
         try{
@@ -92,7 +92,7 @@ const Messenger=(()=>{
         $('im-compose').onsubmit=e=>{e.preventDefault();if(draft().files?.length)void sendBatch();else void send();};
         $('im-attach').onclick=()=>$('im-file').click();
         $('im-file').onchange=e=>{const files=[...e.target.files];e.target.value='';void attach(files);};
-        desk().mount({state,renderThreads,esc,avatar,select,preferences,presence,fileURL,message:id=>[...messages,...legacy].find(m=>m.id===id),feedback,search,globalSearch,findLoaded,older,messageAction,modify,forward,attach,read:()=>markRead()});
+        desk().mount({state,renderThreads,esc,avatar,select,createGroup,preferences,presence,fileURL,message:id=>[...messages,...legacy].find(m=>m.id===id),feedback,search,globalSearch,findLoaded,older,messageAction,modify,forward,attach,read:()=>markRead()});
         $('im-back').onclick=()=>{desk().close();$('im-shell').classList.remove('im-mobile-chat');$('im-search').focus();};
     }
     function mountExtras(){extras()?.mount({state:()=>({user,peer,blocked,canReport,canReview}),request,sendFile:async(file,target)=>{if(peer!==target||blocked)return false;file.clientId=file.clientId||crypto.randomUUID();if(outbox.has(file.clientId))return await send(false,file.clientId);draft().file=file;draft().id=file.clientId;return await send();},submitReport:async(data,target)=>{if(peer!==target)throw Error('گفتگو تغییر کرده است.');const version=epoch,p=await request({action:'studyReport',peer:target,...data});if(version!==epoch)throw Error('حساب تغییر کرده است.');if(p.data)Storage.applyServerData(p.data);if(peer===target){messages=[...new Map([...messages,p.message].map(m=>[m.id,m])).values()];renderMessages(true);}void refreshList();return p;},review:async(id,feedbackText,target)=>{const version=epoch,p=await request({action:'reviewStudyReport',peer:target,id,feedback:feedbackText});if(version!==epoch)return;if(peer===target){messages=messages.map(m=>m.id===id?p.message:m);renderMessages();}}});}
@@ -114,7 +114,34 @@ const Messenger=(()=>{
         });
         desired.forEach((node,i)=>{if(box.children[i]!==node)box.insertBefore(node,box.children[i]||null);});while(box.children.length>desired.length)box.lastElementChild.remove();
     }
-    async function enter(target){target=target||requestedPeer;requestedPeer=null;if(!syncUser())return;active=true;layout();mountExtras();document.body.classList.add('im-open');clearInterval(poll);const version=epoch;if(target){void refreshList();await select(target);}else if(peer){void refreshList();await select(peer);}else{const cachedThreads=await cacheReadThreads();if(!active||version!==epoch)return;if(cachedThreads){threads=cachedThreads;renderThreads();void refreshList();await select(threads.find(t=>t.pinned)?.peer||'~saved');}else{await refreshList();if(active&&version===epoch)await select(threads.find(t=>t.pinned)?.peer||'~saved');}}if(!active||version!==epoch)return;connectEvents();poll=setInterval(()=>{if(active&&!document.hidden&&(!streamReady||Date.now()-lastSync>8000))refresh();},1500);}
+    async function createGroup(name,members){
+        const version=epoch;
+        const result=await request({action:'createGroup',name,members});
+        if(active&&version===epoch){await refreshList();return result;}
+        return null;
+    }
+    async function enter(target){
+        target=target||requestedPeer;requestedPeer=null;
+        if(!syncUser())return;
+        const view=$('view-chat');
+        if(!view)return;
+        if(!desk()){view.textContent='بارگیری پیام‌رسان کامل نشد. صفحه را تازه‌سازی کنید.';return;}
+        document.body.classList.add('im-open');active=true;layout();mountExtras();
+        clearInterval(poll);
+        const version=epoch;
+        if(target||peer){void refreshList();await select(target||peer);}
+        else{
+            const cached=await cacheReadThreads();
+            if(!active||version!==epoch)return;
+            if(cached){threads=cached;renderThreads();void refreshList();}
+            else await refreshList();
+            if(!active||version!==epoch)return;
+            if(!selecting&&!peer)await select(threads.find(t=>t.pinned&&!t.person?.group)?.peer||'~saved');
+        }
+        if(!active||version!==epoch)return;
+        connectEvents();
+        poll=setInterval(()=>{if(active&&!document.hidden&&(!streamReady||Date.now()-lastSync>8000))refresh();},1500);
+    }
     function leave(){stopPlayback();extras()?.close();desk()?.close();active=false;sequence++;clearInterval(poll);poll=null;eventStream?.close();eventStream=null;streamReady=false;document.body.classList.remove('im-open');}
     function logout(){
         leave();
@@ -163,7 +190,8 @@ const Messenger=(()=>{
         $('im-send').disabled=blocked||Boolean(upload)||(peer==='~ai'&&sending);
         $('im-attach').disabled=blocked||Boolean(upload)||peer==='~ai';
     }
-    const fileURL=(p,id)=>`/api/chat?messenger=1&peer=${encodeURIComponent(p)}&file=${encodeURIComponent(id)}`;
+    const apiOrigin=()=>window.DarsyarPlatform?.apiOrigin||'';
+    const fileURL=(p,id)=>`${apiOrigin()}/api/chat?messenger=1&peer=${encodeURIComponent(p)}&file=${encodeURIComponent(id)}`;
     function renderMessages(bottom=false,prepend=false){
         const box=$('im-log');if(!box)return;
         const oldHeight=box.scrollHeight, oldTop=box.scrollTop;
@@ -276,7 +304,8 @@ const Messenger=(()=>{
     function uploadFile(payload,controller,progress){
         return new Promise((resolve,reject)=>{
             const xhr=new XMLHttpRequest();
-            xhr.open('POST','/api/chat?messenger=1');
+            xhr.open('POST',apiOrigin()+'/api/chat?messenger=1');
+            xhr.withCredentials=true;
             xhr.setRequestHeader('Content-Type','application/json');
             xhr.timeout=45000;
             const abort=()=>xhr.abort();

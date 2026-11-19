@@ -93,19 +93,6 @@ const WebStudio = (() => {
         const crumb = document.createElement('div'); crumb.className = 'studio-breadcrumb';
         crumb.innerHTML = `<span>فضای یادگیری من</span><b aria-hidden="true">/</b><strong id="studio-page-name">${window.DarsyarPlatform?.native?'روند':'امروزِ تو'}</strong>`;
         header?.insertBefore(crumb, header.querySelector('.header-left'));
-        const page = document.createElement('section'); page.id = 'view-chat'; page.className = 'view-section';
-        page.innerHTML = `<header class="studio-page-heading"><div><span class="studio-eyebrow">همراه مسیرت</span><h1>یک گفت‌وگوی خوب، یک قدم جلوتر.</h1><p>پیام‌ها، بازخوردها و یادداشت‌هایت؛ همه در یک فضای آرام.</p></div>${icon('chat','studio-heading-icon')}</header><div class="studio-chat-layout"><aside class="studio-chat-aside"><span class="studio-eyebrow">فضای ارتباط</span><div class="studio-contact-symbol">${icon('people')}</div><h2 id="studio-chat-peer"></h2><p id="studio-chat-hint"></p><div class="studio-chat-shortcuts"><button type="button" onclick="Communications.switchTab('chat')">${icon('chat')}گفت‌وگو${icon('arrow')}</button><button type="button" onclick="Communications.switchTab('notes')">${icon('note')}یادداشت‌های شخصی${icon('arrow')}</button><button type="button" onclick="App.navigate('ai-assistant')">${icon('spark')}دستیار هوشمند${icon('arrow')}</button></div><div class="studio-privacy">${icon('shield')}<p>اطلاعات خصوصی و رمز عبورت را در گفت‌وگو ارسال نکن.</p></div></aside><div id="studio-chat-host"></div></div>`;
-        document.querySelector('.content-body')?.append(page);
-        const drawer = document.getElementById('communications-drawer');
-        if (drawer) {
-            document.getElementById('studio-chat-host').append(drawer);
-            drawer.querySelector('.communications-header > button')?.remove();
-            const refresh = document.createElement('button'); refresh.className = 'studio-button secondary'; refresh.type = 'button'; refresh.textContent = 'تازه‌سازی پیام‌ها';
-            refresh.addEventListener('click', () => Communications.switchTab('chat'));
-            drawer.querySelector('.communications-header')?.append(refresh);
-            const input = document.getElementById('advisor-chat-input');
-            input?.addEventListener('keydown', event => { if (event.key === 'Enter' && !event.shiftKey && !event.isComposing) { event.preventDefault(); Communications.sendMessage(); } });
-        }
         const aiAvatar = document.querySelector('.ai-chat-header .ai-avatar');
         if (aiAvatar) aiAvatar.innerHTML = icon('spark');
         document.querySelector('#ai-chat-input')?.setAttribute('aria-label', 'پیام به دستیار هوشمند');
@@ -114,8 +101,9 @@ const WebStudio = (() => {
 
     function chatContext() {
         const user = Storage.getCurrentUser();
-        document.getElementById('studio-chat-peer').textContent = Storage.isManager() ? 'همراه دانش‌آموزانت باش' : user?.advisor?.name || user?.advisor?.username || 'جای همراهت خالی است';
-        document.getElementById('studio-chat-hint').textContent = Storage.isManager() ? 'دانش‌آموز را انتخاب کن و بازخوردت را برایش بنویس.' : user?.advisor ? 'سؤال بپرس، گزارش بده و قدم بعدی را با مشاورت هماهنگ کن.' : 'بعد از اتصال به مشاور، پیام‌های شما این‌جا نمایش داده می‌شوند.';
+        const peer=document.getElementById('studio-chat-peer'),hint=document.getElementById('studio-chat-hint');
+        if(peer)peer.textContent = user?.advisor?.name || 'گفتگو';
+        if(hint)hint.textContent = '';
     }
 
     function clearTransition() {

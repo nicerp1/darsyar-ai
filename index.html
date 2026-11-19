@@ -190,7 +190,7 @@
                         <span class="material-symbols-outlined" aria-hidden="true">sticky_note_2</span>
                     </button>
 
-                    <button class="icon-btn" onclick="Communications.open('chat')" title="گفت‌وگو با مشاور" aria-label="باز کردن گفت‌وگو با مشاور">
+                    <button class="icon-btn" onclick="App.navigate('chat')" title="پیام‌رسان" aria-label="باز کردن پیام‌رسان">
                         <span class="material-symbols-outlined" aria-hidden="true">forum</span>
                         <span id="header-chat-dot" class="notification-dot hidden"></span>
                     </button>
@@ -204,6 +204,7 @@
 
             <!-- Main Content Container -->
             <main class="content-body">
+                <section id="view-chat" class="view-section" aria-label="پیام‌رسان"></section>
 
                 <!-- 1. DASHBOARD VIEW -->
                 <section id="view-dashboard" class="view-section active">

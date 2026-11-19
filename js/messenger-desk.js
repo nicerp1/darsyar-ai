@@ -4,6 +4,7 @@ window.MessengerDesk = (() => {
     const paths={
         arrow_forward:'M4 12h15m-6-6 6 6-6 6', account_circle:'M20 20a8 8 0 1 0-16 0m8-8a4 4 0 1 0 0-8 4 4 0 0 0 0 8Z',
         person:'M5 21v-2a5 5 0 0 1 5-5h4a5 5 0 0 1 5 5v2m-7-10a4 4 0 1 0 0-8 4 4 0 0 0 0 8Z',
+        group_add:'M13 20H3v-2a5 5 0 0 1 5-5h2a5 5 0 0 1 5 5v2m-6-9a4 4 0 1 0 0-8 4 4 0 0 0 0 8ZM19 8v8m-4-4h8',
         edit_square:'M13 4H5v16h15v-8m-11 3 1-4 8-8 3 3-8 8Z', edit:'m5 19 1-5 11-11 4 4-11 11Z',
         search:'M15.5 15.5 21 21m-3.5-11A7.5 7.5 0 1 1 2.5 10a7.5 7.5 0 0 1 15 0Z',
         manage_search:'M3 5h15M3 10h8M3 15h6m10 3 3 3m-2-6a4 4 0 1 1-8 0 4 4 0 0 1 8 0Z',
@@ -42,6 +43,7 @@ window.MessengerDesk = (() => {
                 <div><small>درسیار</small><h1>پیام‌ها</h1></div>
                 ${button('im-account','account_circle','پروفایل و تنظیمات')}
                 ${button('im-new','edit_square','گفتگوی جدید')}
+                ${button('im-new-group','group_add','ساخت گروه')}
               </header>
               <div class="desk-search-bar"><label class="im-search">${glyph('search')}<input id="im-search" type="search" dir="auto" placeholder="جستجوی گفتگو" aria-label="جستجوی گفتگو"></label>${button('im-global-find','manage_search','جستجو در همه پیام‌ها')}</div>
               <form id="im-lookup" hidden>
@@ -50,7 +52,7 @@ window.MessengerDesk = (() => {
                 <small id="im-lookup-status" role="status"></small>
               </form>
               <div class="desk-filters" aria-label="فیلتر گفتگوها">
-                ${[['all','همه'],['unread','خوانده‌نشده'],['pinned','سنجاق‌شده'],['archived','بایگانی']].map(([key,label])=>'<button type="button" data-folder="'+key+'" aria-pressed="'+(key==='all')+'">'+label+'</button>').join('')}
+                ${[['all','همه'],['groups','گروه‌ها'],['unread','خوانده‌نشده'],['pinned','سنجاق‌شده'],['archived','بایگانی']].map(([key,label])=>'<button type="button" data-folder="'+key+'" aria-pressed="'+(key==='all')+'">'+label+'</button>').join('')}
                 <select id="im-folders" hidden aria-label="پوشه‌های گفتگو"></select>
               </div>
               <div id="im-threads" class="im-threads" aria-label="گفتگوها"></div>
@@ -139,6 +141,7 @@ window.MessengerDesk = (() => {
             node.querySelector('[data-desk-action="theme"]').onclick = () => { shell.classList.toggle('desk-alt-theme'); };
         };
         $('im-options').onclick = options;
+        $('im-new-group').onclick = newGroup;
         $('im-details').onclick = $('im-person').onclick = () => setDetails(!detailOpen);
         $('im-find').onclick = search;
         $('im-global-find').onclick = () => search(true);
@@ -236,6 +239,7 @@ window.MessengerDesk = (() => {
         const list=items.filter(t=>{
             if(!t.person||!(filter==='archived'?t.settings?.archived:!t.settings?.archived||query))return false;
             if(filter==='unread'&&!t.unread||filter==='pinned'&&!t.pinned)return false;
+            if(filter==='groups'&&!t.person.group)return false;
             if(filter.startsWith('custom:')&&t.settings?.folder!==filter.slice(7))return false;
             return [t.person.name,t.peer,t.preview].some(v=>String(v||'').toLocaleLowerCase().includes(query));
         }).sort((a,b)=>Number(b.pinned)-Number(a.pinned)||(b.at||'').localeCompare(a.at||''));
@@ -257,13 +261,34 @@ window.MessengerDesk = (() => {
         box.oncontextmenu=event=>{const choose=event.target.closest('[data-peer]');if(choose){event.preventDefault();options(choose.dataset.peer);}};
     }
 
+    function newGroup(){
+        const node=dialog('ساخت گروه','<form class="desk-form"><label>نام گروه<input name="groupName" maxlength="64" required dir="auto" autocomplete="off"></label><label>نام کاربری اعضا<textarea name="members" rows="3" maxlength="660" required dir="ltr" placeholder="@username"></textarea></label><small>نام کاربری‌ها را با فاصله، ویرگول یا خط جدید جدا کنید.</small><p role="alert"></p><button class="desk-primary" type="submit">ساخت گروه</button></form>');
+        const form=node.querySelector('form'),status=node.querySelector('[role="alert"]'),submit=form.querySelector('button[type="submit"]');
+        form.onsubmit=async event=>{
+            event.preventDefault();submit.disabled=true;status.textContent='';
+            const members=form.elements.members.value.toLowerCase().split(/[\s,،]+/u).filter(Boolean).map(name=>name.replace(/^@/,''));
+            try{
+                const result=await api.createGroup(form.elements.groupName.value,members);
+                if(!node.open||!result?.peer)return;
+                node.close();
+                filter='groups';
+                document.querySelectorAll('#im-shell [data-folder]').forEach(item=>item.setAttribute('aria-pressed',String(item.dataset.folder==='groups')));
+                await api.select(result.peer);
+            }catch(error){if(node.open)status.textContent=error.message;}
+            finally{submit.disabled=false;}
+        };
+    }
+
     function options(target) {
         const state=api.state();
         const id=typeof target==='string'?target:state.peer;
         const thread=state.threads.find(t=>t.peer===id);
         if(!thread)return;
         const actions=[['pin',thread.pinned?'برداشتن سنجاق':'سنجاق کردن گفتگو','push_pin'],['archive',thread.settings?.archived?'بازگرداندن از بایگانی':'بایگانی گفتگو','archive'],['folder','انتقال به پوشه','folder']];
-        if(id===state.peer&&!id.startsWith('~'))actions.push(['mute',thread.muted?'فعال کردن اعلان‌ها':'بی‌صدا کردن گفتگو','notifications'],['block',state.ownBlock?'رفع مسدودسازی':'مسدود کردن کاربر','block']);
+        if(id===state.peer&&!id.startsWith('~')){
+            actions.push(['mute',thread.muted?'فعال کردن اعلان‌ها':'بی‌صدا کردن گفتگو','notifications']);
+            if(!thread.person.group)actions.push(['block',state.ownBlock?'رفع مسدودسازی':'مسدود کردن کاربر','block']);
+        }
         const node=dialog(thread.person.name,actionButtons(actions));
         node.querySelectorAll('[data-desk-action]').forEach(item=>item.onclick=()=>{
             node.close();
@@ -296,7 +321,9 @@ window.MessengerDesk = (() => {
         clearTimeout(presenceTimer);
         const {at,typing}=state.presence;
         const age=Date.now()-(at||0);
-        if(!state.peer.startsWith('~')&&at&&age<45000){
+        if(state.person?.group){
+            $('im-subtitle').textContent=Number(state.person.memberCount||0).toLocaleString('fa-IR')+' عضو';
+        }else if(!state.peer.startsWith('~')&&at&&age<45000){
             if(typing&&age<6500)$('im-subtitle').innerHTML='<span class="desk-typing"><i></i><i></i><i></i></span> در حال نوشتن';
             else $('im-subtitle').textContent='اکنون در این گفتگو';
             presenceTimer=setTimeout(()=>header(),(typing&&age<6500?6500:45000)-age+20);
@@ -337,7 +364,8 @@ window.MessengerDesk = (() => {
                 ${m.replyTo?'<button type="button" class="desk-quote" data-quote="'+api.esc(m.replyTo)+'"><strong>پاسخ به پیام</strong><span dir="auto">'+api.esc(quote?.deleted?'پیام حذف شد':quote?.text?.slice(0,120)||quote?.file?.name||'مشاهده پیام')+'</span></button>':''}
                 ${window.MessengerExtras?.reportHTML(m)||''}${media}${legacyText?'<p dir="auto">'+api.esc(legacyText)+'</p>':''}`;
             result.push(`<article class="im-message${mine?' mine':''}${grouped?' grouped':''}${album?' desk-album':''}" data-message="${api.esc(m.id)}" data-date="${api.esc(label)}">
-              ${body}<footer><span class="desk-reactions">${reactionMarkup(m.id,state)}</span><time>${formatTime(m.createdAt)}</time>
+              ${state.person?.group&&!mine&&!grouped&&!m.deleted?'<strong class="desk-message-author" dir="auto">'+api.esc(m.senderName||m.sender)+'</strong>':''}
+              ${body}<footer><span class="desk-reactions">${reactionMarkup(m,state)}</span><time>${formatTime(m.createdAt)}</time>
               ${m.editedAt?'<small>ویرایش شد</small>':''}${mine&&!m.deleted?'<span class="'+(state.readAt>=m.createdAt?'desk-read':'')+'" title="'+status+'" aria-label="'+status+'">'+glyph(m.failed?'error':m.pending?'schedule':state.deliveredAt>=m.createdAt||state.readAt>=m.createdAt?'done_all':'check')+'</span>':''}
               ${m.failed?'<button type="button" data-action="retry">تلاش دوباره</button>':!m.deleted&&!m.pending?'<button type="button" class="desk-message-more" data-action="menu" aria-label="گزینه‌های پیام">'+glyph('more_horiz')+'</button>':''}</footer></article>`);
         }
@@ -345,9 +373,11 @@ window.MessengerDesk = (() => {
         return result.join('');
     }
 
-    function reactionMarkup(id, state) {
-        const mine=state.reactions.mine?.[id], theirs=state.reactions.theirs?.[id];
-        return [...new Set([mine,theirs].filter(Boolean))].map(emoji=>'<button type="button" data-react="'+api.esc(emoji)+'" aria-pressed="'+(mine===emoji)+'" aria-label="واکنش '+api.esc(emoji)+'">'+api.esc(emoji)+' '+[mine,theirs].filter(e=>e===emoji).length+'</button>').join('');
+    function reactionMarkup(message, state) {
+        const byActor=message.groupReactions||{};
+        const mine=state.person?.group?byActor[state.user]:state.reactions.mine?.[message.id];
+        const values=state.person?.group?Object.values(byActor):[mine,state.reactions.theirs?.[message.id]];
+        return [...new Set(values.filter(Boolean))].map(emoji=>'<button type="button" data-react="'+api.esc(emoji)+'" aria-pressed="'+(mine===emoji)+'" aria-label="واکنش '+api.esc(emoji)+'">'+api.esc(emoji)+' '+values.filter(e=>e===emoji).length+'</button>').join('');
     }
 
     function fileMarkup(m) {
@@ -436,7 +466,8 @@ window.MessengerDesk = (() => {
     }
 
     async function react(id,emoji) {
-        const own=api.state().reactions.mine?.[id]===emoji;
+        const state=api.state();
+        const own=(state.person?.group?api.message(id)?.groupReactions?.[state.user]:state.reactions.mine?.[id])===emoji;
         if(await api.modify('react',id,{emoji:own?null:emoji})&&motion()){
             const chip=$('im-log').querySelector('[data-message="'+CSS.escape(id)+'"] [data-react="'+emoji+'"]');
             chip?.animate?.([{transform:'scale(.82)'},{transform:'scale(1.22)',offset:.6},{transform:'none'}],{duration:250});
@@ -508,7 +539,7 @@ window.MessengerDesk = (() => {
         panel.innerHTML=`<header><h2>جزئیات گفتگو</h2>${button('im-detail-close','close','بستن جزئیات')}</header>
             <div class="desk-detail-person"><span class="im-avatar">${api.avatar(state.person)}</span><strong dir="auto">${api.esc(state.person?.name)}</strong><small dir="ltr">${state.peer.startsWith('~')?'':api.esc('@'+state.peer)}</small></div>
             <label class="desk-setting">پس‌زمینه گفتگو <select id="im-wall-select"><option value="mist">مه‌آلود</option><option value="plain">ساده</option><option value="dusk">گرگ‌ومیش</option></select></label>
-            ${state.peer.startsWith('~')?'':actionButtons([['profile','مشاهده پروفایل','person'],['mute',state.threads.find(t=>t.peer===state.peer)?.muted?'فعال کردن اعلان‌ها':'بی‌صدا کردن اعلان‌ها','notifications']])}
+            ${state.peer.startsWith('~')?'':actionButtons([...(state.person?.group?[]:[['profile','مشاهده پروفایل','person']]),['mute',state.threads.find(t=>t.peer===state.peer)?.muted?'فعال کردن اعلان‌ها':'بی‌صدا کردن اعلان‌ها','notifications']])}
             ${[['تصاویر و ویدیو',m=>m.file.type.startsWith('image/')||m.file.type.startsWith('video/')],['اسناد',m=>!m.file.voice&&!/^(audio|image|video)\//.test(m.file.type)],['پیام‌های صوتی',m=>m.file.voice]].map(([label,test])=>'<details><summary>'+label+'</summary>'+media.filter(test).map(m=>'<button type="button" class="desk-action" data-detail-media="'+api.esc(m.id)+'">'+api.esc(m.file.name)+'</button>').join('')+'</details>').join('')}
             <details><summary>پیوندها</summary>${urls.map(url=>'<a href="'+api.esc(url)+'" dir="ltr" target="_blank" rel="noopener noreferrer">'+api.esc(url)+'</a>').join('')}</details>
             ${state.hasMore?'<button type="button" class="desk-action" id="im-detail-more">بارگیری موارد قدیمی‌تر</button>':''}`;
