@@ -12,11 +12,47 @@ const Messenger=(()=>{
     async function cacheWrite(target,value){const k=cacheKey(target),safe={...value,messages:(value.messages||[]).slice(-120).map(m=>({...m,file:m.file?{...m.file,data:undefined}:undefined}))};threadCache.set(k,safe);const db=await openCache();if(!db)return;try{db.transaction('threads','readwrite').objectStore('threads').put({key:k,value:safe,savedAt:Date.now()});}catch{}}
     async function cacheReadThreads(){const k=`${encodeURIComponent(user)}::@threads`;if(threadListCache.has(k))return threadListCache.get(k);const db=await openCache();if(!db)return null;return new Promise(resolve=>{try{const req=db.transaction('threads').objectStore('threads').get(k);req.onsuccess=()=>{const value=req.result?.value||null;if(value)threadListCache.set(k,value);resolve(value);};req.onerror=()=>resolve(null);}catch{resolve(null);}});}
     async function cacheWriteThreads(value){const k=`${encodeURIComponent(user)}::@threads`,threads=value||[];threadListCache.set(k,threads);const db=await openCache();if(!db)return;try{db.transaction('threads','readwrite').objectStore('threads').put({key:k,value:threads,savedAt:Date.now()});}catch{}}
-    async function cacheDeleteAccount(){const db=await openCache();if(!db)return;try{const tx=db.transaction('threads','readwrite'),store=tx.objectStore('threads'),req=store.openCursor(),prefix=`${encodeURIComponent(user)}::`;req.onsuccess=()=>{const cursor=req.result;if(cursor){if(String(cursor.key).startsWith(prefix))cursor.delete();cursor.continue();}};}catch{}}
-    const draft=()=>{if(!drafts.has(peer))drafts.set(peer,{text:'',file:null,reply:null,id:null});return drafts.get(peer);};
+    async function cacheDeleteAccount(account){
+        const prefix=encodeURIComponent(account)+'::';
+        for(const cache of [threadCache,threadListCache]){
+            for(const key of cache.keys())if(key.startsWith(prefix))cache.delete(key);
+        }
+        const db=await openCache();if(!db)return;
+        try{
+            const tx=db.transaction('threads','readwrite'), req=tx.objectStore('threads').openCursor();
+            req.onsuccess=()=>{const cursor=req.result;if(cursor){if(String(cursor.key).startsWith(prefix))cursor.delete();cursor.continue();}};
+        }catch{}
+    }
+    const draftKey = target => 'darsyar-im-draft:' + encodeURIComponent(user) + ':' + encodeURIComponent(target);
+    const draft = () => {
+        if(!drafts.has(peer)){
+            let text='';
+            try{text=localStorage.getItem(draftKey(peer))||'';}catch{}
+            drafts.set(peer,{text,file:null,reply:null,id:null});
+        }
+        return drafts.get(peer);
+    };
+    function rememberDraft(target,text){
+        if(!target||!user)return;
+        try{if(text)localStorage.setItem(draftKey(target),text);else localStorage.removeItem(draftKey(target));}catch{}
+    }
+    const desk=()=>window.MessengerDesk;
+    let requestedPeer;
+    let settings={}, reactions={}, presenceState={}, unreadSince='', deliveredAt='', presenceSent=0, olderPending=false;
+    let upload=null;
+    const state=()=>({user,peer,person,threads,messages:[...legacy,...messages],blocked,ownBlock,settings,reactions,presence:presenceState,unreadSince,readAt,deliveredAt,hasMore});
+    function sessionMeta(p,initial=false){
+        settings=p.settings||{}; reactions=p.reactions||{}; presenceState=p.presence||{};
+        deliveredAt=p.deliveredAt||'';
+        if(initial)unreadSince=p.ownReadAt||((threads.find(t=>t.peer===peer)?.unread)?'0000':'');
+    }
+    function presence(typing){
+        if(!active||document.hidden||!peer||peer.startsWith('~')||blocked||Date.now()-presenceSent<(typing?2400:20000))return;
+        presenceSent=Date.now();void request({action:'presence',peer,typing}).catch(()=>{});
+    }
     const readReceipts=new Map();
     let lastListRefresh=0;
-    let messageCursor=null;
+    let messageCursor=null, olderCursor=null;
     let canReport=false,canReview=false,refreshAgain=false,lastSync=0;
     const extras=()=>window.MessengerExtras;
     let eventStream=null,streamReady=false;
@@ -43,7 +79,7 @@ const Messenger=(()=>{
     function layout(){const view=$('view-chat');if(!view||$('im-shell'))return;
         // Keep the old notes drawer intact for the notes shortcut and old clients.
         const previous=view.querySelector('#communications-drawer');if(previous){document.body.append(previous);previous.classList.remove('open');previous.setAttribute('aria-hidden','true');}
-        view.innerHTML=`<div id="im-shell"><aside class="im-sidebar"><header><button type="button" id="im-exit" class="im-icon" aria-label="بازگشت به روند">${icon('back')}</button><h1>گفتگوها</h1><button type="button" id="im-new" class="im-icon" aria-label="گفتگوی جدید با نام کاربری">${icon('plus')}</button></header><label class="im-search">${icon('search')}<input id="im-search" placeholder="جستجو در گفتگوها" aria-label="جستجو در گفتگوها"></label><form id="im-lookup" hidden><label for="im-username">نام کاربری روند</label><div><input id="im-username" dir="ltr" placeholder="@username" maxlength="33" required autocomplete="off"><button type="submit">شروع</button></div><small id="im-lookup-status" role="status"></small></form><div id="im-threads" class="im-threads" aria-label="فهرست گفتگوها"></div><footer>پیام‌رسان روند <span>گفتگو، یادگیری، همراهی</span></footer></aside><section class="im-conversation" aria-label="گفتگو"><header id="im-header"><button type="button" id="im-back" class="im-icon" aria-label="بازگشت به فهرست چت‌ها">${icon('back')}</button><button type="button" id="im-person"><span id="im-avatar" class="im-avatar"></span><span><strong id="im-name">پیام‌رسان روند</strong><small id="im-subtitle">یک گفتگو انتخاب کن</small></span></button><button type="button" id="im-mute" class="im-icon" aria-label="بی‌صدا کردن گفتگو" title="بی‌صدا کردن گفتگو" hidden>${icon('mute')}</button><button type="button" id="im-block" class="im-icon" aria-label="مسدود کردن گفتگو" hidden>${icon('shield')}</button></header><div id="im-log" class="im-log" aria-label="پیام‌های گفتگو"></div><div id="im-feedback" class="im-feedback" role="status" aria-live="polite"></div><div id="im-compose-area"><p class="im-safety">رمز عبور، نشانی و اطلاعات خصوصی را در گفتگو نفرست. فایل ناشناس را باز نکن.</p><div id="im-context" hidden></div><div id="im-emojis" hidden>${['👍','❤️','👏','😊','🎯','🌱'].map(v=>`<button type="button" data-emoji="${v}">${v}</button>`).join('')}</div><form id="im-compose"><button id="im-attach" type="button" class="im-icon" aria-label="پیوست عکس یا فایل">${icon('clip')}</button><input type="file" id="im-file" hidden accept=".jpg,.jpeg,.png,.webp,.pdf,.txt,.docx,.xlsx,.pptx,.zip"><textarea id="im-input" rows="1" maxlength="4000" placeholder="پیام بنویس…" aria-label="متن پیام"></textarea><button type="button" id="im-emoji-toggle" class="im-icon" aria-label="شکلک‌ها">${icon('smile')}</button><button id="im-send" type="submit" class="im-send" aria-label="ارسال پیام">${icon('send')}</button></form></div></section></div>`;
+        view.innerHTML=desk().layout();
         $('im-exit').onclick=()=>App.navigate('dashboard');$('im-back').onclick=()=>$('im-shell').classList.remove('im-mobile-chat');
         $('im-new').onclick=()=>{$('im-lookup').hidden=!$('im-lookup').hidden;if(!$('im-lookup').hidden)$('im-username').focus();};
         $('im-search').oninput=renderThreads;
@@ -51,58 +87,268 @@ const Messenger=(()=>{
         $('im-person').onclick=()=>{if(person&&!peer.startsWith('~'))Community.profile(peer);};
         $('im-mute').onclick=async()=>{const target=peer,seq=sequence,t=threads.find(x=>x.peer===target),next=!t?.muted;try{await request({action:'mute',peer:target,muted:next});if(seq!==sequence||target!==peer)return;t.muted=next;renderThreads();renderHeader();feedback(next?'اعلان‌های این گفتگو بی‌صدا شد.':'اعلان‌های این گفتگو فعال شد.');}catch(e){feedback(e.message);}};
         $('im-block').onclick=async()=>{if(!confirm(ownBlock?'مسدودسازی این گفتگو برداشته شود؟':'این کاربر دیگر نتواند به شما پیام بدهد؟'))return;try{await request({action:'block',peer,blocked:!ownBlock});await select(peer);}catch(e){feedback(e.message);}};
-        $('im-input').oninput=()=>{draft().text=$('im-input').value;draft().id=null;$('im-input').style.height='auto';$('im-input').style.height=Math.min(140,$('im-input').scrollHeight)+'px';};
-        $('im-input').onkeydown=e=>{if(e.key==='Enter'&&!e.shiftKey&&!e.isComposing&&window.innerWidth>720){e.preventDefault();send();}};
-        $('im-compose').onsubmit=e=>{e.preventDefault();send();};$('im-attach').onclick=()=>$('im-file').click();$('im-file').onchange=attach;
-        $('im-emoji-toggle').onclick=()=>{$('im-emojis').hidden=!$('im-emojis').hidden;};$('im-emojis').querySelectorAll('button').forEach(b=>b.onclick=()=>{$('im-input').value+=b.dataset.emoji;$('im-input').dispatchEvent(new Event('input'));$('im-input').focus();});
+        $('im-input').oninput=()=>{draft().text=$('im-input').value;draft().id=null;rememberDraft(peer,draft().text);$('im-input').style.height='auto';$('im-input').style.height=Math.min(140,$('im-input').scrollHeight)+'px';};
+        $('im-input').onkeydown=e=>{if(e.key==='Enter'&&!e.shiftKey&&!e.isComposing&&window.innerWidth>720){e.preventDefault();$('im-compose').requestSubmit();}};
+        $('im-compose').onsubmit=e=>{e.preventDefault();if(draft().files?.length)void sendBatch();else void send();};
+        $('im-attach').onclick=()=>$('im-file').click();
+        $('im-file').onchange=e=>{const files=[...e.target.files];e.target.value='';void attach(files);};
+        desk().mount({state,renderThreads,esc,avatar,select,preferences,presence,fileURL,message:id=>[...messages,...legacy].find(m=>m.id===id),feedback,search,globalSearch,findLoaded,older,messageAction,modify,forward,attach,read:()=>markRead()});
+        $('im-back').onclick=()=>{desk().close();$('im-shell').classList.remove('im-mobile-chat');$('im-search').focus();};
     }
     function mountExtras(){extras()?.mount({state:()=>({user,peer,blocked,canReport,canReview}),request,sendFile:async(file,target)=>{if(peer!==target||blocked)return false;file.clientId=file.clientId||crypto.randomUUID();if(outbox.has(file.clientId))return await send(false,file.clientId);draft().file=file;draft().id=file.clientId;return await send();},submitReport:async(data,target)=>{if(peer!==target)throw Error('گفتگو تغییر کرده است.');const version=epoch,p=await request({action:'studyReport',peer:target,...data});if(version!==epoch)throw Error('حساب تغییر کرده است.');if(p.data)Storage.applyServerData(p.data);if(peer===target){messages=[...new Map([...messages,p.message].map(m=>[m.id,m])).values()];renderMessages(true);}void refreshList();return p;},review:async(id,feedbackText,target)=>{const version=epoch,p=await request({action:'reviewStudyReport',peer:target,id,feedback:feedbackText});if(version!==epoch)return;if(peer===target){messages=messages.map(m=>m.id===id?p.message:m);renderMessages();}}});}
     function stopPlayback(){document.querySelectorAll('#im-log audio').forEach(audio=>{if(!audio.paused)audio.pause();});}
     function reconcileMessages(box,markup){
         const template=document.createElement('template');template.innerHTML=markup;
         const existing=new Map([...box.querySelectorAll(':scope > [data-message]')].map(n=>[n.dataset.message,n]));
-        const dates=new Map([...box.querySelectorAll(':scope > .im-date')].map(n=>[n.textContent,n]));
+        const dates=new Map([...box.querySelectorAll(':scope > .im-date,:scope > .desk-unread')].map(n=>[n.textContent,n]));
         const desired=[...template.content.children].map(node=>{
-            if(node.classList.contains('im-date')&&dates.has(node.textContent))return dates.get(node.textContent);
+            if(node.matches('.im-date,.desk-unread')&&dates.has(node.textContent))return dates.get(node.textContent);
             if(node.id==='im-older'&&box.querySelector('#im-older'))return box.querySelector('#im-older');
             const old=existing.get(node.dataset.message);if(!old)return node;
             const a=old.cloneNode(true),b=node.cloneNode(true);a.querySelector('footer')?.remove();b.querySelector('footer')?.remove();a.querySelector('.im-study-card')?.remove();b.querySelector('.im-study-card')?.remove();
             if(a.innerHTML!==b.innerHTML)return node;
+            old.className=node.className;
             if(old.querySelector('footer')?.innerHTML!==node.querySelector('footer')?.innerHTML)old.querySelector('footer').innerHTML=node.querySelector('footer').innerHTML;
             const report=old.querySelector('.im-study-card'),nextReport=node.querySelector('.im-study-card');if(report&&nextReport&&report.outerHTML!==nextReport.outerHTML)report.replaceWith(nextReport);
             return old;
         });
         desired.forEach((node,i)=>{if(box.children[i]!==node)box.insertBefore(node,box.children[i]||null);});while(box.children.length>desired.length)box.lastElementChild.remove();
     }
-    async function enter(target){if(!syncUser())return;active=true;layout();mountExtras();document.body.classList.add('im-open');clearInterval(poll);const version=epoch;if(target){void refreshList();await select(target);}else if(peer){void refreshList();await select(peer);}else{const cachedThreads=await cacheReadThreads();if(!active||version!==epoch)return;if(cachedThreads){threads=cachedThreads;renderThreads();void refreshList();await select(threads.find(t=>t.pinned)?.peer||'~saved');}else{await refreshList();if(active&&version===epoch)await select(threads.find(t=>t.pinned)?.peer||'~saved');}}if(!active||version!==epoch)return;connectEvents();poll=setInterval(()=>{if(active&&!document.hidden&&(!streamReady||Date.now()-lastSync>8000))refresh();},1500);}
-    function leave(){stopPlayback();extras()?.close();active=false;sequence++;clearInterval(poll);poll=null;eventStream?.close();eventStream=null;streamReady=false;document.body.classList.remove('im-open');}
-    function logout(){leave();syncUser();if($('view-chat'))$('view-chat').querySelector('#im-shell')?.remove();}
+    async function enter(target){target=target||requestedPeer;requestedPeer=null;if(!syncUser())return;active=true;layout();mountExtras();document.body.classList.add('im-open');clearInterval(poll);const version=epoch;if(target){void refreshList();await select(target);}else if(peer){void refreshList();await select(peer);}else{const cachedThreads=await cacheReadThreads();if(!active||version!==epoch)return;if(cachedThreads){threads=cachedThreads;renderThreads();void refreshList();await select(threads.find(t=>t.pinned)?.peer||'~saved');}else{await refreshList();if(active&&version===epoch)await select(threads.find(t=>t.pinned)?.peer||'~saved');}}if(!active||version!==epoch)return;connectEvents();poll=setInterval(()=>{if(active&&!document.hidden&&(!streamReady||Date.now()-lastSync>8000))refresh();},1500);}
+    function leave(){stopPlayback();extras()?.close();desk()?.close();active=false;sequence++;clearInterval(poll);poll=null;eventStream?.close();eventStream=null;streamReady=false;document.body.classList.remove('im-open');}
+    function logout(){
+        leave();
+        upload?.abort();
+        if(user)void cacheDeleteAccount(user);
+        const prefix='darsyar-im-draft:'+encodeURIComponent(user)+':';
+        try{for(let i=localStorage.length-1;i>=0;i--){const key=localStorage.key(i);if(key?.startsWith(prefix))localStorage.removeItem(key);}}catch{}
+        syncUser();$('view-chat')?.querySelector('#im-shell')?.remove();
+    }
     async function refreshList(){const version=epoch;try{const p=await request(null,'&action=list');if(version!==epoch)return;threads=p.threads||[];renderThreads();void cacheWriteThreads(threads);}catch(e){if(active)feedback(e.message);}}
-    function renderThreads(){const box=$('im-threads');if(!box)return;const q=($('im-search').value||'').toLowerCase();const rank=t=>t.pinned?0:t.peer==='~saved'?1:t.peer==='~ai'?2:3;
-        const list=threads.filter(t=>`${t.person.name} ${t.person.username}`.toLowerCase().includes(q)).sort((a,b)=>rank(a)-rank(b)||(b.at||'').localeCompare(a.at||''));
-        box.innerHTML=list.map(t=>`<button type="button" class="im-thread ${peer===t.peer?'selected':''}" data-peer="${esc(t.peer)}" aria-current="${peer===t.peer?'true':'false'}"><span class="im-avatar">${avatar(t.person)}</span><span class="im-thread-copy"><strong>${esc(t.person.name)}</strong><small>${esc(t.preview||(t.pinned?'مشاور شما · همیشه بالای گفتگوها':t.peer==='~saved'?'یادداشت‌ها و فایل‌های شخصی':t.peer==='~ai'?'بپرس؛ کوتاه و کاربردی جواب می‌دهم':'شروع گفتگو'))}</small></span><span class="im-thread-meta"><time>${t.at?new Date(t.at).toLocaleTimeString('fa-IR',{hour:'2-digit',minute:'2-digit'}):''}</time>${t.pinned?`<span title="مشاور پین‌شده">${icon('pin')}</span>`:''}${t.muted?`<span class="im-muted-badge" title="اعلان‌ها بی‌صدا هستند">${icon('mute')}</span>`:''}${t.unread?'<i aria-label="پیام خوانده‌نشده"></i>':''}</span></button>`).join('')||'<p class="im-empty-list">گفتگویی پیدا نشد. با دکمهٔ + و نام کاربری شروع کن.</p>';
-        box.querySelectorAll('[data-peer]').forEach(b=>b.onclick=()=>select(b.dataset.peer));
+    function renderThreads(){if($('im-threads'))desk().threads(threads);}
+    function applySnapshot(target,p,seq,fromCache=false){if(seq!==sequence)return false;peer=target===user?'~saved':target;person={...p.peer,username:peer};messages=[...new Map([...Array.from(outbox.values()).filter(e=>e.target===peer).map(e=>({id:e.id,sender:user,text:e.snapshot.text||(e.snapshot.file?.voice?'پیام صوتی':'فایل پیوست'),createdAt:e.createdAt||(e.createdAt=new Date().toISOString()),pending:!e.failed,failed:e.failed})),...(p.messages||[])].map(m=>[m.id,m])).values()].sort((a,b)=>a.createdAt.localeCompare(b.createdAt));legacy=p.legacy||[];canReport=Boolean(p.canReport);canReview=Boolean(p.canReview);hasMore=Boolean(p.hasMore);messageCursor=p.cursor||p.messageCursor||null;olderCursor=p.olderCursor||null;blocked=Boolean(p.blocked);ownBlock=Boolean(p.ownBlock);readAt=p.readAt||'';aiRetry=null;if(peer==='~saved')person.name='پیام‌های ذخیره‌شده';let thread=threads.find(t=>t.peer===peer);if(!thread){thread={peer,person,preview:''};threads.push(thread);}thread.person=person;thread.muted=Boolean(p.muted??thread.muted);sessionMeta(p,true);renderThreads();renderHeader();desk().header();renderMessages(true);restoreDraft();$('im-shell').classList.add('im-mobile-chat');selecting=false;if(!fromCache)presence(false);feedback(fromCache?'نسخهٔ ذخیره‌شده · در حال همگام‌سازی…':blocked?'این گفتگو مسدود است.':peer==='~ai'?'پاسخ‌های این دستیار کوتاه‌اند؛ برای توضیح مفصل از صفحهٔ دستیار استفاده کن.':'');if(!fromCache)updateReceipts();return true;}
+    async function select(target){
+        if(!syncUser()||!$('im-shell'))return false;
+        if(target!==peer)upload?.abort();
+        stopPlayback();extras()?.close();desk().close();
+        const version=epoch,seq=++sequence,previous=peer;
+        selecting=true;
+        if(target!==previous){desk().loading();$('im-shell').classList.add('im-mobile-chat');}
+        feedback('در حال دریافت گفتگو…');
+        $('im-send').disabled=$('im-input').disabled=$('im-attach').disabled=true;
+        let cached;
+        try{
+            cached=await cacheRead(target);
+            if(seq!==sequence||version!==epoch||!active)return false;
+            if(cached){applySnapshot(target,cached,seq,true);selecting=true;}
+            const p=await request(null,'&peer='+encodeURIComponent(target));
+            if(seq!==sequence||version!==epoch||!active)return false;
+            applySnapshot(target,p,seq);void cacheWrite(peer,p);return true;
+        }catch(error){
+            if(seq===sequence&&version===epoch){
+                if(!cached){peer=previous;renderMessages(true);if(!previous)$('im-shell').classList.remove('im-mobile-chat');}
+                feedback(cached?'همگام‌سازی گفتگو ناموفق بود.':error.message);
+            }
+            return Boolean(cached);
+        }finally{
+            if(seq===sequence&&version===epoch){selecting=false;if(active)restoreDraft();}
+        }
     }
-    function applySnapshot(target,p,seq,fromCache=false){if(seq!==sequence)return false;peer=target===user?'~saved':target;person={...p.peer,username:peer};messages=[...new Map([...Array.from(outbox.values()).filter(e=>e.target===peer).map(e=>({id:e.id,sender:user,text:e.snapshot.text||(e.snapshot.file?.voice?'پیام صوتی':'فایل پیوست'),createdAt:e.createdAt||(e.createdAt=new Date().toISOString()),pending:!e.failed,failed:e.failed})),...(p.messages||[])].map(m=>[m.id,m])).values()].sort((a,b)=>a.createdAt.localeCompare(b.createdAt));legacy=p.legacy||[];canReport=Boolean(p.canReport);canReview=Boolean(p.canReview);hasMore=Boolean(p.hasMore);messageCursor=p.cursor||p.messageCursor||null;blocked=Boolean(p.blocked);ownBlock=Boolean(p.ownBlock);readAt=p.readAt||'';aiRetry=null;if(peer==='~saved')person.name='پیام‌های ذخیره‌شده';let thread=threads.find(t=>t.peer===peer);if(!thread){thread={peer,person,preview:''};threads.push(thread);}thread.person=person;thread.muted=Boolean(p.muted??thread.muted);renderThreads();renderHeader();renderMessages(true);restoreDraft();$('im-shell').classList.add('im-mobile-chat');selecting=false;feedback(fromCache?'نسخهٔ ذخیره‌شده · در حال همگام‌سازی…':blocked?'این گفتگو مسدود است.':peer==='~ai'?'پاسخ‌های این دستیار کوتاه‌اند؛ برای توضیح مفصل از صفحهٔ دستیار استفاده کن.':'');if(!fromCache)void markRead();return true;}
-    async function select(target){if(!syncUser()||!$('im-shell'))return false;stopPlayback();extras()?.close();const version=epoch,seq=++sequence;const previous=peer;peer=target;selecting=true;feedback('در حال دریافت گفتگو…');$('im-send').disabled=true;$('im-input').disabled=true;$('im-attach').disabled=true;
-        try{const cached=await cacheRead(target);if(seq!==sequence||version!==epoch||!active)return false;if(cached)applySnapshot(target,cached,seq,true);const p=await request(null,`&peer=${encodeURIComponent(target)}`);if(seq!==sequence||version!==epoch||!active)return false;applySnapshot(target,p,seq,false);void cacheWrite(peer,p);return true;
-        }catch(e){if(seq===sequence&&version===epoch){if(messages.length)feedback('نمایش دادهٔ ذخیره‌شده؛ همگام‌سازی ناموفق بود.');else{peer=previous;feedback(e.message);restoreDraft();}}return Boolean(messages.length);}finally{if(seq===sequence&&version===epoch){selecting=false;if(active)restoreDraft();}}}
     function renderHeader(){$('im-avatar').innerHTML=avatar(person);$('im-name').textContent=person?.name||'';$('im-subtitle').textContent=peer==='~saved'?'فقط خودت به این گفتگو دسترسی داری':peer==='~ai'?'هوش مصنوعی · پاسخ‌های کوتاه':`@${peer}`;$('im-block').hidden=peer.startsWith('~');$('im-block').setAttribute('aria-label',ownBlock?'رفع مسدودسازی':'مسدود کردن گفتگو');const muted=Boolean(threads.find(t=>t.peer===peer)?.muted),mute=$('im-mute');mute.hidden=peer.startsWith('~');mute.classList.toggle('is-muted',muted);mute.setAttribute('aria-label',muted?'فعال‌کردن اعلان‌های گفتگو':'بی‌صدا کردن گفتگو');mute.title=muted?'فعال‌کردن اعلان‌های گفتگو':'بی‌صدا کردن گفتگو';}
-    function restoreDraft(){if(!peer)return;extras()?.update();const d=draft();$('im-input').value=d.text;$('im-input').disabled=blocked;$('im-send').disabled=blocked||(peer==='~ai'&&sending);$('im-attach').disabled=blocked||peer==='~ai';$('im-context').hidden=!d.reply&&!d.file;$('im-context').innerHTML=d.file||d.reply?`<span>${icon(d.file?'file':'reply')}<span><strong>${d.file?'پیوست آماده ارسال':'در پاسخ به'}</strong><small>${esc(d.file?.name||d.reply.text||'فایل')}</small></span></span><button type="button" class="im-icon" aria-label="حذف پیوست یا پاسخ">${icon('close')}</button>`:'';if(!$('im-context').hidden)$('im-context').querySelector('button').onclick=()=>{d.file=null;d.reply=null;d.id=null;restoreDraft();};}
+    function restoreDraft(){if(!peer)return;extras()?.update();const d=draft();if($('im-input').value!==d.text)$('im-input').value=d.text;restoreDraftControls();$('im-context').hidden=!d.reply&&!d.file;$('im-context').innerHTML=d.file||d.reply?`<span>${icon(d.file?'file':'reply')}<span><strong>${d.file?'پیوست آماده ارسال':'در پاسخ به'}</strong><small>${esc(d.file?.name||d.reply.text||'فایل')}</small></span></span><button type="button" class="im-icon" aria-label="حذف پیوست یا پاسخ">${icon('close')}</button>`:'';if(!$('im-context').hidden)$('im-context').querySelector('button').onclick=()=>{d.file=null;d.reply=null;d.id=null;restoreDraft();};if(d.files?.length)previewFiles(d);}
     function feedback(text){if($('im-feedback'))$('im-feedback').textContent=text||'';}
-    const fileURL=(p,id)=>`/api/chat?messenger=1&peer=${encodeURIComponent(p)}&file=${encodeURIComponent(id)}`;
-    function renderMessages(bottom=false,prepend=false){const box=$('im-log');if(!box)return;const oldHeight=box.scrollHeight,oldTop=box.scrollTop;const nearBottom=oldHeight-oldTop-box.clientHeight<100;const all=[...legacy,...messages].sort((a,b)=>a.createdAt.localeCompare(b.createdAt)||a.id.localeCompare(b.id));let day='';
-        const markup=`${hasMore?'<button type="button" id="im-older">پیام‌های قدیمی‌تر</button>':''}`+all.map(m=>{const label=new Date(m.createdAt).toLocaleDateString('fa-IR',{year:'numeric',month:'long',day:'numeric'});const divider=day!==label?`<div class="im-date">${esc(label)}</div>`:'';day=label;const quoted=all.find(x=>x.id===m.replyTo);const mine=m.sender===user;return `${divider}<article class="im-message ${mine?'mine':''}" data-message="${esc(m.id)}">${quoted?`<blockquote><strong>در پاسخ به</strong>${esc(quoted.text.slice(0,120)||'فایل پیوست')}</blockquote>`:''}${extras()?.reportHTML(m)||''}${m.file?`${m.file.voice?extras()?.voiceHTML(m.file,fileURL(peer,m.file.id))||'':''}${m.file.type.startsWith('image/')?`<a class="im-photo" href="${fileURL(peer,m.file.id)}" target="_blank" rel="noopener"><img src="${fileURL(peer,m.file.id)}" alt="${esc(m.file.name)}" loading="lazy"></a>`:''}<a class="im-document" href="${fileURL(peer,m.file.id)}" download="${esc(m.file.name)}">${icon('file')}<span><strong>${esc(m.file.name)}</strong><small>${Utils.toPersianDigits(Math.ceil(m.file.size/1024))} کیلوبایت · دریافت فایل</small></span></a>`:''}${m.text?`<p dir="auto">${esc(m.text)}</p>`:''}<footer><time>${new Date(m.createdAt).toLocaleTimeString('fa-IR',{hour:'2-digit',minute:'2-digit'})}</time>${mine?`<span class="im-receipt" title="${m.failed?'ارسال ناموفق':m.pending?'در حال ارسال':peer==='~saved'?'ذخیره شد':readAt>=m.createdAt?'خوانده شد':'ارسال شد'}">${m.failed?'!':m.pending?'◷':peer==='~saved'||readAt>=m.createdAt?icon('check'):'✓'}</span>`:''}${m.failed?'<button type="button" data-action="retry">تلاش دوباره</button>':!m.legacy&&!m.pending?`<details class="im-menu"><summary aria-label="گزینه‌های پیام">${icon('more')}</summary><div>${!m.id.startsWith('bot-')?'<button type="button" data-action="reply">پاسخ</button>':''}<button type="button" data-action="save">ذخیره در پیام‌های من</button>${!mine&&peer!=='~ai'?'<button type="button" data-action="report">گزارش پیام</button>':''}</div></details>`:m.legacy?'<small>سابقه</small>':''}</footer></article>`;}).join('')||'';
-        reconcileMessages(box,markup);
-        if(!all.length)box.innerHTML=`<div class="im-welcome"><span>${icon(peer==='~saved'?'saved':peer==='~ai'?'spark':'send')}</span><h2>${peer==='~saved'?'برای خودت نگه دار.':peer==='~ai'?'یک سؤال کوتاه، یک قدم جلوتر.':'گفتگو از همین‌جا شروع می‌شود.'}</h2><p>${peer==='~saved'?'عکس، فایل و یادداشت‌هایت را اینجا ذخیره کن.':peer==='~ai'?'درسی بپرس، راهنمایی بگیر یا قدم بعدی مطالعه‌ات را پیدا کن.':'پیام بنویس یا یک فایل درسی بفرست.'}</p>${peer==='~ai'?'<div class="im-prompts"><button type="button">برای شروع مطالعه چه کار کنم؟</button><button type="button">یک روش مرور سریع بگو</button><button type="button">پومودورو چطور کمک می‌کند؟</button></div>':''}</div>`;
-        if($('im-older'))$('im-older').onclick=older;box.querySelectorAll('.im-prompts button').forEach(b=>b.onclick=()=>{draft().text=b.textContent;restoreDraft();send();});
-        box.querySelectorAll('[data-action]').forEach(b=>b.onclick=()=>messageAction(b.dataset.action,all.find(m=>m.id===b.closest('[data-message]').dataset.message)));
-        if(bottom||nearBottom)box.scrollTop=box.scrollHeight;else box.scrollTop=oldTop+(prepend?box.scrollHeight-oldHeight:0);
+    function restoreDraftControls(){
+        if(selecting||!peer)return;
+        $('im-input').disabled=blocked||Boolean(upload);
+        $('im-send').disabled=blocked||Boolean(upload)||(peer==='~ai'&&sending);
+        $('im-attach').disabled=blocked||Boolean(upload)||peer==='~ai';
     }
-    async function older(){const seq=sequence,target=peer;try{const p=await request(null,`&peer=${encodeURIComponent(target)}&offset=${messages.filter(m=>!m.pending&&!m.failed).length}`);if(seq!==sequence)return;const map=new Map([...p.messages,...messages].map(m=>[m.id,m]));messages=[...map.values()];hasMore=p.hasMore;renderMessages(false,true);void cacheWrite(target,{peer:person,messages,legacy,canReport,canReview,hasMore,messageCursor,blocked,ownBlock,readAt,muted:threads.find(t=>t.peer===target)?.muted});}catch(e){feedback(e.message);}}
-    async function markRead(){const at=messages.filter(m=>m.sender!==user&&!m.pending).at(-1)?.createdAt,target=peer,key=`${user}:${peer}`,version=epoch;if(!at||!peer||readReceipts.get(key)>=at)return;const previous=readReceipts.get(key);readReceipts.set(key,at);try{await request({action:'read',peer:target,at});if(version!==epoch)return;const t=threads.find(t=>t.peer===target);if(t)t.unread=false;renderThreads();}catch{if(readReceipts.get(key)===at)readReceipts.set(key,previous);}}
-    async function refresh(){if(refreshing){refreshAgain=true;return;}if(selecting||!peer)return;refreshing=true;const seq=sequence,target=peer;try{const after=messageCursor?`&afterAt=${encodeURIComponent(messageCursor.at)}&afterKey=${encodeURIComponent(messageCursor.key)}`:'';const p=await request(null,`&peer=${encodeURIComponent(target)}&light=1${after}`);if(!active||seq!==sequence)return;lastSync=Date.now();extras()?.connection(streamReady?'متصل':'همگام‌سازی خودکار');messageCursor=p.cursor||messageCursor;const before=JSON.stringify(messages);messages=[...new Map([...messages,...p.messages].map(m=>[m.id,m])).values()].sort((a,b)=>a.createdAt.localeCompare(b.createdAt));const changed=before!==JSON.stringify(messages)||readAt!==p.readAt;readAt=p.readAt;blocked=p.blocked;ownBlock=p.ownBlock;extras()?.update();void cacheWrite(target,{peer:person,messages,legacy,canReport,canReview,hasMore,messageCursor,blocked,ownBlock,readAt,muted:threads.find(t=>t.peer===target)?.muted});if(changed){renderMessages();markRead();}if(p.moreChanges)setTimeout(()=>{if(active&&seq===sequence)refresh();},0);if(Date.now()-lastListRefresh>15000){lastListRefresh=Date.now();void refreshList();}}catch(e){if(active&&seq===sequence)feedback(e.message);}finally{refreshing=false;if(refreshAgain){refreshAgain=false;setTimeout(()=>{if(active)refresh();},0);}}}
-    async function attach(e){const file=e.target.files?.[0],target=peer,version=epoch;e.target.value='';if(!file)return;if(file.size>2*1024*1024)return feedback('حداکثر حجم عکس یا فایل ۲ مگابایت است.');if(!/\.(jpe?g|png|webp|pdf|txt|docx|xlsx|pptx|zip)$/i.test(file.name))return feedback('این نوع فایل پشتیبانی نمی‌شود.');try{const data=await new Promise((resolve,reject)=>{const r=new FileReader();r.onload=()=>resolve(String(r.result).split(',')[1]);r.onerror=reject;r.readAsDataURL(file);});if(version!==epoch||target!==peer)return;draft().file={name:file.name,data};draft().id=null;restoreDraft();feedback('فایل آماده است؛ برای ارسال دکمهٔ ارسال را بزن.');}catch{feedback('فایل خوانده نشد.');}}
+    const fileURL=(p,id)=>`/api/chat?messenger=1&peer=${encodeURIComponent(p)}&file=${encodeURIComponent(id)}`;
+    function renderMessages(bottom=false,prepend=false){
+        const box=$('im-log');if(!box)return;
+        const oldHeight=box.scrollHeight, oldTop=box.scrollTop;
+        const nearBottom=oldHeight-oldTop-box.clientHeight<100;
+        const all=[...legacy,...messages].sort((a,b)=>a.createdAt.localeCompare(b.createdAt)||a.id.localeCompare(b.id));
+        reconcileMessages(box,desk().messageMarkup(all,state(),hasMore));
+        if($('im-older'))$('im-older').onclick=older;
+        if(bottom||nearBottom)box.scrollTop=box.scrollHeight;
+        else box.scrollTop=oldTop+(prepend?box.scrollHeight-oldHeight:0);
+        desk().afterMessages();
+    }
+    async function older(){
+        if(olderPending||!hasMore)return false;
+        olderPending=true;
+        const seq=sequence,target=peer,button=$('im-older');
+        if(button)button.disabled=true;
+        const boundary=olderCursor
+            ? '&beforeAt='+encodeURIComponent(olderCursor.at)+'&beforeKey='+encodeURIComponent(olderCursor.key)
+            : '&offset='+messages.filter(m=>!m.pending&&!m.failed).length;
+        try{
+            const p=await request(null,'&peer='+encodeURIComponent(target)+boundary);
+            if(seq!==sequence)return false;
+            messages=[...new Map([...p.messages,...messages].map(m=>[m.id,m])).values()]
+                .sort((a,b)=>a.createdAt.localeCompare(b.createdAt)||a.id.localeCompare(b.id));
+            hasMore=Boolean(p.hasMore);
+            olderCursor=p.olderCursor||null;
+            renderMessages(false,true);
+            return p.messages.length>0;
+        }catch(error){if(seq===sequence)feedback(error.message);return false;}
+        finally{olderPending=false;if(button?.isConnected)button.disabled=false;}
+    }
+    function updateReceipts(){void markRead('delivered');void markRead();}
+    async function markRead(action='read'){
+        const target=peer, log=$('im-log');
+        if(!active||selecting||document.hidden||!target||target.startsWith('~'))return;
+        if(action==='read'&&(!log?.clientHeight||log.scrollHeight-log.scrollTop-log.clientHeight>120))return;
+        const at=messages.filter(m=>m.sender!==user&&!m.pending&&!m.deleted).at(-1)?.createdAt;
+        const key=[user,target,action].join(':'), version=epoch, previous=readReceipts.get(key);
+        if(!at||previous>=at)return;
+        readReceipts.set(key,at);
+        try{
+            await request({action,peer:target,at});
+            if(version!==epoch||action!=='read')return;
+            const thread=threads.find(t=>t.peer===target);
+            if(thread&&(!thread.at||thread.at<=at))thread.unread=false;
+            renderThreads();
+        }catch{if(readReceipts.get(key)===at)readReceipts.set(key,previous);}
+    }
+    async function refresh(){if(refreshing){refreshAgain=true;return;}if(selecting||!peer)return;refreshing=true;const seq=sequence,target=peer;try{const after=messageCursor?`&afterAt=${encodeURIComponent(messageCursor.at)}&afterKey=${encodeURIComponent(messageCursor.key)}`:'';const p=await request(null,`&peer=${encodeURIComponent(target)}&light=1${after}`);if(!active||seq!==sequence)return;lastSync=Date.now();extras()?.connection(streamReady?'متصل':'همگام‌سازی خودکار');messageCursor=p.cursor||messageCursor;const before=JSON.stringify([messages,reactions,deliveredAt]);sessionMeta(p);desk().header();presence(false);messages=[...new Map([...messages,...p.messages].map(m=>[m.id,m])).values()].sort((a,b)=>a.createdAt.localeCompare(b.createdAt));const changed=before!==JSON.stringify([messages,reactions,deliveredAt])||readAt!==p.readAt;readAt=p.readAt;blocked=p.blocked;ownBlock=p.ownBlock;restoreDraftControls();extras()?.update();void cacheWrite(target,{peer:person,messages,legacy,canReport,canReview,hasMore,messageCursor,blocked,ownBlock,readAt,settings,reactions,deliveredAt,muted:threads.find(t=>t.peer===target)?.muted});if(changed){renderMessages();updateReceipts();}if(p.moreChanges)setTimeout(()=>{if(active&&seq===sequence)refresh();},0);if(Date.now()-lastListRefresh>15000){lastListRefresh=Date.now();void refreshList();}}catch(e){if(active&&seq===sequence)feedback(e.message);}finally{refreshing=false;if(refreshAgain){refreshAgain=false;setTimeout(()=>{if(active)refresh();},0);}}}
+    const fileData=blob=>new Promise((resolve,reject)=>{
+        const reader=new FileReader();
+        reader.onload=()=>resolve(String(reader.result).split(',')[1]);
+        reader.onerror=()=>reject(Error('خواندن فایل ناموفق بود.'));
+        reader.readAsDataURL(blob);
+    });
+    async function attach(files,sticker=false){
+        if(!peer||blocked||selecting||upload||peer==='~ai')return;
+        const target=peer,version=epoch;
+        const valid=files.slice(0,10).filter(file=>file.size>0&&file.size<=2*1024*1024&&/\.(jpe?g|png|webp|gif|mp4|webm|pdf|txt|docx|xlsx|pptx|zip)$/i.test(file.name));
+        if(files.length!==valid.length)feedback('حداکثر ۱۰ فایل پشتیبانی‌شده، هر کدام تا ۲ مگابایت.');
+        if(!valid.length)return;
+        try{
+            const items=await Promise.all(valid.map(async file=>({name:file.name,data:await fileData(file),clientId:crypto.randomUUID(),sticker})));
+            if(version!==epoch||target!==peer)return;
+            const d=draft();d.files=[...(d.files||[]),...items].slice(0,10);d.album=d.album||crypto.randomUUID();restoreDraft();
+        }catch(error){if(version===epoch&&target===peer)feedback(error.message);}
+    }
+    function previewFiles(d){
+        const el=$('im-context');
+        el.hidden=false;
+        el.innerHTML='<div class="desk-uploads">'+d.files.map((file,i)=>{
+            const ext=file.name.split('.').pop().toLowerCase();
+            const type={jpg:'jpeg',jpeg:'jpeg',png:'png',webp:'webp',gif:'gif'}[ext];
+            const thumb=type?'<img loading="lazy" alt="" src="data:image/'+type+';base64,'+file.data+'">':'';
+            return '<div>'+thumb+'<span dir="auto">'+esc(file.name)+'</span><button type="button" data-remove-file="'+i+'" aria-label="حذف '+esc(file.name)+'">×</button></div>';
+        }).join('')+'</div>';
+        el.querySelectorAll('[data-remove-file]').forEach(btn=>btn.onclick=()=>{
+            d.files.splice(Number(btn.dataset.removeFile),1);if(!d.files.length)d.album=null;restoreDraft();
+        });
+    }
+    async function sendBatch(){
+        if(upload||!peer||blocked||selecting||!draft().files?.length)return;
+        const target=peer,version=epoch,d=draft(),files=d.files.slice(),album=files.length>1?d.album:null;
+        const controller=new AbortController();upload=controller;
+        const status=$('im-feedback');
+        status.innerHTML='<span></span> <progress max="1" value="0" aria-label="پیشرفت ارسال فایل"></progress> <button type="button">لغو ارسال</button>';
+        status.querySelector('button').onclick=()=>controller.abort();
+        const bar=status.querySelector('progress'),label=status.querySelector('span');
+        restoreDraftControls();
+        let sent=0;
+        try{
+            for(const file of files){
+                if(controller.signal.aborted||version!==epoch||target!==peer)break;
+                label.textContent='ارسال '+(sent+1)+' از '+files.length;
+                const payload={peer:target,id:file.clientId,text:sent?'':d.text,file,album,replyTo:sent?null:d.reply?.id};
+                const result=await uploadFile(payload,controller,fraction=>{bar.value=(sent+fraction)/files.length;});
+                if(version!==epoch)return;
+                d.files=d.files.filter(item=>item.clientId!==file.clientId);
+                if(sent++===0){d.text='';d.reply=null;rememberDraft(target,'');}
+                if(target===peer){messages=[...new Map([...messages,result.message].map(m=>[m.id,m])).values()];renderMessages(true);}
+            }
+            if(target===peer)feedback(sent===files.length?'فایل‌ها ارسال شدند.':'فایل‌های باقی‌مانده برای ارسال دوباره آماده‌اند.');
+        }catch(error){if(target===peer&&version===epoch)feedback(error.message+' فایل‌های باقی‌مانده برای تلاش دوباره آماده‌اند.');}
+        finally{
+            if(upload===controller)upload=null;
+            if(version===epoch&&target===peer)restoreDraft();
+            if(sent&&version===epoch)void refreshList();
+        }
+    }
+    function uploadFile(payload,controller,progress){
+        return new Promise((resolve,reject)=>{
+            const xhr=new XMLHttpRequest();
+            xhr.open('POST','/api/chat?messenger=1');
+            xhr.setRequestHeader('Content-Type','application/json');
+            xhr.timeout=45000;
+            const abort=()=>xhr.abort();
+            controller.signal.addEventListener('abort',abort,{once:true});
+            xhr.upload.onprogress=e=>{if(e.lengthComputable)progress(e.loaded/e.total);};
+            xhr.onloadend=()=>controller.signal.removeEventListener('abort',abort);
+            xhr.onerror=xhr.ontimeout=()=>reject(Error('ارتباط با سرور برقرار نشد.'));
+            xhr.onabort=()=>reject(Error('ارسال لغو شد.'));
+            xhr.onload=()=>{
+                try{const result=JSON.parse(xhr.responseText);if(xhr.status>=200&&xhr.status<300)resolve(result);else reject(Error(result.error||'ارسال ناموفق بود.'));}
+                catch{reject(Error('پاسخ سرور معتبر نبود.'));}
+            };
+            xhr.send(JSON.stringify(payload));
+        });
+    }
+    async function preferences(target,change){
+        const version=epoch;
+        try{
+            const result=await request({action:'preferences',peer:target,...change});
+            if(version!==epoch)return false;
+            const thread=threads.find(t=>t.peer===target);
+            if(thread){thread.settings=result.settings;thread.pinned=result.settings.pinned??thread.pinned;}
+            if(peer===target){settings=result.settings;desk().header();}
+            renderThreads();return true;
+        }catch(error){if(version===epoch)feedback(error.message);return false;}
+    }
+    async function modify(action,id,change={}){
+        const target=peer,seq=sequence;
+        try{
+            const result=await request({action,peer:target,id,...change});
+            if(seq!==sequence)return false;
+            if(result.message)messages=messages.map(m=>m.id===id?result.message:m);
+            if(result.reactions)reactions={...reactions,mine:result.reactions};
+            renderMessages();void refreshList();return true;
+        }catch(error){if(seq===sequence)feedback(error.message);return false;}
+    }
+    async function search(term){
+        const seq=sequence;
+        const result=await request(null,'&action=search&peer='+encodeURIComponent(peer)+'&q='+encodeURIComponent(term));
+        return seq===sequence?result.messages:[];
+    }
+    async function globalSearch(term){
+        const version=epoch;
+        const result=await request(null,'&action=globalSearch&q='+encodeURIComponent(term));
+        return version===epoch?result.messages:[];
+    }
+    async function findLoaded(id){
+        const seq=sequence, selector='[data-message="'+CSS.escape(id)+'"]';
+        let node=$('im-log')?.querySelector(selector);
+        for(let page=0;!node&&hasMore&&page<20;page++){
+            if(!(await older())||seq!==sequence)return null;
+            node=$('im-log')?.querySelector(selector);
+        }
+        return node;
+    }
+    async function forward(items,target){
+        const version=epoch,source=peer;
+        try{
+            for(const item of items){
+                let file;
+                if(item.file){
+                    const result=await fetch(fileURL(source,item.file.id),{credentials:'same-origin'});
+                    if(!result.ok)throw Error('فایل پیدا نشد.');
+                    file={name:item.file.name,data:await fileData(await result.blob()),voice:item.file.voice,duration:item.file.duration,waveform:item.file.waveform,sticker:item.file.sticker};
+                }
+                if(version!==epoch||source!==peer||!active)return false;
+                await request({peer:target,id:crypto.randomUUID(),text:item.text,file,forwarded:true});
+            }
+            if(source===peer){feedback('پیام‌ها بازفرستاده شدند.');void refresh();void refreshList();}
+            return true;
+        }catch(error){if(version===epoch&&source===peer)feedback(error.message);return false;}
+    }
     const outbox=new Map();
     async function send(retry=false,failedId=null){
         if(!peer||blocked||selecting||(peer==='~ai'&&sending))return false;
@@ -114,7 +360,7 @@ const Messenger=(()=>{
         let entry=previous;
         if(!retry){
             entry={id,target,snapshot,sending:true,createdAt:previous?.createdAt||new Date().toISOString()};outbox.set(id,entry);
-            if(!previous)drafts.set(target,{text:'',file:null,reply:null,id:null});
+            if(!previous){drafts.set(target,{text:'',file:null,reply:null,id:null,files:d.files,album:d.album});rememberDraft(target,'');}
             messages=[...messages.filter(m=>m.id!==id),{id,sender:user,text:snapshot.text||(snapshot.file?.voice?'پیام صوتی':'فایل پیوست'),createdAt:entry.createdAt,pending:true}];
         }
         if(target==='~ai')sending=true;
@@ -139,7 +385,7 @@ const Messenger=(()=>{
         }finally{if(version===epoch){if(target==='~ai')sending=false;if(active)restoreDraft();}}
     }
     async function messageAction(action,message){if(!message)return;if(action==='retry'){send(false,message.id);return;}if(action==='reply'){draft().reply=message;restoreDraft();$('im-input').focus();return;}const target=peer,version=epoch;try{if(action==='report'){if(!confirm('این پیام به‌عنوان محتوای نامناسب گزارش شود؟'))return;await request({action:'report',peer:target,id:message.id});feedback('گزارش ثبت شد.');return;}let file=null;if(message.file){const response=await fetch(fileURL(target,message.file.id),{credentials:'same-origin'});if(!response.ok)throw Error('فایل دریافت نشد.');const blob=await response.blob();const data=await new Promise((resolve,reject)=>{const r=new FileReader();r.onload=()=>resolve(String(r.result).split(',')[1]);r.onerror=reject;r.readAsDataURL(blob);});file={name:message.file.name,data,...(message.file.voice?{voice:true,duration:message.file.duration}:{})};}if(version!==epoch)return;await request({peer:'~saved',id:crypto.randomUUID(),text:message.text,file});feedback('در پیام‌های ذخیره‌شده قرار گرفت.');await refreshList();}catch(e){feedback(e.message);}}
-    function open(target){App.navigate('chat');if(target)select(target);}
+    function open(target){requestedPeer=target;App.navigate('chat');}
     return {enter,leave,logout,open,select,peer:()=>peer,isOpenWith:target=>active&&peer===target};
 })();
 window.Messenger=Messenger;
