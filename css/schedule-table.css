@@ -1,6 +1,25 @@
 /* Weekly timetable: theme tokens shared with the existing schedule UI. */
 #scm-table[hidden] { display: none; }
 #scm-table { min-width: 0; }
+/* Expand only the timetable view; other pages retain their reading width. */
+html.scm-on .content-body:has(#view-schedule.active #scm-table:not([hidden])) {
+    max-width: none;
+    padding-inline: clamp(12px, 1.5vw, 28px);
+}
+html.scm-on #scm:has(> #scm-table:not([hidden])) {
+    width: 100%;
+    max-width: none;
+    margin-inline: 0;
+}
+#scm-table:not([hidden]) .scm-table-scroll {
+    max-height: none;
+    min-height: max(360px, calc(100dvh - 360px));
+}
+#scm-table:not([hidden]) .scm-timetable {
+    min-height: max(360px, calc(100dvh - 360px));
+}
+#scm-table .scm-timetable td { height: 1px; }
+#scm-table :is(.scm-table-course, .scm-table-empty) { height: 100%; }
 .scm-table-heading { display:flex; align-items:center; justify-content:space-between; gap:16px; margin:10px 0 22px; }
 .scm-eyebrow { color:var(--m-accent); font-size:12px; font-weight:800; letter-spacing:.3px; }
 .scm-table-heading h3 { font-size:24px; margin:6px 0 !important; }
@@ -45,3 +64,4 @@
 @media(max-width:720px) { .scm-table-heading { align-items:flex-start; flex-direction:column; } .scm-table-heading h3 { font-size:22px; } .scm-table-total { padding:8px 12px; } .scm-timetable { min-width:1040px; } }
 @media(prefers-reduced-motion:reduce) { .scm-table-course { transition:none; } }
 html[data-motion="off"] .scm-table-course { transition:none; }
+
