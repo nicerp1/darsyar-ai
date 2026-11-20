@@ -8,8 +8,8 @@
     from { opacity: 0; transform: translate3d(0, 10px, 0) scale(.99); }
     to { opacity: 1; transform: none; }
 }
-@keyframes course-arrive {
-    from { opacity: 0; transform: translate3d(0, 14px, 0) scale(.97); }
+@keyframes schedule-view-in {
+    from { opacity: .65; transform: translateY(4px); }
     to { opacity: 1; transform: none; }
 }
 @media screen and (prefers-reduced-motion: no-preference) {
@@ -21,46 +21,33 @@
     html:not([data-motion="off"]) .view-section.active > :is(.content-card,.web-panel,.studio-dashboard,.scm) {
         animation: panel-arrive 480ms var(--motion-out) 45ms backwards;
     }
-    html:not([data-motion="off"]) #scm :is(#scm-day,#scm-week,#scm-table):not([hidden]) {
+    html:not([data-motion="off"]) #scm:not(.scm-compact) :is(#scm-day,#scm-week,#scm-table):not([hidden]) {
+        animation: schedule-view-in 200ms var(--motion-out) backwards;
+    }
+    html:not([data-motion="off"]) #scm.scm-compact :is(#scm-day,#scm-week):not([hidden]) {
         animation: panel-arrive 380ms var(--motion-out) backwards;
     }
-    html:not([data-motion="off"]) #scm .scm-table-heading {
-        animation: panel-arrive 420ms var(--motion-out) backwards;
-    }
-    #scm .scm-timetable td { --column-delay: 0ms; --row-delay: 0ms; }
-    #scm .scm-timetable td:nth-child(3) { --column-delay: 25ms; }
-    #scm .scm-timetable td:nth-child(4) { --column-delay: 50ms; }
-    #scm .scm-timetable td:nth-child(5) { --column-delay: 75ms; }
-    #scm .scm-timetable td:nth-child(6) { --column-delay: 100ms; }
-    #scm .scm-timetable td:nth-child(7) { --column-delay: 125ms; }
-    #scm .scm-timetable td:nth-child(8) { --column-delay: 150ms; }
-    #scm .scm-timetable tr:nth-child(2) td { --row-delay: 30ms; }
-    #scm .scm-timetable tr:nth-child(n+3) td { --row-delay: 60ms; }
     html:not([data-motion="off"]) #scm :is(.scm-table-course,.scm-table-empty) {
-        animation: course-arrive 440ms var(--motion-out) calc(var(--column-delay) + var(--row-delay)) backwards;
-        transition: transform 240ms var(--motion-out), box-shadow 240ms ease, border-color 180ms ease, background-color 180ms ease;
+        transition: transform 160ms var(--motion-out), border-color 160ms ease, background-color 160ms ease, color 160ms ease;
     }
     html:not([data-motion="off"]) #scm .scm-seg button {
         transition: background-color 220ms ease, color 180ms ease, box-shadow 240ms ease, transform 180ms var(--motion-out);
     }
     html:not([data-motion="off"]) #scm .scm-seg button:active { transform: scale(.96); }
-    html:not([data-motion="off"]) #scm :is(.scm-table-course,.scm-table-empty):active { transform: scale(.975); }
+    html:not([data-motion="off"]) #scm :is(.scm-table-course,.scm-table-empty):active { transform: scale(.985); }
     html:not([data-motion="off"]) .scm-detail {
-        opacity: 0; transform: translate3d(0, 16px, 0) scale(.97);
-        transition: opacity 180ms ease, transform 220ms var(--motion-out), display 220ms allow-discrete, overlay 220ms allow-discrete;
+        opacity: 0; transform: translateY(8px) scale(.985);
+        transition: opacity 140ms ease, transform 180ms var(--motion-out), display 180ms allow-discrete, overlay 180ms allow-discrete;
     }
     html:not([data-motion="off"]) .scm-detail[open] { opacity: 1; transform: none; }
     html:not([data-motion="off"]) .scm-detail::backdrop {
         background-color: #10182b00;
-        transition: background-color 220ms ease, display 220ms allow-discrete, overlay 220ms allow-discrete;
+        transition: background-color 160ms ease, display 180ms allow-discrete, overlay 180ms allow-discrete;
     }
     html:not([data-motion="off"]) .scm-detail[open]::backdrop { background-color: #10182b99; }
     @starting-style {
-        html:not([data-motion="off"]) .scm-detail[open] { opacity: 0; transform: translate3d(0, 16px, 0) scale(.97); }
+        html:not([data-motion="off"]) .scm-detail[open] { opacity: 0; transform: translateY(8px) scale(.985); }
         html:not([data-motion="off"]) .scm-detail[open]::backdrop { background-color: #10182b00; }
-    }
-    html:not([data-motion="off"]) .scm-detail[open] :is(h2,.scm-detail-meta,.scm-detail-note,footer) {
-        animation: panel-arrive 340ms var(--motion-out) 60ms backwards;
     }
     html:not([data-motion="off"]) :is(.nav-item,.scm-detail button) {
         transition: background-color 200ms ease, color 200ms ease, box-shadow 200ms ease, transform 200ms var(--motion-out);
@@ -68,8 +55,6 @@
     html:not([data-motion="off"]) .scm-detail button:active { transform: scale(.96); }
 }
 @media (hover:hover) and (prefers-reduced-motion:no-preference) {
-    html:not([data-motion="off"]) #scm .scm-table-course:hover { transform: translateY(-4px); box-shadow: 0 10px 24px #00000016; }
-    html:not([data-motion="off"]) #scm .scm-table-empty:hover { transform: translateY(-2px); }
     html:not([data-motion="off"]) .scm-detail button:hover { transform: translateY(-2px); }
 }
 @media (prefers-reduced-motion:reduce) {

@@ -90,8 +90,16 @@
         dialog.id = 'scm-detail'; dialog.className = 'scm-detail';
         dialog.setAttribute('aria-labelledby', 'scm-detail-title');
         document.body.append(dialog);
+        let fromBackdrop = false;
+        const isBackdrop = e => {
+            if (e.target !== dialog) return false;
+            const { left, right, top, bottom } = dialog.getBoundingClientRect();
+            return e.clientX < left || e.clientX > right || e.clientY < top || e.clientY > bottom;
+        };
+        dialog.addEventListener('pointerdown', e => { fromBackdrop = isBackdrop(e); });
         dialog.addEventListener('click', e => {
-            if (e.target === dialog || e.target.closest('[data-detail-close]')) dialog.close();
+            if ((fromBackdrop && isBackdrop(e)) || e.target.closest('[data-detail-close]')) dialog.close();
+            fromBackdrop = false;
             const action = e.target.closest('[data-detail-action]');
             if (!action) return;
             const d = Number(dialog.dataset.day), t = Number(dialog.dataset.task);
@@ -115,7 +123,7 @@
         const all = rows.reduce((a, r) => ({ t: a.t + r.total, d: a.d + r.done }), { t: 0, d: 0 });
         $('#scm-title').textContent = mode === 'table' ? 'جدول هفتگی' : 'برنامه مطالعه';
         $('#scm-sub').textContent = mode === 'table'
-            ? `کل هفته: ${dur(rows.reduce((sum, row) => sum + row.minutes, 0))} مطالعه`
+            ? (all.t ? `${pd(all.d)} از ${pd(all.t)} تسک انجام شد · ${dur(rows.reduce((sum, row) => sum + row.minutes, 0))} مطالعه` : 'برای شروع، به یکی از روزها درس اضافه کن.')
             : `${DAY_L[today()]} ${faFull.format(new Date())}${all.t ? ` · ${pd(all.d)} از ${pd(all.t)} تسک هفته` : ''}`;
         root.querySelectorAll('#scm-strip [data-day]').forEach((chip, i) => {
             const r = rows[i];
@@ -189,12 +197,24 @@
 
     function paintTable(rows) {
         const count = Math.max(1, ...data.days.map(day => day.tasks.length));
-        $('#scm-table').innerHTML = `<div class="scm-table-scroll" tabindex="0" role="region" aria-label="جدول برنامه و جزئیات درس‌ها"><table class="scm-timetable" aria-labelledby="scm-title"><thead><tr><th scope="col">نوبت</th>${data.days.map((day, d) => `<th scope="col" class="${d === today() ? 'is-today' : ''}"><strong>${DAY_L[d]}</strong><small>${faFull.format(dateOf(d))}${d === today() ? ' · امروز' : ''}</small>${rows[d].minutes ? `<span>${tableDuration(rows[d].minutes)}</span>` : ''}</th>`).join('')}</tr></thead><tbody>${Array.from({length: count}, (_, t) => `<tr><th scope="row" aria-label="نوبت ${pd(t + 1)}"><span>${pd(t + 1)}</span></th>${data.days.map((day, d) => {
+        const panel = $('#scm-table');
+        const previous = $('.scm-table-scroll', panel);
+        const scroll = previous && { top: previous.scrollTop, left: previous.scrollLeft };
+        panel.innerHTML = `<div class="scm-table-scroll" tabindex="0" role="region" aria-label="جدول برنامه و جزئیات درس‌ها"><table class="scm-timetable" aria-labelledby="scm-title"><thead><tr><th scope="col">نوبت</th>${data.days.map((_, d) => {
+            const currentDay = d === today();
+            return `<th scope="col"${currentDay ? ' class="is-today"' : ''}><strong>${DAY_L[d]}</strong><small>${currentDay ? 'امروز، ' : ''}${faFull.format(dateOf(d))}</small>${rows[d].minutes ? `<span class="scm-column-time">${tableDuration(rows[d].minutes)}</span>` : ''}</th>`;
+        }).join('')}</tr></thead><tbody>${Array.from({length: count}, (_, t) => `<tr><th scope="row" aria-label="نوبت ${pd(t + 1)}"><span>${pd(t + 1)}</span></th>${data.days.map((day, d) => {
             const task = day.tasks[t];
-            if (!task) return `<td><button type="button" class="scm-table-empty" data-act="table-add" data-d="${d}" aria-label="افزودن درس به ${DAY_L[d]}">${ico('add')}<span>وقت آزاد</span></button></td>`;
+            const cell = d === today() ? '<td class="is-today">' : '<td>';
+            if (!task) return `${cell}<button type="button" class="scm-table-empty" data-act="table-add" data-d="${d}" title="افزودن درس" aria-label="افزودن درس به ${DAY_L[d]}">${ico('add')}</button></td>`;
             const status = STATUS[task.status] || STATUS.pending;
-            return `<td><button type="button" class="scm-table-course" data-act="detail" data-d="${d}" data-t="${t}" style="--course:${esc(task.color)}" aria-label="جزئیات ${esc(task.subject)}، ${DAY_L[d]}، ${dur(task.durationMinutes)}، ${status[0]}"><strong>${esc(task.subject)}</strong><span class="scm-course-meta"><span class="scm-course-time">${ico('schedule')}${tableDuration(task.durationMinutes)}</span>${status[1] ? `<span class="scm-course-status">${status[0]}</span>` : ''}</span>${task.note ? `<small>${esc(task.note)}</small>` : ''}</button></td>`;
-        }).join('')}</tr>`).join('')}</tbody></table></div><p class="scm-table-hint">${ico('info')}روی هر درس بزن تا جزئیاتش را ببینی. زمان‌ها مدت پیشنهادی مطالعه‌اند.</p>`;
+            return `${cell}<button type="button" class="scm-table-course" data-act="detail" data-d="${d}" data-t="${t}" style="--course:${esc(task.color)}" aria-label="جزئیات ${esc(task.subject)}، ${DAY_L[d]}، ${dur(task.durationMinutes)}، ${status[0]}"><strong>${esc(task.subject)}</strong><span class="scm-course-meta"><span class="scm-course-time">${ico('schedule')}${tableDuration(task.durationMinutes)}</span>${status[1] ? `<span class="scm-course-status ${status[1]}">${status[0]}</span>` : ''}</span>${task.note ? `<small>${esc(task.note)}</small>` : ''}</button></td>`;
+        }).join('')}</tr>`).join('')}</tbody></table></div><p class="scm-table-hint">${ico('info')}برای دیدن جزئیات، روی درس و برای افزودن درس، روی + بزن.</p>`;
+        if (scroll) {
+            const scroller = $('.scm-table-scroll', panel);
+            scroller.scrollTop = scroll.top;
+            scroller.scrollLeft = scroll.left;
+        }
     }
 
     function showDetail(d, t) {
@@ -202,7 +222,9 @@
         if (!task) return;
         const dialog = document.getElementById('scm-detail');
         dialog.dataset.day = d; dialog.dataset.task = t;
-        dialog.innerHTML = `<header><span class="scm-eyebrow">${DAY_L[d]} · نوبت ${pd(t + 1)}</span><button type="button" data-detail-close aria-label="بستن جزئیات">${ico('close')}</button></header><h2 id="scm-detail-title">${esc(task.subject)}</h2><div class="scm-detail-meta"><span>${ico('schedule')}${dur(task.durationMinutes)}</span><span>${(STATUS[task.status] || STATUS.pending)[0]}</span></div><h3>توضیحات درس</h3><p class="scm-detail-note">${esc(task.note || 'هنوز توضیحی برای این درس ثبت نشده است.')}</p><footer><button type="button" data-detail-action="edit">${ico('edit')}ویرایش درس</button>${data.manager ? '' : `<button type="button" class="is-primary" data-detail-action="focus">${ico('play_arrow')}شروع تمرکز</button>`}</footer>`;
+        const status = STATUS[task.status] || STATUS.pending;
+        dialog.style.setProperty('--course', task.color);
+        dialog.innerHTML = `<header><div><span class="scm-eyebrow">${DAY_L[d]} · نوبت ${pd(t + 1)}</span><h2 id="scm-detail-title">${esc(task.subject)}</h2></div><button type="button" data-detail-close aria-label="بستن جزئیات" autofocus>${ico('close')}</button></header><div class="scm-detail-meta"><span>${ico('schedule')}${dur(task.durationMinutes)}</span><span class="scm-course-status ${status[1]}">${status[0]}</span></div><section class="scm-detail-copy"><h3>توضیحات درس</h3><p class="scm-detail-note">${esc(task.note || 'هنوز توضیحی برای این درس ثبت نشده است.')}</p></section><footer><button type="button" data-detail-action="edit">${ico('edit')}ویرایش درس</button>${data.manager ? '' : `<button type="button" class="is-primary" data-detail-action="focus">${ico('play_arrow')}شروع تمرکز</button>`}</footer>`;
         dialog.showModal();
     }
 
