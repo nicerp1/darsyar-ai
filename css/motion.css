@@ -21,10 +21,10 @@
     html:not([data-motion="off"]) .view-section.active > :is(.content-card,.web-panel,.studio-dashboard,.scm) {
         animation: panel-arrive 480ms var(--motion-out) 45ms backwards;
     }
-    html:not([data-motion="off"]) #scm:not(.scm-compact) :is(#scm-day,#scm-week,#scm-table):not([hidden]) {
+    html:not([data-motion="off"]) #scm #scm-table:not([hidden]) {
         animation: schedule-view-in 200ms var(--motion-out) backwards;
     }
-    html:not([data-motion="off"]) #scm.scm-compact :is(#scm-day,#scm-week):not([hidden]) {
+    html:not([data-motion="off"]) #scm :is(#scm-day,#scm-week):not([hidden]) {
         animation: panel-arrive 380ms var(--motion-out) backwards;
     }
     html:not([data-motion="off"]) #scm :is(.scm-table-course,.scm-table-empty) {

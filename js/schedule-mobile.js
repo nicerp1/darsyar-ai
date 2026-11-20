@@ -202,7 +202,8 @@
         const scroll = previous && { top: previous.scrollTop, left: previous.scrollLeft };
         panel.innerHTML = `<div class="scm-table-scroll" tabindex="0" role="region" aria-label="جدول برنامه و جزئیات درس‌ها"><table class="scm-timetable" aria-labelledby="scm-title"><thead><tr><th scope="col">نوبت</th>${data.days.map((_, d) => {
             const currentDay = d === today();
-            return `<th scope="col"${currentDay ? ' class="is-today"' : ''}><strong>${DAY_L[d]}</strong><small>${currentDay ? 'امروز، ' : ''}${faFull.format(dateOf(d))}</small>${rows[d].minutes ? `<span class="scm-column-time">${tableDuration(rows[d].minutes)}</span>` : ''}</th>`;
+            const row = rows[d];
+            return `<th scope="col"${currentDay ? ' class="is-today"' : ''}><strong>${DAY_L[d]}</strong><small>${currentDay ? 'امروز، ' : ''}${faFull.format(dateOf(d))}</small>${row.total ? `<span class="scm-column-time">${tableDuration(row.minutes)}</span><div class="scm-column-progress" role="progressbar" aria-label="پیشرفت ${DAY_L[d]}" aria-valuenow="${row.pct}" aria-valuetext="${pd(row.done)} از ${pd(row.total)} تسک انجام شد"><i style="width:${row.pct}%"></i></div>` : ''}</th>`;
         }).join('')}</tr></thead><tbody>${Array.from({length: count}, (_, t) => `<tr><th scope="row" aria-label="نوبت ${pd(t + 1)}"><span>${pd(t + 1)}</span></th>${data.days.map((day, d) => {
             const task = day.tasks[t];
             const cell = d === today() ? '<td class="is-today">' : '<td>';

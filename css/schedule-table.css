@@ -1,46 +1,42 @@
 /* Weekly timetable: theme tokens shared with the existing schedule UI. */
 #scm-table[hidden] { display: none; }
 #scm-table { min-width: 0; }
-/* Desktop schedule views share the same toolbar and content frame. */
-html.scm-on .content-body:has(#view-schedule.active #scm:not(.scm-compact)) {
+/* Only the timetable expands beyond the standard day/week layout. */
+html.scm-on .content-body:has(#view-schedule.active #scm-table:not([hidden])) {
     max-width: none;
     padding-block: 10px 18px;
     padding-inline: clamp(8px, .75vw, 16px);
 }
-html.scm-on #scm:not(.scm-compact) {
+html.scm-on #scm:has(> #scm-table:not([hidden])) {
     width: 100%;
     max-width: none;
     margin-inline: 0;
-    grid-template-columns: minmax(0, 1fr) auto;
-    align-items: center;
-    gap: 12px 16px;
+    gap: 8px;
 }
-#scm:not(.scm-compact) .scm-title h2 { font-size: 21px; line-height: 1.35; }
-#scm:not(.scm-compact) .scm-title p { font-size: 12px; }
-#scm:not(.scm-compact) :is(.scm-seg, .scm-icon) { min-height: 44px; height: auto; }
-#scm:not(.scm-compact) .scm-seg { width: clamp(198px, 23vw, 300px); padding: 3px; }
-#scm:not(.scm-compact) .scm-seg button { min-height: 36px; }
-#scm:not(.scm-compact) .scm-seg button[aria-selected="true"] { color: var(--m-accent); }
-#scm:not(.scm-compact) .scm-icon { width: 44px; }
-#scm:not(.scm-compact) .scm-strip.is-off { display: none; }
-#scm:not(.scm-compact) > :is(.scm-strip, #scm-day, #scm-week, #scm-table) { grid-column: 1 / -1; }
-#scm:not(.scm-compact) > :is(#scm-day, #scm-week) { width: min(100%, 1080px); justify-self: center; }
+#scm:has(> #scm-table:not([hidden])) .scm-strip { display: none; }
+#scm:has(> #scm-table:not([hidden])) .scm-seg { height: 46px; }
+#scm:has(> #scm-table:not([hidden])) .scm-title h2 { line-height: 1.25; }
+#scm:has(> #scm-table:not([hidden])) .scm-title p { line-height: 1.35; }
 .scm-eyebrow { color:var(--m-accent); font-size:12px; font-weight:800; letter-spacing:.3px; }
 .scm-table-hint { color:var(--m-muted); font-size:12px; }
-.scm-table-scroll { overflow:auto; max-height:max(240px, calc(100dvh - 160px)); border:1px solid var(--m-line); border-radius:var(--m-r-lg); background:var(--m-surface); scrollbar-width:thin; scroll-padding-block:76px 8px; }
+.scm-table-scroll { overflow:auto; max-height:max(220px, calc(100dvh - 206px)); border:1px solid var(--m-line); border-radius:var(--m-r-lg); background:var(--m-surface); scrollbar-width:thin; scroll-padding-block:88px 8px; }
 .scm-timetable { width:100%; min-width:42rem; border-collapse:separate; border-spacing:0; table-layout:fixed; color:var(--m-ink); }
 .scm-timetable th,.scm-timetable td { padding:6px; border-bottom:1px solid var(--m-line); vertical-align:middle; }
-.scm-timetable thead th { position:sticky; top:0; z-index:2; background:var(--m-raised); text-align:center; padding-block:8px; font-size:14px; line-height:1.35; }
+.scm-timetable thead th { position:sticky; top:0; z-index:2; background:var(--m-surface); text-align:center; padding-block:8px; font-size:14px; line-height:1.35; }
 .scm-timetable thead th:first-child { width:3.25rem; }
 .scm-timetable th small,.scm-column-time { display:block; font-size:11px; font-weight:400; color:var(--m-muted); margin-top:3px; }
 .scm-timetable .scm-column-time { font-weight:700; }
-.scm-timetable thead .is-today { color:var(--m-accent); background:color-mix(in srgb,var(--m-accent) 10%,var(--m-raised)); box-shadow:inset 0 3px var(--m-accent); }
-.scm-timetable td.is-today { background:color-mix(in srgb,var(--m-accent) 4%,var(--m-surface)); }
+.scm-timetable thead .is-today { color:var(--m-accent); background:color-mix(in srgb,var(--m-accent) 10%,var(--m-surface)); box-shadow:inset 0 2px var(--m-accent); }
+.scm-timetable td.is-today { background:color-mix(in srgb,var(--m-accent) 3%,var(--m-surface)); }
+.scm-column-progress { height:3px; max-width:46px; margin:5px auto 0; border-radius:5px; background:var(--m-line); overflow:hidden; }
+.scm-column-progress i { display:block; height:100%; background:var(--m-good); border-radius:inherit; }
 .scm-timetable tbody th { text-align:center; background:var(--m-surface); }
 .scm-timetable tbody th span { display:inline-grid; place-items:center; min-width:28px; min-height:28px; padding-inline:3px; border-radius:8px; background:var(--m-raised); font-size:13px; font-weight:700; color:var(--m-muted); }
 .scm-timetable tbody tr:last-child > * { border-bottom:0; }
-.scm-table-course { width:100%; min-height:56px; display:grid; justify-items:start; gap:3px; text-align:start; padding:6px; line-height:1.4; border:1px solid var(--m-line); border-inline-start:3px solid var(--course,var(--m-accent)); border-radius:var(--m-r-sm); background:color-mix(in srgb,var(--course,var(--m-accent)) 6%,var(--m-surface)); color:var(--m-ink); }
-.scm-table-course:is(:hover,:focus-visible) { border-color:var(--m-accent); background:color-mix(in srgb,var(--m-accent) 8%,var(--m-surface)); }
+.scm-table-course { position:relative; width:100%; min-height:56px; display:grid; justify-items:start; gap:3px; text-align:start; padding:6px; padding-inline-start:8px; line-height:1.4; border:1px solid var(--m-line); border-radius:var(--m-r-md); background:var(--m-surface); color:var(--m-ink); }
+.scm-table-course::before { content:""; position:absolute; inset-block:10px; inset-inline-start:0; width:3px; border-radius:3px; background:var(--course,var(--m-accent)); }
+.scm-table-course:has(.scm-course-status.ok) { background:color-mix(in srgb,var(--m-good) 6%,var(--m-surface)); }
+.scm-table-course:is(:hover,:focus-visible) { border-color:color-mix(in srgb,var(--course,var(--m-accent)) 55%,var(--m-line)); background:color-mix(in srgb,var(--m-accent) 8%,var(--m-surface)); }
 .scm-table-course strong { font-size:14px; max-width:100%; overflow-wrap:anywhere; }
 .scm-course-meta { display:flex; flex-wrap:wrap; align-items:center; column-gap:5px; row-gap:2px; max-width:100%; }
 .scm-course-status,.scm-course-time { display:inline-flex; align-items:center; gap:3px; font-size:11px; color:var(--m-muted); max-width:100%; overflow-wrap:anywhere; }
@@ -50,7 +46,7 @@ html.scm-on #scm:not(.scm-compact) {
 .scm-course-status.bad { --state:var(--m-bad); }
 .scm-course-time { font-size:12px; color:var(--m-ink); }
 .scm-table-course .scm-glyph { font-size:13px; }
-.scm-table-course small { display:block; overflow:hidden; max-width:100%; white-space:nowrap; text-overflow:ellipsis; font-size:11px; color:var(--m-muted); }
+.scm-table-course small { display:block; overflow:hidden; width:100%; min-width:0; white-space:nowrap; text-overflow:ellipsis; font-size:11px; color:var(--m-muted); }
 .scm-table-empty { width:100%; min-height:44px; display:grid; place-items:center; border:1px dashed transparent; border-radius:var(--m-r-sm); background:transparent; color:var(--m-muted); font-size:16px; }
 .scm-table-empty .scm-glyph { opacity:.7; }
 .scm-table-empty:is(:hover,:focus-visible) { border-color:var(--m-line); background:var(--m-raised); color:var(--m-accent); }
