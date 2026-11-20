@@ -39,6 +39,8 @@ module.exports = async (req, res) => {
         setCookie(res, token);
         const rows = await db(`app_data?username=eq.${encodeURIComponent(username)}&key=not.like.im_*&select=key,value`);
         const data = Object.fromEntries((rows || []).filter(row => row.key !== 'chat_reports').map(row => [row.key, row.value]));
+        const rooms = require('../lib/study-rooms');
+        data.room_study_history = rooms.history(await rooms.getMember(username));
         const user = await decorateUser(profile);
         if (user.accountType === 'student') user.advisor = await findStudentAdvisor(user.username);
         const users = ['admin', 'advisor'].includes(user.accountType) ? await listManagedStudents(profile) : undefined;

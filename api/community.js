@@ -8,6 +8,7 @@ const androidReleaseNotice={
     createdAt:'2026-11-01T16:45:00.000Z'
 };
 module.exports = async(req,res) => {
+    if (req.query?.rooms === '1') return require('../lib/study-rooms').handler(req, res);
     res.setHeader('Cache-Control','private, no-store');
     try {
         const actor=await getSession(req); if(!actor)return res.status(401).json({error:'ابتدا وارد حساب شوید.'});

@@ -11,6 +11,7 @@ const StudyWorkspace=(()=>{
         const days=new Map(),subjects=new Map();
         const add=(date,seconds)=>{if(/^\d{4}-\d{2}-\d{2}$/.test(date))days.set(date,(days.get(date)||0)+seconds);};
         rows('study_history').forEach(row=>add(row.date,Math.round(positive(row.hours)*3600)));
+        rows('room_study_history').forEach(row=>add(row.date,Math.round(positive(row.hours)*3600)));
         rows('manual_reports').filter(row=>row.status!=='missed').forEach(row=>{const seconds=Math.round(positive(row.minutes)*60);add(row.date,seconds);if(row.subject)subjects.set(row.subject,(subjects.get(row.subject)||0)+seconds);});
         return {days,subjects};
     }

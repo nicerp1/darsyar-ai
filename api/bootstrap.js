@@ -6,6 +6,8 @@ module.exports = async (req, res) => {
         const rows = await db(`app_data?username=eq.${encodeURIComponent(user.username)}&key=not.like.im_*&select=key,value`);
         const privateKeys = new Set(['chat_reports']);
         const data = Object.fromEntries((rows || []).filter(row => !privateKeys.has(row.key) && !/^(notice_|news_|read_)/.test(row.key)).map(row => [row.key, row.value]));
+        const rooms = require('../lib/study-rooms');
+        data.room_study_history = rooms.history(await rooms.getMember(user.username));
         const decorated = await decorateUser(user);
         if (decorated.accountType === 'student') decorated.advisor = await findStudentAdvisor(user.username);
         const users = ['admin', 'advisor'].includes(decorated.accountType) ? await listManagedStudents(user) : undefined;

@@ -40,16 +40,17 @@ const WebStudio = (() => {
     let routeAnimations = [];
     const mobileTabForRoute = route => {
         if (['dashboard','stats','pomodoro','schedule','profile'].includes(route)) return route;
+        if (route === 'study-rooms') return 'pomodoro';
         if (['chat','admin','legal','subscription'].includes(route)) return 'profile';
         return 'stats';
     };
-    const viewLabels = { dashboard:'امروزِ تو', pomodoro:'اتاق تمرکز', chat:'گفت‌وگو', schedule:'برنامه من', stats:'آمار و پیشرفت', 'ai-assistant':'هوش مصنوعی روند', flashcards:'فلش‌کارت', 'ai-writing':'کارگاه نوشتن', 'ai-research':'پژوهش', gamification:'لیگ و دوستان', admin:'پنل مشاوره', profile:'پروفایل', legal:'قوانین و حریم خصوصی' };
+    const viewLabels = { dashboard:'امروزِ تو', pomodoro:'اتاق تمرکز', 'study-rooms':'اتاق مطالعه', chat:'گفت‌وگو', schedule:'برنامه من', stats:'آمار و پیشرفت', 'ai-assistant':'هوش مصنوعی روند', flashcards:'فلش‌کارت', 'ai-writing':'کارگاه نوشتن', 'ai-research':'پژوهش', gamification:'لیگ و دوستان', admin:'پنل مشاوره', profile:'پروفایل', legal:'قوانین و حریم خصوصی' };
 
     function init() {
         if (!enabled() || ready) return;
         ready = true;
         document.documentElement.classList.add('studio-web');
-        const mapping = { dashboard:'home', pomodoro:'timer', schedule:'calendar', stats:'chart', chat:'chat', 'ai-assistant':'spark', flashcards:'cards', 'ai-writing':'note', 'ai-research':'compass', gamification:'trophy', admin:'people', profile:'user', subscription:'trophy', exams:'book' };
+        const mapping = { dashboard:'home', pomodoro:'timer', 'study-rooms':'people', schedule:'calendar', stats:'chart', chat:'chat', 'ai-assistant':'spark', flashcards:'cards', 'ai-writing':'note', 'ai-research':'compass', gamification:'trophy', admin:'people', profile:'user', subscription:'trophy', exams:'book' };
         Object.entries(mapping).forEach(([name, glyph]) => {
             const nav = document.getElementById(`nav-${name}`);
             const oldIcon = nav?.querySelector('.material-symbols-outlined');
@@ -168,6 +169,7 @@ const WebStudio = (() => {
         const add = (date, hours) => { if (date && Number.isFinite(Number(hours))) byDate.set(date, (byDate.get(date) || 0) + Math.max(0, Number(hours))); };
         (Storage.get('study_history', []) || []).forEach(row => add(row.date, row.hours || 0));
         (Storage.get('manual_reports', []) || []).filter(row => row.status !== 'missed').forEach(row => add(row.date, Number(row.minutes || 0) / 60));
+        (Storage.get('room_study_history', []) || []).forEach(row => add(row.date, Number(row.hours || 0)));
         return byDate;
     }
 

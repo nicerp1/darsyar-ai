@@ -10,6 +10,7 @@ const Stats = (function () {
     function realStudyData() {
         const byDate = new Map();
         (Storage.get('study_history', []) || []).forEach(item => { if (item?.date) byDate.set(item.date, (byDate.get(item.date) || 0) + Number(item.hours || 0)); });
+        (Storage.get('room_study_history', []) || []).forEach(item => { if (item?.date) byDate.set(item.date, (byDate.get(item.date) || 0) + Number(item.hours || 0)); });
         (Storage.get('manual_reports', []) || []).filter(item => item?.date && item.status !== 'missed').forEach(item => byDate.set(item.date, (byDate.get(item.date) || 0) + Number(item.minutes || 0) / 60));
         return [...byDate.entries()].sort(([a], [b]) => a.localeCompare(b)).map(([date, hours]) => ({ date, hours }));
     }

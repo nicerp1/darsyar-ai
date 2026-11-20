@@ -133,6 +133,21 @@ const Schedule = (function () {
     function openForStudent(username) { requestedTarget = username; App.navigate('schedule'); toggleAdminDrawer(true); }
     function printSchedule() { Utils?.printElement('schedule-printable-area', adminTarget ? `برنامه ${adminTarget.name || adminTarget.username}` : 'برنامه مطالعاتی هفتگی روند'); }
     const getState = () => ({ days: current(), manager: Boolean(adminTarget), target: adminTarget });
-    return { getState, init, toggleAdminDrawer, selectAdminStudent, openEditTaskModal, saveTaskSubmit, deleteCurrentTask, launchPomoForTask, updateReportDuration, saveManualReport, removeManualReport, openForStudent, printSchedule };
+    const getOwnDays = () => normalize(Storage.get('schedule', []));
+    async function addOwnTask(day, subject, minutes) {
+        if (!Number.isInteger(day) || day < 0 || day >= 7 || !subject || !Number.isInteger(minutes) || minutes < 5 || minutes > 600) throw Error('عنوان، روز و مدت معتبر وارد کن.');
+        const schedule = getOwnDays(), id = crypto.randomUUID();
+        schedule[day].tasks.push({ id, subject: subject.slice(0, 100), durationMinutes: minutes, status: 'pending', color: '#7855ca', note: '' });
+        await Storage.saveConfirmed('schedule', schedule);
+        return id;
+    }
+    async function setOwnTaskDone(day, id, done) {
+        const schedule = getOwnDays(), task = schedule[day]?.tasks.find(t => t.id === id);
+        if (!task) throw Error('این تسک در برنامه پیدا نشد.');
+        if (!done && (Storage.get('task_completions', []) || []).some(record => record.taskId === id)) throw Error('این هدف گزارش ثبت‌شده دارد و از اتاق نمی‌توان آن را برگرداند.');
+        task.status = done ? 'completed' : 'pending';
+        await Storage.saveConfirmed('schedule', schedule);
+    }
+    return { getState, getOwnDays, addOwnTask, setOwnTaskDone, init, toggleAdminDrawer, selectAdminStudent, openEditTaskModal, saveTaskSubmit, deleteCurrentTask, launchPomoForTask, updateReportDuration, saveManualReport, removeManualReport, openForStudent, printSchedule };
 })();
 window.Schedule = Schedule;

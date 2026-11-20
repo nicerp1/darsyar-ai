@@ -82,12 +82,13 @@ const App = (function () {
 
             renderUserHeader();
             renderSidebarRolePermissions();
-            navigate(currentView);
+            navigate(window.StudyRooms?.hasInvite() ? 'study-rooms' : currentView);
         }
     }
 
     function onUserChanged() {
         window.Messenger?.logout();
+        window.StudyRooms?.reset();
         document.getElementById('sf-completion')?.close();
         window.Community?.init();
         checkAuthAndRender();
@@ -138,6 +139,7 @@ const App = (function () {
             if (typeof Utils !== 'undefined') Utils.showToast('دسترسی به این بخش فقط برای مدیر اصلی مجاز است.', 'error');
             viewName = 'dashboard';
         }
+        if (previousView === 'study-rooms' && viewName !== previousView) window.StudyRooms?.exit();
         if (window.WebStudio?.enabled()) WebStudio.beforeLeave(viewName, previousView);
         currentView = viewName;
         document.body.classList.toggle('aw-chat-open',viewName==='ai-assistant'&&Boolean(window.WebStudio?.enabled()&&window.AIWorkspace));
@@ -173,6 +175,9 @@ const App = (function () {
                 break;
             case 'pomodoro':
                 if (typeof Pomodoro !== 'undefined') Pomodoro.init();
+                break;
+            case 'study-rooms':
+                window.StudyRooms?.enter();
                 break;
             case 'flashcards':
                 if (typeof Flashcards !== 'undefined') Flashcards.init();
