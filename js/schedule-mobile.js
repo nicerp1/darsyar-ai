@@ -200,16 +200,24 @@
         const panel = $('#scm-table');
         const previous = $('.scm-table-scroll', panel);
         const scroll = previous && { top: previous.scrollTop, left: previous.scrollLeft };
-        panel.innerHTML = `<div class="scm-table-scroll" tabindex="0" role="region" aria-label="جدول برنامه و جزئیات درس‌ها"><table class="scm-timetable" aria-labelledby="scm-title"><thead><tr><th scope="col">نوبت</th>${data.days.map((_, d) => {
+        panel.innerHTML = `<div class="scm-table-scroll" tabindex="0" role="region" aria-label="جدول برنامه و جزئیات درس‌ها"><table class="scm-timetable" aria-labelledby="scm-title"><thead><tr><th scope="col">نوبت</th>${data.days.map((day, d) => {
             const currentDay = d === today();
             const row = rows[d];
-            return `<th scope="col"${currentDay ? ' class="is-today"' : ''}><strong>${DAY_L[d]}</strong><small>${currentDay ? 'امروز، ' : ''}${faFull.format(dateOf(d))}</small>${row.total ? `<span class="scm-column-time">${tableDuration(row.minutes)}</span><div class="scm-column-progress" role="progressbar" aria-label="پیشرفت ${DAY_L[d]}" aria-valuenow="${row.pct}" aria-valuetext="${pd(row.done)} از ${pd(row.total)} تسک انجام شد"><i style="width:${row.pct}%"></i></div>` : ''}</th>`;
+            const segments = day.tasks.map(task => `<i class="${task.status === 'completed' ? 'is-done' : ''}" style="flex-grow:${task.durationMinutes};--segment:${esc(task.color)}"></i>`).join('');
+            return `<th scope="col"${currentDay ? ' class="is-today"' : ''}>
+                <div class="scm-table-day">
+                    <strong>${DAY_L[d]}</strong>
+                    <small>${currentDay ? 'امروز، ' : ''}${faFull.format(dateOf(d))}</small>
+                    <span class="scm-column-time">${row.total ? tableDuration(row.minutes) : 'بدون تسک'}</span>
+                    ${row.total ? `<div class="scm-column-progress" role="progressbar" aria-label="پیشرفت ${DAY_L[d]}" aria-valuenow="${row.pct}" aria-valuetext="${pd(row.done)} از ${pd(row.total)} تسک انجام شد">${segments}</div>` : '<div class="scm-column-progress is-empty" aria-hidden="true"></div>'}
+                </div>
+            </th>`;
         }).join('')}</tr></thead><tbody>${Array.from({length: count}, (_, t) => `<tr><th scope="row" aria-label="نوبت ${pd(t + 1)}"><span>${pd(t + 1)}</span></th>${data.days.map((day, d) => {
             const task = day.tasks[t];
             const cell = d === today() ? '<td class="is-today">' : '<td>';
             if (!task) return `${cell}<button type="button" class="scm-table-empty" data-act="table-add" data-d="${d}" title="افزودن درس" aria-label="افزودن درس به ${DAY_L[d]}">${ico('add')}</button></td>`;
             const status = STATUS[task.status] || STATUS.pending;
-            return `${cell}<button type="button" class="scm-table-course" data-act="detail" data-d="${d}" data-t="${t}" style="--course:${esc(task.color)}" aria-label="جزئیات ${esc(task.subject)}، ${DAY_L[d]}، ${dur(task.durationMinutes)}، ${status[0]}"><strong>${esc(task.subject)}</strong><span class="scm-course-meta"><span class="scm-course-time">${ico('schedule')}${tableDuration(task.durationMinutes)}</span>${status[1] ? `<span class="scm-course-status ${status[1]}">${status[0]}</span>` : ''}</span>${task.note ? `<small>${esc(task.note)}</small>` : ''}</button></td>`;
+            return `${cell}<button type="button" class="scm-table-course" data-act="detail" data-d="${d}" data-t="${t}" style="--course:${esc(task.color)}" aria-label="جزئیات ${esc(task.subject)}، ${DAY_L[d]}، ${dur(task.durationMinutes)}، ${status[0]}"><strong>${esc(task.subject)}</strong><span class="scm-course-meta"><span class="scm-course-time">${ico('schedule')}${tableDuration(task.durationMinutes)}</span>${status[1] ? `<span class="scm-course-status ${status[1]}">${status[1] === 'ok' ? ico('check') : ''}${status[0]}</span>` : ''}</span>${task.note ? `<small>${esc(task.note)}</small>` : ''}</button></td>`;
         }).join('')}</tr>`).join('')}</tbody></table></div><p class="scm-table-hint">${ico('info')}برای دیدن جزئیات، روی درس و برای افزودن درس، روی + بزن.</p>`;
         if (scroll) {
             const scroller = $('.scm-table-scroll', panel);

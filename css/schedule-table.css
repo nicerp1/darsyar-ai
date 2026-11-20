@@ -19,17 +19,20 @@ html.scm-on #scm:has(> #scm-table:not([hidden])) {
 #scm:has(> #scm-table:not([hidden])) .scm-title p { line-height: 1.35; }
 .scm-eyebrow { color:var(--m-accent); font-size:12px; font-weight:800; letter-spacing:.3px; }
 .scm-table-hint { color:var(--m-muted); font-size:12px; }
-.scm-table-scroll { overflow:auto; max-height:max(220px, calc(100dvh - 206px)); border:1px solid var(--m-line); border-radius:var(--m-r-lg); background:var(--m-surface); scrollbar-width:thin; scroll-padding-block:88px 8px; }
+.scm-table-scroll { overflow:auto; max-height:max(220px, calc(100dvh - 206px)); border:1px solid var(--m-line); border-radius:var(--m-r-lg); background:var(--m-surface); scrollbar-width:thin; scroll-padding-block:108px 8px; }
 .scm-timetable { width:100%; min-width:42rem; border-collapse:separate; border-spacing:0; table-layout:fixed; color:var(--m-ink); }
 .scm-timetable th,.scm-timetable td { padding:6px; border-bottom:1px solid var(--m-line); vertical-align:middle; }
-.scm-timetable thead th { position:sticky; top:0; z-index:2; background:var(--m-surface); text-align:center; padding-block:8px; font-size:14px; line-height:1.35; }
+.scm-timetable thead th { position:sticky; top:0; z-index:2; background:var(--m-raised); text-align:center; padding-block:6px; font-size:14px; line-height:1.35; }
 .scm-timetable thead th:first-child { width:3.25rem; }
-.scm-timetable th small,.scm-column-time { display:block; font-size:11px; font-weight:400; color:var(--m-muted); margin-top:3px; }
+.scm-table-day { display:grid; align-content:center; min-height:74px; gap:2px; padding:4px; border:1px solid var(--m-line); border-radius:var(--m-r-md); background:var(--m-surface); overflow-wrap:anywhere; }
+.scm-table-day small,.scm-column-time { display:block; font-size:11px; font-weight:400; color:var(--m-muted); }
 .scm-timetable .scm-column-time { font-weight:700; }
-.scm-timetable thead .is-today { color:var(--m-accent); background:color-mix(in srgb,var(--m-accent) 10%,var(--m-surface)); box-shadow:inset 0 2px var(--m-accent); }
+.scm-timetable thead .is-today .scm-table-day { color:var(--m-accent); border-color:var(--m-accent); background:linear-gradient(135deg,color-mix(in srgb,var(--m-accent) 10%,var(--m-surface)),var(--m-surface)); }
 .scm-timetable td.is-today { background:color-mix(in srgb,var(--m-accent) 3%,var(--m-surface)); }
-.scm-column-progress { height:3px; max-width:46px; margin:5px auto 0; border-radius:5px; background:var(--m-line); overflow:hidden; }
-.scm-column-progress i { display:block; height:100%; background:var(--m-good); border-radius:inherit; }
+.scm-column-progress { display:flex; width:65%; max-width:72px; gap:2px; height:4px; margin:3px auto 0; border-radius:5px; overflow:hidden; }
+.scm-column-progress.is-empty { background:var(--m-line); }
+.scm-column-progress i { flex-basis:0; min-width:0; background:var(--segment,var(--m-accent)); border-radius:inherit; opacity:.38; }
+.scm-column-progress i.is-done { opacity:1; }
 .scm-timetable tbody th { text-align:center; background:var(--m-surface); }
 .scm-timetable tbody th span { display:inline-grid; place-items:center; min-width:28px; min-height:28px; padding-inline:3px; border-radius:8px; background:var(--m-raised); font-size:13px; font-weight:700; color:var(--m-muted); }
 .scm-timetable tbody tr:last-child > * { border-bottom:0; }
@@ -46,6 +49,7 @@ html.scm-on #scm:has(> #scm-table:not([hidden])) {
 .scm-course-status.bad { --state:var(--m-bad); }
 .scm-course-time { font-size:12px; color:var(--m-ink); }
 .scm-table-course .scm-glyph { font-size:13px; }
+.scm-table-course .scm-course-status .scm-glyph { font-size:11px; }
 .scm-table-course small { display:block; overflow:hidden; width:100%; min-width:0; white-space:nowrap; text-overflow:ellipsis; font-size:11px; color:var(--m-muted); }
 .scm-table-empty { width:100%; min-height:44px; display:grid; place-items:center; border:1px dashed transparent; border-radius:var(--m-r-sm); background:transparent; color:var(--m-muted); font-size:16px; }
 .scm-table-empty .scm-glyph { opacity:.7; }
