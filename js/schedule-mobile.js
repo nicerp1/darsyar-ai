@@ -43,6 +43,7 @@
     const faFull = new Intl.DateTimeFormat('fa-IR-u-ca-persian', { day: 'numeric', month: 'long' });
     const dateOf = i => { const d = new Date(); d.setDate(d.getDate() + i - today()); return d; };
     const dur = m => { const h = Math.floor(m / 60), r = m % 60; return h ? (r ? `${pd(h)} ساعت و ${pd(r)} دقیقه` : `${pd(h)} ساعت`) : `${pd(r)} دقیقه`; };
+    const tableDuration = m => `${pd(m)} دقیقه`;
 
     const viewModes = { phone: 'week', desktop: 'table' };
     let root, data = null, sel = today(), mode = phone.matches ? viewModes.phone : viewModes.desktop, dir = 0, seen = new Map(), firstPaint = true;
@@ -58,7 +59,7 @@
         root.classList.toggle('scm-compact', phone.matches);
         root.innerHTML = `
         <header class="scm-head">
-            <div class="scm-title"><h2>برنامه مطالعه</h2><p id="scm-sub"></p></div>
+            <div class="scm-title"><h2 id="scm-title">برنامه مطالعه</h2><p id="scm-sub"></p></div>
             <div class="scm-tools">
                 <button type="button" class="scm-icon" data-act="print" aria-label="چاپ برنامه">${ico('print')}</button>
                 <button type="button" class="scm-icon is-primary" data-act="add" aria-label="افزودن تسک">${ico('add')}</button>
@@ -112,7 +113,10 @@
         if (!data || !root) return;
         const rows = data.days.map(stats);
         const all = rows.reduce((a, r) => ({ t: a.t + r.total, d: a.d + r.done }), { t: 0, d: 0 });
-        $('#scm-sub').textContent = `${DAY_L[today()]} ${faFull.format(new Date())}${all.t ? ` · ${pd(all.d)} از ${pd(all.t)} تسک هفته` : ''}`;
+        $('#scm-title').textContent = mode === 'table' ? 'جدول هفتگی' : 'برنامه مطالعه';
+        $('#scm-sub').textContent = mode === 'table'
+            ? `کل هفته: ${dur(rows.reduce((sum, row) => sum + row.minutes, 0))} مطالعه`
+            : `${DAY_L[today()]} ${faFull.format(new Date())}${all.t ? ` · ${pd(all.d)} از ${pd(all.t)} تسک هفته` : ''}`;
         root.querySelectorAll('#scm-strip [data-day]').forEach((chip, i) => {
             const r = rows[i];
             chip.classList.toggle('is-sel', i === sel && mode === 'day');
@@ -185,14 +189,12 @@
 
     function paintTable(rows) {
         const count = Math.max(1, ...data.days.map(day => day.tasks.length));
-        const total = rows.reduce((sum, row) => sum + row.minutes, 0);
-        $('#scm-table').innerHTML = `<div class="scm-table-heading"><div><span class="scm-eyebrow">نقشه هفته تو</span><h3>یک هفته، یک نگاه</h3><p>روی هر درس بزن و جزئیاتش را ببین.</p></div><span class="scm-table-total">${ico('schedule')}${dur(total)} مطالعه</span></div>
-        <div class="scm-table-scroll" tabindex="0" role="region" aria-label="جدول هفتگی؛ برای دیدن همه روزها افقی حرکت کنید"><table class="scm-timetable"><caption>برنامه هفتگی · زمان‌ها مدت مطالعه هستند</caption><thead><tr><th scope="col">نوبت</th>${data.days.map((day, d) => `<th scope="col" class="${d === today() ? 'is-today' : ''}"><strong>${DAY_L[d]}</strong><small>${faFull.format(dateOf(d))}${d === today() ? ' · امروز' : ''}</small><span>${dur(rows[d].minutes)}</span></th>`).join('')}</tr></thead><tbody>${Array.from({length: count}, (_, t) => `<tr><th scope="row"><span>${pd(t + 1)}</span><small>نوبت مطالعه</small></th>${data.days.map((day, d) => {
+        $('#scm-table').innerHTML = `<div class="scm-table-scroll" tabindex="0" role="region" aria-label="جدول برنامه و جزئیات درس‌ها"><table class="scm-timetable" aria-labelledby="scm-title"><thead><tr><th scope="col">نوبت</th>${data.days.map((day, d) => `<th scope="col" class="${d === today() ? 'is-today' : ''}"><strong>${DAY_L[d]}</strong><small>${faFull.format(dateOf(d))}${d === today() ? ' · امروز' : ''}</small>${rows[d].minutes ? `<span>${tableDuration(rows[d].minutes)}</span>` : ''}</th>`).join('')}</tr></thead><tbody>${Array.from({length: count}, (_, t) => `<tr><th scope="row" aria-label="نوبت ${pd(t + 1)}"><span>${pd(t + 1)}</span></th>${data.days.map((day, d) => {
             const task = day.tasks[t];
             if (!task) return `<td><button type="button" class="scm-table-empty" data-act="table-add" data-d="${d}" aria-label="افزودن درس به ${DAY_L[d]}">${ico('add')}<span>وقت آزاد</span></button></td>`;
             const status = STATUS[task.status] || STATUS.pending;
-            return `<td><button type="button" class="scm-table-course" data-act="detail" data-d="${d}" data-t="${t}" style="--course:${esc(task.color)}" aria-label="جزئیات ${esc(task.subject)}، ${DAY_L[d]}، ${dur(task.durationMinutes)}"><span class="scm-course-status">${ico(task.status === 'completed' ? 'check_circle' : 'menu_book')}${status[0]}</span><strong>${esc(task.subject)}</strong><span class="scm-course-time">${ico('schedule')}${dur(task.durationMinutes)}</span><small>${esc(task.note || 'مشاهده جزئیات درس')}${ico('arrow_back')}</small></button></td>`;
-        }).join('')}</tr>`).join('')}</tbody></table></div><p class="scm-table-hint">${ico('info')}هر ردیف یک نوبت مطالعه است؛ زمان هر کارت، مدت پیشنهادی مطالعه همان درس است.</p>`;
+            return `<td><button type="button" class="scm-table-course" data-act="detail" data-d="${d}" data-t="${t}" style="--course:${esc(task.color)}" aria-label="جزئیات ${esc(task.subject)}، ${DAY_L[d]}، ${dur(task.durationMinutes)}، ${status[0]}"><strong>${esc(task.subject)}</strong><span class="scm-course-meta"><span class="scm-course-time">${ico('schedule')}${tableDuration(task.durationMinutes)}</span>${status[1] ? `<span class="scm-course-status">${status[0]}</span>` : ''}</span>${task.note ? `<small>${esc(task.note)}</small>` : ''}</button></td>`;
+        }).join('')}</tr>`).join('')}</tbody></table></div><p class="scm-table-hint">${ico('info')}روی هر درس بزن تا جزئیاتش را ببینی. زمان‌ها مدت پیشنهادی مطالعه‌اند.</p>`;
     }
 
     function showDetail(d, t) {
