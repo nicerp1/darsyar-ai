@@ -47,18 +47,16 @@ const AIAssistant = (function () {
         quotaEl.innerHTML = `اعتبار رایگان امروز: <strong>${pd(remaining)}</strong> از ${pd(MAX_DAILY_FREE_QUOTA)} پیام`;
     }
 
-    function renderChatHistory() {
+    function renderChatHistory(pending = null) {
         const feed = document.getElementById('ai-chat-messages');
         if (!feed) return;
 
         const messages = Storage.get('ai_chat_history', [
-            {
-                role: 'assistant',
-                content: `سلام! من **دستیار هوشمند روند** هستم. 🎓\n\nمی‌توانم در موارد زیر به شما کمک کنم:\n- حل گام‌به‌گام مسائل **ریاضی و فیزیک** با فرمول‌های ریاضی مانند $$\\int x^2 dx = \\frac{x^3}{3} + C$$\n- خلاصه‌سازی و تدریس مفهومی دروس **زیست‌شناسی و شیمی**\n- تحلیل آرایه‌های ادبیات و نگارش متن\n- رفع اشکال قواعد زبان انگلیسی و عربی\n\nهر سوالی دارید بفرمایید!`
-            }
+            { role: 'assistant', content: 'سلام! من چت‌بات روند هستم. چطور کمکت کنم؟' }
         ]);
 
-        feed.innerHTML = messages.map(msg => createMessageHtml(msg.role, msg.content)).join('');
+        const display = pending ? [...messages, { role: 'user', content: pending }] : messages;
+        feed.innerHTML = display.map(msg => createMessageHtml(msg.role, msg.content)).join('');
         feed.scrollTop = feed.scrollHeight;
     }
 
@@ -100,35 +98,27 @@ const AIAssistant = (function () {
         if (input && !presetText) input.value = '';
 
         const history = Storage.get('ai_chat_history', []);
-        history.push({ role: 'user', content: text });
-        Storage.set('ai_chat_history', history);
-        incrementTodayUsage();
-        renderChatHistory();
-
-        // Assistant Typing State
+        const messages = [...history, { role: 'user', content: text }];
+        const account = user?.username;
         isTyping = true;
+        renderChatHistory(text);
         showTypingIndicator();
 
         try {
-            const aiResponse = await generateAssistantResponse(text, history);
-            removeTypingIndicator();
-
-            history.push({ role: 'assistant', content: aiResponse });
-            Storage.set('ai_chat_history', history);
+            const content = await generateAssistantResponse(messages);
+            if (Storage.getCurrentUser()?.username !== account) return;
+            Storage.set('ai_chat_history', [...messages, { role: 'assistant', content }]);
+            incrementTodayUsage();
             Storage.addXP(5);
-            renderChatHistory();
-
-            if (typeof Utils !== 'undefined') {
-                Utils.playSound('beep');
-            }
+            Utils.playSound('beep');
         } catch (error) {
-            removeTypingIndicator();
-            const fallbackMsg = generateAcademicFallbackResponse(text);
-            history.push({ role: 'assistant', content: fallbackMsg });
-            Storage.set('ai_chat_history', history);
-            renderChatHistory();
+            if (Storage.getCurrentUser()?.username !== account) return;
+            if (input && !input.value) input.value = text;
+            Utils.showToast(error.message, 'error');
         } finally {
+            removeTypingIndicator();
             isTyping = false;
+            if (Storage.getCurrentUser()?.username === account) renderChatHistory();
         }
     }
 
@@ -142,7 +132,7 @@ const AIAssistant = (function () {
         indicator.innerHTML = `
             <div class="bubble-avatar">🤖</div>
             <div class="bubble-content" style="display: flex; gap: 4px; align-items: center; padding: 12px 18px;">
-                <span>در حال تحلیل و نگارش پاسخ</span>
+                <span>در حال پاسخ‌دادن…</span>
                 <span class="typing-dot" style="animation: pulse 1s infinite;">.</span>
                 <span class="typing-dot" style="animation: pulse 1s infinite 0.2s;">.</span>
                 <span class="typing-dot" style="animation: pulse 1s infinite 0.4s;">.</span>
@@ -157,120 +147,30 @@ const AIAssistant = (function () {
         if (ind) ind.remove();
     }
 
-    async function generateAssistantResponse(userPrompt, history) {
-        const settings = Storage.getSettings();
-        try {
-            // GapGPT live call
-            const systemPrompt = `تو «دستیار هوشمند روند» هستی؛ یک مشاور و مدرس تحصیلی حرفه‌ای، صبور و دقیق برای دانش‌آموزان و دانشجویان ایرانی.
-همیشه پاسخ‌ها را ساختاریافته با تیتر، بولت‌پوینت، لحن محترمانه و انگیزشی بنویس.
-برای فرمول‌های ریاضی و فیزیک حتماً از نگارش استاندارد LaTeX و دلار استفاده کن (مانند $x = \\frac{-b \\pm \\sqrt{b^2 - 4ac}}{2a}$ یا فرمول‌های درون‌خطی $E = mc^2$).`;
-
-            const messagesPayload = [
-                { role: 'system', content: systemPrompt },
-                ...history.slice(-6).map(m => ({ role: m.role, content: m.content }))
-            ];
-
-            const response = await fetch('/api/ai', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    model: settings.aiModel || 'gapgpt-qwen-3.5',
-                    messages: messagesPayload,
-                    temperature: 0.7,
-                    max_tokens: 800
-                })
-            });
-
-            if (!response.ok) throw new Error('GapGPT response not ok');
-
-            const data = await response.json();
-            if (data.choices && data.choices[0] && data.choices[0].message) {
-                return data.choices[0].message.content;
-            }
-        } catch (error) { console.warn('AI service unavailable, using fallback.', error); }
-
-        // High quality built-in academic intelligence engine
-        return generateAcademicFallbackResponse(userPrompt);
-    }
-
-    function generateAcademicFallbackResponse(prompt) {
-        const lower = prompt.toLowerCase();
-
-        if (lower.includes('ریاضی') || lower.includes('مشتق') || lower.includes('انتگرال') || lower.includes('حد') || lower.includes('معادله')) {
-            return `### 📐 حل و بررسی تحلیلی مسئله ریاضی
-
-برای حل این مبحث، از اصول و قضایای پایه حسابان و دیفرانسیل بهره می‌گیریم:
-
-۱. **فرمول کلیدی مشتق:**
-$$f'(x) = \\lim_{h \\to 0} \\frac{f(x+h) - f(x)}{h}$$
-
-۲. **مشتق توابع پرکاربرد:**
-- اگر $f(x) = x^n$ باشد، آنگاه: $f'(x) = n x^{n-1}$
-- اگر $f(x) = \\sin(x)$ باشد، آنگاه: $f'(x) = \\cos(x)$
-- قاعده زنجیره‌ای: $(f(g(x)))' = f'(g(x)) \\cdot g'(x)$
-
-۳. **نکته تستی برای آزمون:**
-همواره در ابتدا دامنه تابع را بررسی کنید تا در نقاط ناپیوستگی یا ریشه‌های مخرج دچار خطا نشوید!`;
+    async function generateAssistantResponse(history) {
+        const response = await fetch('/api/ai', {
+            method: 'POST',
+            credentials: 'same-origin',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                mode: 'assistant',
+                model: Storage.getSettings().aiModel || 'gapgpt-qwen-3.5',
+                messages: history.slice(-9)
+            })
+        });
+        if (!response.ok) {
+            throw new Error(response.status === 401
+                ? 'نشستت پایان یافته. دوباره وارد حساب شو.'
+                : 'پاسخی دریافت نشد. پیام برای تلاش دوباره حفظ شد.');
         }
-
-        if (lower.includes('فیزیک') || lower.includes('شتاب') || lower.includes('نیرو') || lower.includes('سینماتیک') || lower.includes('انرژی')) {
-            return `### ⚡ تحلیل مفهومی و فرمولی فیزیک
-
-برای تسلط بر این مسئله فیزیک، به روابط بنیادی زیر دقت فرمایید:
-
-۱. **معادله حرکت با شتاب ثابت:**
-$$x(t) = \\frac{1}{2} a t^2 + v_0 t + x_0$$
-
-۲. **معادله مستقل از زمان:**
-$$v^2 - v_0^2 = 2 a \\Delta x$$
-
-۳. **قانون بقای انرژی مکانیکی:**
-$$E_1 = E_2 \\implies K_1 + U_1 = K_2 + U_2$$
-
-💡 **راهکار حل سریع:** ابتدا داده‌های مسئله را در یک ستون مشخص کنید و فرمولی را برگزینید که کمترین مجهول را داشته باشد.`;
-        }
-
-        if (lower.includes('زیست') || lower.includes('سلول') || lower.includes('ژنتیک') || lower.includes('گیاهی')) {
-            return `### 🧬 نکات ترکیبی و مفهومی زیست‌شناسی
-
-برای یادگیری عمیق این مبحث زیست‌شناسی، ارتباط ساختار و عملکرد را در نظر داشته باشید:
-
-- **نکته ۱:** در فرایند رونویسی، آنزیم RNA پلی‌مراز پیوند فسفودی‌استر را تشکیل می‌دهد.
-- **نکته ۲:** ترجمه همواره در سیتوپلاسم و روی ریبوزوم‌ها با کدون آغازین **AUG** (متیونین) شروع می‌شود.
-- **تله تستی کنکور:** به کلمات کلیدی مانند «همه»، «هیچ‌یک»، «اغلب» و «به‌طور معمول» در صورت تست توجه ویژه داشته باشید.`;
-        }
-
-        if (lower.includes('شیمی') || lower.includes('اسید') || lower.includes('تعادل') || lower.includes('مول')) {
-            return `### 🧪 جمع‌بندی نکات و فرمول‌های شیمی
-
-۱. **محاسبه $pH$ و غلظت یون هیدرونیوم:**
-$$pH = -\\log[H_3O^+] \\quad , \\quad [H_3O^+][OH^-] = 10^{-14}$$
-
-۲. **قانون گازهای ایده‌آل:**
-$$P V = n R T$$
-
-۳. **استراتژی حل مسائل استوکیومتری:**
-همواره واکنش را موازنه کنید، سپس مقادیر گرم را با استفاده از جرم مولی ($M$) به مول تبدیل نمایید.`;
-        }
-
-        // Generic inspiring academic tutor reply
-        return `### 🎓 پاسخ دستیار هوشمند روند
-
-در پاسخ به پرسش شما درباره **«${prompt.substring(0, 45)}...»**:
-
-۱. **چارچوب مفهومی:**
-موفقیت در یادگیری این مبحث نیازمند درک گام‌به‌گام اصول و تکرار منظم با تکنیک بازیابی فعال (Active Recall) است.
-
-۲. **پیشنهاد مطالعاتی روند:**
-- مبحث را به بخش‌های کوچک ۱۰ الی ۱۵ دقیقه‌ای تقسیم کنید.
-- از بخش **فلش‌کارت و لایتنر** برای تثبیت فرمول‌ها و لغات استفاده نمایید.
-- در پایان یک آزمون ۵ تستی زمان‌دار از خود بگیرید.
-
-۳. **توصیه انگیزشی:**
-استمرار کوچک روزانه به مراتب موثرتر از ساعت‌های طولانی و نامنظم مطالعه است. اگر سوال تکمیلی دارید با کمال میل پاسخگو هستم! ✨`;
+        const data = await response.json();
+        const text = data.choices?.[0]?.message?.content;
+        if (typeof text !== 'string' || !text.trim()) throw new Error('پاسخی دریافت نشد. دوباره تلاش کن.');
+        return text.trim();
     }
 
     function clearChat() {
+        if (isTyping) return;
         if (confirm('آیا از پاک کردن کل تاریخچه گفتگو با هوش مصنوعی اطمینان دارید؟')) {
             Storage.set('ai_chat_history', []);
             renderChatHistory();

@@ -1,8 +1,13 @@
 /** Independent web workspaces; native AI screens and persisted data keys stay intact. */
 const AIWorkspace = (() => {
     const config = {
-        chat: {route:'ai-assistant', label:'دستیار یادگیری', icon:'spark'}
+        chat: {route:'ai-assistant', label:'هوش مصنوعی روند', icon:'spark'}
     };
+    const chatPrompts = [
+        ['chart','آمار مطالعهٔ امروز','امروز چقدر مطالعه کرده‌ام؟ ساعت و دقیقه را بگو.'],
+        ['note','خلاصه کردن یک متن','نکته‌های اصلی این متن را کوتاه خلاصه کن: '],
+        ['target','تمرین یک مبحث','دربارهٔ این مبحث یک سؤال تمرینی از من بپرس: ']
+    ];
     const state = {};
     let owner = null;
     const esc = value => String(value ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -31,24 +36,22 @@ const AIWorkspace = (() => {
         if (!state[kind]) state[kind]={busy:false,content:'',title:'',id:null,truncated:false,editing:false};
         if (!view.classList.contains('aw-mounted')) {
             view.classList.add('aw-mounted','aw-workspace'); view.dataset.workspace=kind;
-            view.innerHTML = shell(kind) + (kind==='chat' ? chatLayout() : documentLayout(kind));
-            if (kind==='chat') {
-                state.chat.prompts=[...view.querySelectorAll('.aw-prompt')].map(button=>button.outerHTML).join('');
-                view.querySelector('.aw-chat-guide').remove();
-                view.querySelector('.aw-tool-nav').hidden=true;
-                view.querySelector('.aw-conversation-header').insertAdjacentHTML('afterbegin',`<button type="button" class="aw-button aw-back" data-route="dashboard">${icon('arrow')}<span>بازگشت به سایت</span></button>`);
-                view.querySelector('.aw-back').setAttribute('aria-label','بازگشت به سایت');
-            }
+            view.innerHTML = kind==='chat' ? chatLayout() : shell(kind)+documentLayout(kind);
             if (!view.dataset.awBound) {
                 view.dataset.awBound='true';
                 view.addEventListener('click',onClick);
                 view.addEventListener('submit',event=>{event.preventDefault();kind==='chat'?sendChat():generate(kind);});
                 view.addEventListener('input',event=>{
-                if(event.target.matches('[data-history-search]')) renderHistory(kind);
-                if(event.target.id==='aw-chat-input') { event.target.style.height='auto';event.target.style.height=`${Math.min(180,event.target.scrollHeight)}px`; }
+                    if(event.target.matches('[data-history-search]')) renderHistory(kind);
+                    if(event.target.id==='aw-chat-input') updateChatInput();
                 });
             }
-            if(kind==='chat') el('aw-chat-input').addEventListener('keydown',event=>{if(event.key==='Enter'&&!event.shiftKey&&!event.isComposing){event.preventDefault();sendChat();}});
+            if(kind==='chat') el('aw-chat-input').addEventListener('keydown',event=>{
+                if(event.key==='Enter'&&!event.shiftKey&&!event.isComposing&&matchMedia('(pointer:fine)').matches){
+                    event.preventDefault();
+                    void sendChat();
+                }
+            });
         }
         if(kind==='chat') renderChat(); else renderHistory(kind);
         sync(kind);
@@ -59,7 +62,37 @@ const AIWorkspace = (() => {
     }
 
     function chatLayout() {
-        return `<div class="aw-chat-layout"><aside class="aw-chat-guide" data-reveal><span class="aw-kicker">یادگیری، با گفت‌وگو</span><div class="aw-emblem">${icon('spark')}</div><h1>از «نمی‌فهمم»<br>تا «یاد گرفتم».</h1><p>سؤالت را بپرس؛ مسئله را با هم قدم‌به‌قدم باز می‌کنیم.</p><div class="aw-guide-separator"></div><span class="aw-kicker">از کجا شروع کنیم؟</span>${[['امروز چقدر مطالعه کرده‌ام؟','زمان مطالعه امروز من را با ساعت و دقیقه بگو.'],['برای قدم بعدی راهنمایی‌ام کن','با توجه به برنامه و آمار واقعی مطالعه‌ام، قدم بعدی مناسب چیست؟'],['از من سؤال تمرینی بپرس','درباره این مبحث از من سؤال تمرینی بپرس: '],['نکته‌های یک متن را خلاصه کن','نکته‌های مهم این متن را خلاصه کن: ']].map(([label,prompt],i)=>`<button class="aw-prompt" type="button" data-prompt="${esc(prompt)}"><span>${pd(String(i+1).padStart(2,'0'))}</span>${label}${icon('arrow')}</button>`).join('')}<p class="aw-footnote">پاسخ‌های هوش مصنوعی ممکن است خطا داشته باشند؛ نکات مهم را با کتاب یا معلمت بررسی کن.</p></aside><section class="aw-conversation" data-reveal><header class="aw-conversation-header"><div><span class="aw-presence"></span><strong>دستیار روند</strong><small id="aw-chat-quota"></small></div>${button('clear-chat','پاک‌کردن گفت‌وگو','plus','quiet')}</header><div id="aw-chat-feed" class="aw-chat-feed" role="log" aria-label="گفت‌وگو با دستیار"></div><div id="aw-chat-status" class="aw-status" role="status" aria-live="polite" hidden></div><form class="aw-composer"><label for="aw-chat-input" class="aw-sr-only">پیام به دستیار</label><textarea id="aw-chat-input" maxlength="10000" rows="2" placeholder="هر سؤال، شروع یک کشف تازه است…"></textarea><div class="aw-composer-footer"><small>Enter ارسال · Shift + Enter خط جدید</small><button class="aw-send" type="submit" id="aw-chat-submit" aria-label="ارسال پیام">${icon('arrow')}</button>${button('cancel','توقف','plus','aw-cancel')}</div></form><p class="aw-chat-disclaimer">اطلاعات شخصی و رمز عبورت را در پیام‌ها ننویس.</p></section></div>`;
+        return `
+            <header class="aw-chat-bar">
+                <div class="aw-chat-title">
+                    <span class="aw-brand-mark">${icon('spark')}</span>
+                    <div><h1>${config.chat.label}</h1><p id="aw-chat-quota"></p></div>
+                </div>
+                <button type="button" class="aw-button aw-new-chat" data-action="clear-chat" title="گفت‌وگوی جدید" aria-label="گفت‌وگوی جدید">
+                    ${icon('plus')}<span>گفت‌وگوی جدید</span>
+                </button>
+            </header>
+            <div id="aw-chat-feed" class="aw-chat-feed" tabindex="0" aria-label="محتوای گفت‌وگو">
+                <div id="aw-chat-welcome" class="aw-chat-welcome">
+                    <span class="aw-brand-mark aw-brand-mark-large">${icon('spark')}</span>
+                    <h2>امروز چی یاد بگیریم؟</h2>
+                    <p>سؤالت رو بنویس یا از یکی از پیشنهادها شروع کن.</p>
+                    <div class="aw-empty-prompts">
+                        ${chatPrompts.map(([glyph,label,prompt])=>`<button type="button" class="aw-prompt" data-prompt="${esc(prompt)}">${icon(glyph)}<span>${label}</span></button>`).join('')}
+                    </div>
+                </div>
+                <div id="aw-chat-messages" class="aw-chat-messages" role="log" aria-label="پیام‌های هوش مصنوعی روند" hidden></div>
+            </div>
+            <div class="aw-chat-bottom">
+                <div id="aw-chat-status" class="aw-status" role="status" aria-live="polite" hidden></div>
+                <form class="aw-composer">
+                    <label for="aw-chat-input" class="aw-sr-only">پیام به هوش مصنوعی روند</label>
+                    <textarea id="aw-chat-input" maxlength="10000" rows="1" dir="auto" placeholder="پیامت رو بنویس…"></textarea>
+                    <button class="aw-send" type="submit" id="aw-chat-submit" aria-label="ارسال پیام" title="ارسال پیام" disabled>${icon('arrow')}</button>
+                    <button class="aw-send aw-cancel" type="button" data-action="cancel" aria-label="توقف پاسخ" title="توقف پاسخ" hidden>${icon('stop')}</button>
+                </form>
+                <p class="aw-chat-disclaimer">اطلاعات شخصی رو در پیام ننویس.</p>
+            </div>`;
     }
 
     function documentLayout(kind) {
@@ -75,12 +108,24 @@ const AIWorkspace = (() => {
         const target=event.target.closest('button'); if(!target) return;
         const kind=event.currentTarget.dataset.workspace;
         if(target.dataset.route) return App.navigate(target.dataset.route);
-        if(target.dataset.prompt) {el('aw-chat-input').value=target.dataset.prompt;el('aw-chat-input').focus();return;}
+        if(target.dataset.prompt) {
+            const input=el('aw-chat-input');
+            input.value=target.dataset.prompt;
+            input.focus();input.setSelectionRange(input.value.length,input.value.length);
+            updateChatInput();
+            return;
+        }
         if(target.dataset.historyId) return load(kind,target.dataset.historyId);
         if(target.dataset.section) {el(target.dataset.section)?.scrollIntoView({behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'instant':'smooth',block:'center'});return;}
         switch(target.dataset.action) {
             case 'cancel': state[kind].controller?.abort();break;
-            case 'clear-chat': if(!state.chat.busy && confirm('تاریخچه این گفت‌وگو پاک شود؟')){Storage.set('ai_chat_history',[]);renderChat();}break;
+            case 'clear-chat':
+                if(!state.chat.busy&&(!messageHistory().length||confirm('برای شروع گفت‌وگوی جدید، پیام‌های این گفت‌وگو پاک می‌شوند. ادامه می‌دهی؟'))){
+                    Storage.set('ai_chat_history',[]);
+                    el('aw-chat-input').value='';
+                    status('chat');updateChatInput();renderChat();
+                }
+                break;
             case 'copy': if(state[kind].content) Utils.copyToClipboard(state[kind].content,'متن کپی شد.');break;
             case 'print': if(state[kind].content) Utils.printElement(`aw-${kind}-output`,esc(state[kind].title));break;
             case 'edit': state[kind].editing=true;el(`aw-${kind}-edit-text`).value=state[kind].content;sync(kind);el(`aw-${kind}-edit-text`).focus();break;
@@ -102,7 +147,8 @@ const AIWorkspace = (() => {
         view.querySelectorAll('[data-action="copy"],[data-action="print"],[data-action="edit"]').forEach(button=>button.disabled=!item.content||item.busy||item.editing);
         if(kind==='chat') {
             view.querySelectorAll('[data-prompt]').forEach(button=>button.disabled=item.busy);
-            el('aw-chat-submit').disabled=item.busy;el('aw-chat-input').disabled=item.busy;
+            el('aw-chat-submit').hidden=item.busy;el('aw-chat-input').readOnly=item.busy;
+            updateChatInput();
             view.querySelector('[data-action="clear-chat"]').disabled=item.busy;
             el('aw-chat-quota').textContent=unlimited()?'حساب ویژه':`${pd(Math.max(0,10-usage()))} پیام باقی‌مانده امروز`;
         } else {
@@ -117,26 +163,39 @@ const AIWorkspace = (() => {
         box.hidden=!text;box.textContent=text;box.classList.toggle('is-error',error);
     }
 
-    async function request(messages,maxTokens,signal) {
-        const response=await fetch('/api/ai',{method:'POST',credentials:'same-origin',headers:{'Content-Type':'application/json'},signal,body:JSON.stringify({model:Storage.getSettings().aiModel||'gapgpt-qwen-3.5',messages,temperature:.65,max_tokens:maxTokens})});
+    async function request(messages,maxTokens,signal,mode) {
+        const response=await fetch('/api/ai',{method:'POST',credentials:'same-origin',headers:{'Content-Type':'application/json'},signal,body:JSON.stringify({model:Storage.getSettings().aiModel||'gapgpt-qwen-3.5',messages,temperature:.65,max_tokens:maxTokens,mode})});
         if(!response.ok) throw new Error(response.status===429?'درخواست‌ها زیاد شده‌اند؛ کمی بعد دوباره تلاش کن.':response.status===401?'نشستت پایان یافته؛ دوباره وارد حساب شو.':'ارتباط با سرویس هوشمند برقرار نشد؛ دوباره تلاش کن.');
         const data=await response.json(),choice=data.choices?.[0];
         if(typeof choice?.message?.content!=='string'||!choice.message.content.trim())throw new Error('پاسخ قابل‌نمایشی دریافت نشد؛ دوباره تلاش کن.');
         return {text:choice.message.content.trim(),truncated:choice.finish_reason==='length'};
     }
 
-    function renderChat() {
+    function updateChatInput() {
+        const input=el('aw-chat-input');
+        input.style.height='auto';
+        input.style.height=`${input.scrollHeight}px`;
+        el('aw-chat-submit').disabled=state.chat.busy||!input.value.trim();
+    }
+
+    function renderChat(follow = true) {
         const messages=messageHistory(),item=state.chat;
         const display=item.busy?[...messages,{role:'user',content:item.pending}]:messages;
-        el('aw-chat-feed').innerHTML=display.length?display.map(message=>`<article class="aw-message ${message.role}"><span class="aw-message-mark">${icon(message.role==='user'?'user':'spark')}</span><div><span class="aw-message-label">${message.role==='user'?'تو':'روند'}</span><div class="aw-prose">${Utils.renderKaTeXAndMarkdown(message.content)}</div></div></article>`).join(''):`<div class="aw-chat-welcome"><div class="aw-welcome-orbit" aria-hidden="true">${icon('spark')}</div><span class="aw-kicker">کنجکاوی‌ات را دنبال کن</span><h2>امروز چه چیزی را<br><em>با هم یاد بگیریم؟</em></h2><p>مسئله، متن یا مفهومی که ذهنت را درگیر کرده بنویس.</p></div>`;
-        const feed=el('aw-chat-feed');
-        if (!display.length) {
-            const suggestions=document.createElement('div');suggestions.className='aw-empty-prompts';
-            suggestions.innerHTML=item.prompts||'';
-            feed.querySelector('.aw-chat-welcome').append(suggestions);
-        }
-        feed.scrollTop=feed.scrollHeight;
-        if (!display.length) feed.scrollTop=0;
+        const feed=el('aw-chat-feed'),log=el('aw-chat-messages');
+        const atBottom=feed.scrollHeight-feed.scrollTop-feed.clientHeight<80;
+        const previous=item.display||[];
+        let start=0;
+        while(start<display.length&&start<previous.length&&display[start].role===previous[start].role&&display[start].content===previous[start].content)start++;
+        while(log.children.length>start)log.lastElementChild.remove();
+        el('aw-chat-welcome').hidden=Boolean(display.length);
+        log.hidden=!display.length;
+        log.insertAdjacentHTML('beforeend',display.slice(start).map(message=>{
+            const mine=message.role==='user';
+            return `<article class="aw-message ${message.role}" aria-label="${mine?'پیام تو':'پاسخ روند'}">${mine?'':`<span class="aw-message-mark">${icon('spark')}</span>`}<div class="aw-prose" dir="auto">${Utils.renderKaTeXAndMarkdown(message.content)}</div></article>`;
+        }).join(''));
+        item.display=display;
+        if(!display.length)feed.scrollTop=0;
+        else if(follow||atBottom)feed.scrollTop=feed.scrollHeight;
     }
 
     async function sendChat() {
@@ -147,13 +206,13 @@ const AIWorkspace = (() => {
         item.busy=true;item.pending=text;item.controller=new AbortController();
         status('chat','در حال فکرکردن به سؤال تو…');sync('chat');renderChat();
         try {
-            const result=await request([{role:'user',content:'به فارسی، دقیق و آموزشی پاسخ بده. مسئله را گام‌به‌گام توضیح بده و عدم اطمینان را روشن کن. فرمول‌ها را با LaTeX بنویس.'},...history.slice(-8),{role:'user',content:text}],2400,item.controller.signal);
+            const result=await request([...history.slice(-8),{role:'user',content:text}],900,item.controller.signal,'assistant');
             if(username()!==user||owner!==user)return;
             Storage.set('ai_chat_history',[...history,{role:'user',content:text},{role:'assistant',content:result.text}]);
             Storage.set('ai_usage',{date:dayKey(),count:usage()+1});Storage.addXP(5);input.value='';input.style.height='auto';
             status('chat',result.truncated?'پاسخ به محدودیت طول رسید؛ برای جزئیات بیشتر یک سؤال تکمیلی بپرس.':'');
-        } catch(error) { if(username()===user&&owner===user)status('chat',error.name==='AbortError'?'درخواست متوقف شد؛ پیام تو برای ارسال دوباره حفظ شده است.':error.message,true); }
-        finally { item.busy=false;item.controller=null;if(owner===user&&username()===user){renderChat();sync('chat');} }
+        } catch(error) { if(username()===user&&owner===user)status('chat',error.name==='AbortError'?'درخواست متوقف شد؛ پیام تو برای ارسال دوباره حفظ شده است.':error.message,error.name!=='AbortError'); }
+        finally { item.busy=false;item.controller=null;if(owner===user&&username()===user){renderChat(false);sync('chat');} }
     }
 
     async function generate(kind,continuation=false) {

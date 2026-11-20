@@ -158,7 +158,6 @@ html:not(.capacitor-app) #modal-pomodoro-settings .pomo-settings-modal { border-
   html:not(.capacitor-app) .aw-workspace .aw-tool-nav { max-width:100%;overflow-x:auto;scrollbar-width:none; }
   html:not(.capacitor-app) .aw-workspace .aw-tool-nav::-webkit-scrollbar { display:none; }
   html:not(.capacitor-app) .aw-workspace .aw-tool-nav button { flex:0 0 auto; }
-  html:not(.capacitor-app) .aw-workspace .aw-conversation { border-radius:18px;box-shadow:none; }
   html:not(.capacitor-app) #view-chat .studio-chat-layout { min-width:0; }
   html:not(.capacitor-app) .studio-focus-ready .studio-focus-unified { min-height:calc(100dvh - 175px);padding:16px 15px;border-radius:20px; }
   html:not(.capacitor-app) .studio-focus-unified .pomo-dial-wrap { width:min(260px,66vw); }

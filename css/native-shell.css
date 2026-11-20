@@ -18,5 +18,5 @@
     }
     html.native-shell body .content-body { padding-bottom: calc(80px + var(--native-safe-bottom)); }
     html.native-shell body #sidebar .sidebar-header { padding-top: calc(26px + var(--native-safe-top)); }
-    html.native-shell body :is(#im-header, .im-sidebar > header, .aw-conversation-header) { padding-top: var(--native-safe-top); }
+    html.native-shell body :is(#im-header, .im-sidebar > header) { padding-top: var(--native-safe-top); }
 }

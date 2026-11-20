@@ -23,6 +23,7 @@ const WebStudio = (() => {
         close:'<path d="m6 6 12 12M18 6 6 18"/>',
         play:'<path d="m8 4 13 8-13 8Z"/>',
         pause:'<rect x="5" y="4" width="5" height="16" rx="1"/><rect x="14" y="4" width="5" height="16" rx="1"/>',
+        stop:'<rect x="6" y="6" width="12" height="12" rx="2"/>',
         reset:'<path d="M4 11a8 8 0 1 1 2 6M4 4v7h7"/>',
         expand:'<path d="M9 3H3v6m12-6h6v6M3 15v6h6m12-6v6h-6"/>',
         check:'<path d="m5 12 4 4L19 6"/>',
@@ -42,7 +43,7 @@ const WebStudio = (() => {
         if (['chat','admin','legal','subscription'].includes(route)) return 'profile';
         return 'stats';
     };
-    const viewLabels = { dashboard:'امروزِ تو', pomodoro:'اتاق تمرکز', chat:'گفت‌وگو', schedule:'برنامه من', stats:'آمار و پیشرفت', 'ai-assistant':'دستیار هوشمند', flashcards:'فلش‌کارت', 'ai-writing':'کارگاه نوشتن', 'ai-research':'پژوهش', gamification:'لیگ و دوستان', admin:'پنل مشاوره', profile:'پروفایل', legal:'قوانین و حریم خصوصی' };
+    const viewLabels = { dashboard:'امروزِ تو', pomodoro:'اتاق تمرکز', chat:'گفت‌وگو', schedule:'برنامه من', stats:'آمار و پیشرفت', 'ai-assistant':'هوش مصنوعی روند', flashcards:'فلش‌کارت', 'ai-writing':'کارگاه نوشتن', 'ai-research':'پژوهش', gamification:'لیگ و دوستان', admin:'پنل مشاوره', profile:'پروفایل', legal:'قوانین و حریم خصوصی' };
 
     function init() {
         if (!enabled() || ready) return;
@@ -95,7 +96,7 @@ const WebStudio = (() => {
         header?.insertBefore(crumb, header.querySelector('.header-left'));
         const aiAvatar = document.querySelector('.ai-chat-header .ai-avatar');
         if (aiAvatar) aiAvatar.innerHTML = icon('spark');
-        document.querySelector('#ai-chat-input')?.setAttribute('aria-label', 'پیام به دستیار هوشمند');
+        document.querySelector('#ai-chat-input')?.setAttribute('aria-label', 'پیام به هوش مصنوعی روند');
         document.querySelector('.btn-send-ai')?.setAttribute('aria-label', 'ارسال پیام');
     }
 

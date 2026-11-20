@@ -140,11 +140,7 @@ const App = (function () {
         }
         if (window.WebStudio?.enabled()) WebStudio.beforeLeave(viewName, previousView);
         currentView = viewName;
-        if (window.WebStudio?.enabled()) {
-            const fullChat=viewName==='ai-assistant';
-            document.body.classList.toggle('aw-chat-open',fullChat);
-            document.querySelectorAll('#sidebar,.top-header').forEach(element=>{element.inert=fullChat;});
-        }
+        document.body.classList.toggle('aw-chat-open',viewName==='ai-assistant'&&Boolean(window.WebStudio?.enabled()&&window.AIWorkspace));
         if (viewName==='chat'||window.WebStudio?.enabled()) Communications.close();
 
         // Hide all views
