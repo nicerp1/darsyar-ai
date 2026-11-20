@@ -1,17 +1,40 @@
 /**
- * Study-plan UI (phone + desktop; layout differs only by CSS).
+ * Study-plan UI (phone overview + desktop timetable).
  * Presentation layer only: reads the plan through Schedule.getState() and calls the existing public actions
  * (Schedule.openEditTaskModal / launchPomoForTask / printSchedule). Completion goes through StudyFlow's own
  * proof dialog by activating the (hidden) desktop checkbox, so no business rule is duplicated here.
  */
 (function () {
     'use strict';
-    const phone = matchMedia('(max-width: 720px)');
+    const phone = matchMedia('(max-width: 720px), (max-width: 1000px) and (max-height: 500px) and (pointer: coarse)');
     const reduceQ = matchMedia('(prefers-reduced-motion: reduce)');
     const reduced = () => reduceQ.matches || document.documentElement.dataset.motion === 'off';
     const pd = v => (window.Utils?.toPersianDigits ? Utils.toPersianDigits(v) : String(v));
     const esc = v => String(v ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
-    const ico = n => `<span class="material-symbols-outlined" aria-hidden="true">${n}</span>`;
+    const calendar = '<rect x="3" y="5" width="18" height="16" rx="3"/><path d="M7 3v4m10-4v4M3 10h18"/>';
+    const plus = 'M12 7v10m-5-5h10';
+    const check = 'm7 12 3 3 6-6';
+    const icons = {
+        print: '<path d="M6 8V3h12v5M6 16H4a2 2 0 0 1-2-2v-4a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2h-2M6 13h12v8H6zM6 11h1"/>',
+        add: `<path d="${plus}"/>`,
+        add_circle: `<circle cx="12" cy="12" r="9"/><path d="${plus}"/>`,
+        today: calendar + '<path d="M8 14h2v2H8z"/>',
+        calendar_view_week: calendar + '<path d="M9 10v11m6-11v11"/>',
+        grid_on: '<rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 3v18m6-18v18M3 9h18M3 15h18"/>',
+        schedule: '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
+        hourglass_top: '<path d="M6 3h12M6 21h12M7 3v3c0 3 2 4 5 6-3 2-5 3-5 6v3m10-18v3c0 3-2 4-5 6 3 2 5 3 5 6v3"/>',
+        play_arrow: '<path d="m8 5 12 7-12 7z" fill="currentColor" stroke="none"/>',
+        check: `<path d="${check}"/>`,
+        check_circle: `<circle cx="12" cy="12" r="9"/><path d="${check}"/>`,
+        event_available: calendar + `<path d="${check}" transform="translate(0 2)"/>`,
+        chevron_left: '<path d="m14 6-6 6 6 6"/>',
+        arrow_back: '<path d="M20 12H4m6-6-6 6 6 6"/>',
+        info: '<circle cx="12" cy="12" r="9"/><path d="M12 11v5m0-8h.01"/>',
+        menu_book: '<path d="M12 5v15m0-15C8 3 5 3 2 4v15c3-1 6-1 10 1 4-2 7-2 10-1V4c-3-1-6-1-10 1z"/>',
+        close: '<path d="m6 6 12 12M18 6 6 18"/>',
+        edit: '<path d="m14 5 5 5M4 20l1-5L16 4a2 2 0 0 1 3 0l1 1a2 2 0 0 1 0 3L9 19z"/>'
+    };
+    const ico = name => `<svg class="scm-glyph" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${icons[name]}</svg>`;
     const DAY_S = ['ش', 'ی', 'د', 'س', 'چ', 'پ', 'ج'];
     const DAY_L = ['شنبه', 'یک‌شنبه', 'دوشنبه', 'سه‌شنبه', 'چهارشنبه', 'پنج‌شنبه', 'جمعه'];
     const STATUS = { pending: ['در انتظار', ''], completed: ['انجام شد', 'ok'], partial: ['بخشی انجام شد', 'warn'], missed: ['انجام نشد', 'bad'] };
@@ -21,8 +44,10 @@
     const dateOf = i => { const d = new Date(); d.setDate(d.getDate() + i - today()); return d; };
     const dur = m => { const h = Math.floor(m / 60), r = m % 60; return h ? (r ? `${pd(h)} ساعت و ${pd(r)} دقیقه` : `${pd(h)} ساعت`) : `${pd(r)} دقیقه`; };
 
-    let root, data = null, sel = today(), mode = 'table', dir = 0, seen = new Map(), firstPaint = true;
+    const viewModes = { phone: 'week', desktop: 'table' };
+    let root, data = null, sel = today(), mode = phone.matches ? viewModes.phone : viewModes.desktop, dir = 0, seen = new Map(), firstPaint = true;
     const $ = (s, r = root) => r.querySelector(s);
+    const setMode = next => { viewModes[phone.matches ? 'phone' : 'desktop'] = mode = next; };
 
     function mount() {
         if (root) return true;
@@ -30,6 +55,7 @@
         if (!anchor) return false;
         root = document.createElement('div');
         root.id = 'scm'; root.className = 'scm';
+        root.classList.toggle('scm-compact', phone.matches);
         root.innerHTML = `
         <header class="scm-head">
             <div class="scm-title"><h2>برنامه مطالعه</h2><p id="scm-sub"></p></div>
@@ -42,7 +68,7 @@
             <i class="scm-thumb" aria-hidden="true"></i>
             <button type="button" role="tab" data-mode="day" aria-selected="true">${ico('today')}روز</button>
             <button type="button" role="tab" data-mode="week" aria-selected="false">${ico('calendar_view_week')}هفته</button>
-            <button type="button" role="tab" data-mode="table" aria-selected="false">${ico('grid_on')}جدول</button>
+            <button type="button" role="tab" data-mode="table" aria-selected="false"${phone.matches ? ' hidden disabled' : ''}>${ico('grid_on')}جدول</button>
         </div>
         <div class="scm-strip" id="scm-strip" role="tablist" aria-label="روزهای هفته">
             ${DAY_S.map((s, i) => `<button type="button" role="tab" data-day="${i}"><small>${s}</small><b></b><i><u></u></i></button>`).join('')}
@@ -99,7 +125,9 @@
         });
         $('.scm-seg').dataset.mode = mode;
         root.querySelectorAll('.scm-seg [data-mode]').forEach(b => b.setAttribute('aria-selected', String(b.dataset.mode === mode)));
-        $('#scm-day').hidden = mode !== 'day'; $('#scm-week').hidden = mode !== 'week'; $('#scm-strip').classList.toggle('is-off', mode !== 'day');
+        $('#scm-day').hidden = mode !== 'day'; $('#scm-week').hidden = mode !== 'week';
+        $('#scm-strip').classList.toggle('is-off', mode !== 'day');
+        $('#scm-strip').inert = mode !== 'day';
         $('#scm-table').hidden = mode !== 'table';
         if (mode === 'day') paintDay(rows[sel], animate);
         else if (mode === 'week') paintWeek(rows);
@@ -150,7 +178,7 @@
             const bar = day.tasks.map(t => `<i style="flex:${t.durationMinutes};background:${esc(t.color)}" class="${t.status === 'completed' ? 'is-done' : ''}"></i>`).join('');
             return `<button type="button" class="scm-wrow${i === today() ? ' is-today' : ''}" data-pick="${i}" style="--i:${i}" aria-label="${DAY_L[i]}، ${r.total ? `${pd(r.total)} تسک، ${dur(r.minutes)}` : 'بدون تسک'}">
                 <span class="scm-wday"><b>${DAY_S[i]}</b><small>${faDay.format(dateOf(i))}</small></span>
-                <span class="scm-wmid"><span class="scm-bar">${bar || '<i class="is-none"></i>'}</span><small>${r.total ? `${pd(r.done)}/${pd(r.total)} انجام شد · ${dur(r.minutes)}` : 'بدون تسک'}</small></span>
+                <span class="scm-wmid"><span class="scm-wlabel"><strong>${DAY_L[i]}</strong><span>${faFull.format(dateOf(i))}</span></span><span class="scm-bar" aria-hidden="true">${bar || '<i class="is-none"></i>'}</span><small>${r.total ? `${pd(r.done)}/${pd(r.total)} انجام شد · ${dur(r.minutes)}` : 'بدون تسک'}</small></span>
                 ${ico('chevron_left')}</button>`;
         }).join('');
     }
@@ -178,8 +206,8 @@
 
     function go(i, animate = true) {
         if (i < 0 || i > 6 || (i === sel && mode === 'day')) return;
-        dir = i > sel ? 1 : -1; sel = i; mode = 'day'; paint(animate);
-        root.querySelector(`#scm-strip [data-day="${i}"]`)?.scrollIntoView?.({ block: 'nearest', inline: 'center' });
+        dir = i > sel ? 1 : -1; sel = i; setMode('day'); paint(animate);
+        if (!phone.matches) $(`#scm-strip [data-day="${i}"]`)?.scrollIntoView?.({ block: 'nearest', inline: 'center' });
     }
 
     function complete(d, t) {
@@ -192,8 +220,18 @@
         const el = e.target.closest('[data-act],[data-day],[data-mode],[data-pick]');
         if (!el || !root.contains(el)) return;
         if (el.dataset.day != null) return go(Number(el.dataset.day));
-        if (el.dataset.pick != null) { dir = 0; sel = Number(el.dataset.pick); mode = 'day'; return paint(true); }
-        if (el.dataset.mode) { if (mode !== el.dataset.mode) { mode = el.dataset.mode; dir = 0; paint(true); } return; }
+        if (el.dataset.pick != null) {
+            dir = 0; sel = Number(el.dataset.pick); setMode('day'); paint(true);
+            if (e.detail === 0) $(`#scm-strip [data-day="${sel}"]`)?.focus({ preventScroll: true });
+            return;
+        }
+        if (el.dataset.mode) {
+            const next = el.dataset.mode;
+            if (el.matches('button:not(:disabled)') && mode !== next && (!phone.matches || next !== 'table')) {
+                setMode(next); dir = 0; paint(true);
+            }
+            return;
+        }
         if (el.dataset.act === 'detail') return showDetail(Number(el.dataset.d), Number(el.dataset.t));
         if (el.dataset.act === 'table-add') return window.Schedule?.openEditTaskModal(Number(el.dataset.d), -1);
         const card = el.closest('.scm-task'), d = Number(card?.dataset.d ?? sel), t = Number(card?.dataset.t);
@@ -221,12 +259,26 @@
         }, { passive: true });
     }
 
-    function sync() { document.documentElement.classList.toggle('scm-on', !!root); }   // phone and desktop share the markup; CSS sizes it
+    function sync() {
+        if (!root) return;
+        document.documentElement.classList.add('scm-on');
+        root.classList.toggle('scm-compact', phone.matches);
+        const tableTab = $('button[data-mode="table"]');
+        tableTab.hidden = tableTab.disabled = phone.matches;
+        mode = viewModes[phone.matches ? 'phone' : 'desktop'];
+    }
     function refresh() {
         if (!window.Schedule?.getState || !mount()) return;
         data = Schedule.getState();
         sync(); paint(firstPaint);
     }
     document.addEventListener('schedule:rendered', refresh);
-    phone.addEventListener('change', sync);
+    phone.addEventListener('change', () => {
+        if (!root) return;
+        const focusWillHide = document.activeElement?.closest('[data-mode="table"], #scm-table, #scm-detail');
+        const detail = document.getElementById('scm-detail');
+        if (phone.matches && detail.open) detail.close();
+        sync(); paint(false);
+        if (phone.matches && focusWillHide) $(`button[data-mode="${mode}"]`)?.focus({ preventScroll: true });
+    });
 })();

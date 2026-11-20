@@ -41,9 +41,9 @@ html.scm-on #scm:has(> #scm-table:not([hidden])) {
 .scm-table-course strong { font-size:15px; overflow-wrap:anywhere; }
 .scm-course-status,.scm-course-time,.scm-table-course small { display:flex; align-items:center; gap:5px; font-size:11px; color:var(--m-muted); }
 .scm-course-time { font-size:13px; color:var(--m-ink); }
-.scm-table-course .material-symbols-outlined { font-size:16px; }
+.scm-table-course .scm-glyph { font-size:16px; }
 .scm-table-course small { margin-top:auto; overflow:hidden; max-width:100%; white-space:nowrap; text-overflow:ellipsis; display:block; }
-.scm-table-course small .material-symbols-outlined { float:inline-end; }
+.scm-table-course small .scm-glyph { float:inline-end; }
 .scm-table-empty { width:100%; min-height:158px; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:8px; border:1px dashed var(--m-line); border-radius:14px; background:transparent; color:var(--m-muted); }
 .scm-table-empty:hover { background:var(--m-raised); color:var(--m-accent); }
 .scm-table-hint { display:flex; align-items:center; gap:8px; margin-top:14px !important; line-height:1.8; }
@@ -61,7 +61,6 @@ html.scm-on #scm:has(> #scm-table:not([hidden])) {
 .scm-detail footer button { flex:1; }
 .scm-detail button.is-primary { background:var(--m-accent); color:var(--m-on-accent); border-color:transparent; }
 .scm :is(button,[tabindex]):focus-visible,.scm-detail button:focus-visible { outline:3px solid var(--m-accent); outline-offset:3px; }
-@media(max-width:720px) { .scm-table-heading { align-items:flex-start; flex-direction:column; } .scm-table-heading h3 { font-size:22px; } .scm-table-total { padding:8px 12px; } .scm-timetable { min-width:1040px; } }
 @media(prefers-reduced-motion:reduce) { .scm-table-course { transition:none; } }
 html[data-motion="off"] .scm-table-course { transition:none; }
 
