@@ -17,16 +17,28 @@ const StudyRooms = (() => {
         lock:'<rect x="5" y="10" width="14" height="11" rx="3"/><path d="M8 10V6a4 4 0 0 1 8 0v4"/>',
         globe:'<circle cx="12" cy="12" r="9"/><ellipse cx="12" cy="12" rx="4" ry="9"/><path d="M3 12h18"/>',
         panel:'<rect x="3" y="4" width="18" height="16" rx="3"/><path d="M9 4v16m7-11-3 3 3 3"/>',
-        link:'<path d="M9 15l6-6M8 16l-1 1a3 3 0 0 1-4-4l5-5a3 3 0 0 1 4 0m0 8a3 3 0 0 0 4 0l5-5a3 3 0 0 0-4-4l-1 1"/>'
+        link:'<path d="M9 15l6-6M8 16l-1 1a3 3 0 0 1-4-4l5-5a3 3 0 0 1 4 0m0 8a3 3 0 0 0 4 0l5-5a3 3 0 0 0-4-4l-1 1"/>',
+        more:'<circle cx="5" cy="12" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/>',
+        chevron:'<path d="m7 10 5 5 5-5"/>'
     };
     const ico = n => extra[n] ? `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${extra[n]}</svg>` : WebStudio.icon(n);
     const button = (action, label, glyph, cls='') => `<button type="button" class="sr-btn ${cls}" data-sr="${action}">${glyph ? ico(glyph) : ''}<span>${label}</span></button>`;
+    const iconButton = (action, label, glyph, attributes = '') => `<button type="button" class="sr-btn sr-icon" data-sr="${action}" aria-label="${label}" title="${label}" ${attributes}>${ico(glyph)}</button>`;
+    const drawer = (action, label, glyph, content) => `<aside class="sr-drawer sr-${action}" aria-label="${label}">
+        <button type="button" class="sr-btn sr-drawer-tab" data-sr="${action}" aria-label="${label}" aria-controls="sr-${action}" aria-expanded="false" title="${label}">
+            ${ico(glyph)}<span>${label}</span><span class="sr-drawer-chevron">${ico('chevron')}</span>
+        </button>
+        <div id="sr-${action}" class="sr-drawer-body" inert><h2 class="sr-drawer-title">${label}</h2>${content}</div>
+    </aside>`;
     const $ = (selector, parent = root) => parent.querySelector(selector);
     const user = () => Storage.getCurrentUser()?.username;
     const day = () => (new Date().getDay() + 1) % 7;
     const hours = seconds => seconds === null ? 'زمان خصوصی' : seconds < 60 ? (seconds ? 'کمتر از ۱ دقیقه' : '۰ دقیقه') : seconds < 3600 ? `${digits(Math.floor(seconds/60))} دقیقه` : `${digits(Math.floor(seconds/3600))} ساعت و ${digits(Math.floor(seconds%3600/60))} دقیقه`;
     let root, owner, prefs, active = false, token = 0, snapshot, rooms, offset = 0, filter = 'public', busy = false, polling = false, ticker, interval, sound, lastSecond = -1, lastPhase, lastList = 0, goalDay = day(), suspend = Promise.resolve();
     const fragments = {};
+    const compact = matchMedia('(max-width: 900px)');
+    const openDrawers = new Set();
+    let directoryOpen = null;
 
     function setHtml(selector, html) {
         if (fragments[selector] !== html) { $(selector).innerHTML = html; fragments[selector] = html; }
@@ -47,6 +59,10 @@ const StudyRooms = (() => {
         return result;
     }
     function accept(response) {
+        if (snapshot?.room.id !== response.room.id) {
+            directoryOpen = false;
+            openDrawers.clear();
+        }
         snapshot = response;
         offset = response.now - Date.now();
         status('');
@@ -56,35 +72,39 @@ const StudyRooms = (() => {
     function toast(message) { Utils.showToast(message, 'info'); }
     function mount() {
         root = document.getElementById('view-study-rooms');
-        root.innerHTML = `<div class="sr-layout" id="sr-layout">
+        root.innerHTML = `<div class="sr-layout">
             <section class="sr-stage" aria-labelledby="sr-title">
-                <header class="sr-header"><div class="sr-title"><small>روند / تمرکز گروهی</small><h1 id="sr-title">اتاق مطالعه</h1><div class="sr-room-label"></div></div>
-                    <div class="sr-tools">
-                        <button type="button" class="sr-btn sr-icon" data-sr="directory" aria-label="فهرست اتاق‌ها" aria-controls="sr-directory" aria-expanded="true" title="فهرست اتاق‌ها">${ico('panel')}</button>
-                        <button type="button" class="sr-btn sr-icon" data-sr="fullscreen" aria-label="تمام‌صفحه" aria-pressed="false" title="تمام‌صفحه">${ico('expand')}</button>
-                        <button type="button" class="sr-btn sr-icon" data-sr="settings" aria-label="تنظیمات" title="تنظیمات">${ico('settings')}</button>
-                        <button type="button" class="sr-btn sr-icon" data-sr="share" aria-label="دعوت دوستان" title="دعوت دوستان" hidden>${ico('link')}</button>
+                <header class="sr-header">
+                    <div class="sr-title"><h1 id="sr-title">اتاق مطالعه</h1><div class="sr-room-label"></div></div>
+                    <div class="sr-tools sr-tools-left">
+                        ${iconButton('directory','فهرست اتاق‌ها','panel','aria-controls="sr-directory" aria-expanded="false"')}
+                        ${iconButton('fullscreen','تمام‌صفحه','expand','aria-pressed="false"')}
+                    </div>
+                    <div class="sr-tools sr-tools-right">
+                        ${iconButton('settings','تنظیمات','settings','aria-haspopup="dialog"')}
+                        ${iconButton('more','گزینه‌های اتاق','more','aria-haspopup="dialog" hidden')}
                     </div>
                 </header>
                 <p class="sr-notice" role="status"></p>
-                <div class="sr-lobby"><div class="sr-lobby-mark">${ico('book')}</div><h2>کنار هم، با تمرکز</h2><p>به یک اتاق عمومی بپیوند یا برای دوست‌هایت اتاق بساز.</p><div>${button('show-public','اتاق‌های عمومی','globe','primary')}${button('create','ساخت اتاق','plus')}</div></div>
+                <div class="sr-lobby"><div class="sr-lobby-mark">${ico('book')}</div><h2>کنار هم، با تمرکز</h2><p>به اتاقی بپیوند یا برای دوست‌هایت اتاق بساز.</p><div>${button('show-public','اتاق‌های عمومی','globe','primary')}${button('create','ساخت اتاق','plus')}</div></div>
                 <div class="sr-session" hidden>
-                    <div class="sr-switch" aria-label="نوع تایمر">
-                        <button type="button" data-sr="group" aria-pressed="true">${ico('people')} هم‌زمان با بقیه</button>
-                        <button type="button" data-sr="solo" aria-pressed="false">${ico('timer')} تایمر خودم</button>
-                    </div>
                     <div class="sr-ring"><svg viewBox="0 0 240 240" aria-hidden="true"><circle cx="120" cy="120" r="110"/><circle class="sr-progress" cx="120" cy="120" r="110" pathLength="100"/></svg><div><p class="sr-phase" aria-live="polite">زمان تمرکز</p><strong class="sr-time" dir="ltr" role="timer">۵۰:۰۰</strong><small class="sr-rhythm"></small></div></div>
                     <div class="sr-timer-actions"></div>
-                    <section class="sr-members" aria-label="اعضای حاضر"><h2>اعضای اتاق</h2><div class="sr-member-list"></div><div class="sr-reactions"></div></section>
-                    <section class="sr-goals"><header><div><h2>${ico('target')} هدف‌های من</h2><small>همگام با برنامهٔ مطالعهٔ تو</small></div><div>${button('plan','انتخاب از برنامه','calendar')}${button('goal','افزودن تسک','plus')}</div></header><div class="sr-goal-list"></div></section>
+                    <span class="sr-mode-label"></span>
                 </div>
+                <div class="sr-dimmer" aria-hidden="true"></div>
+                <div class="sr-drawers" hidden>
+                    ${drawer('goals','هدف‌های من','target',`<div class="sr-goal-tools">${button('plan','انتخاب از برنامه','calendar')}${button('goal','افزودن تسک','plus')}</div><div class="sr-goal-list"></div>`)}
+                    ${drawer('members','اعضای اتاق','people','<div class="sr-member-list"></div><div class="sr-reactions"></div>')}
+                </div>
+                <aside id="sr-directory" class="sr-directory" aria-label="فهرست اتاق‌ها" inert>
+                    <header><h2>اتاق‌ها</h2>${iconButton('close-directory','بستن فهرست اتاق‌ها','close')}</header>
+                    <div class="sr-switch"><button type="button" data-sr="public" aria-pressed="true">${ico('globe')} عمومی</button><button type="button" data-sr="private" aria-pressed="false">${ico('lock')} خصوصی</button></div>
+                    <div class="sr-room-list"></div>
+                    ${button('create','ساخت اتاق','plus','primary')}
+                    ${button('join-link','ورود با لینک دعوت','link')}
+                </aside>
             </section>
-            <aside id="sr-directory" class="sr-directory" aria-label="فهرست اتاق‌ها"><header><div><small>باهم درس بخونیم</small><h2>اتاق‌ها</h2></div><button class="sr-btn sr-icon" type="button" data-sr="directory" aria-label="بستن فهرست اتاق‌ها" title="بستن فهرست">${ico('panel')}</button></header>
-                <div class="sr-switch"><button type="button" data-sr="public" aria-pressed="true">${ico('globe')} عمومی</button><button type="button" data-sr="private" aria-pressed="false">${ico('lock')} خصوصی</button></div>
-                <div class="sr-room-list"></div>
-                ${button('create','ساخت اتاق','plus','primary')}
-                ${button('join-link','ورود با لینک دعوت','link')}
-            </aside>
             <dialog class="sr-dialog" aria-labelledby="sr-dialog-title"></dialog>
         </div>`;
         root.addEventListener('click', clicked);
@@ -94,8 +114,11 @@ const StudyRooms = (() => {
             if (root && !document.fullscreenElement && !root.classList.contains('sr-expanded')) syncFullscreen();
         });
         document.addEventListener('keydown', e => {
-            if (active && e.key === 'Escape' && !$('.sr-dialog').open && root.classList.contains('sr-expanded')) setExpanded(false);
+            if (!active || e.key !== 'Escape' || $('.sr-dialog').open || e.defaultPrevented) return;
+            if (directoryIsOpen() || openDrawers.size) closePanels(true);
+            else if (root.classList.contains('sr-expanded')) setExpanded(false);
         });
+        compact.addEventListener('change', () => { if (active) closePanels(true); });
         document.addEventListener('visibilitychange', () => {
             if (!active) return;
             if (document.hidden && snapshot?.room) suspend = request('suspend', {id:snapshot.room.id}, true).catch(()=>{});
@@ -104,15 +127,41 @@ const StudyRooms = (() => {
         addEventListener('pagehide', () => { if (active && snapshot?.room) void request('suspend', {id:snapshot.room.id}, true).catch(()=>{}); });
     }
     function setPressed(action, value) { const el = $(`[data-sr="${action}"]`); if (el) el.setAttribute('aria-pressed', String(value)); }
+    const directoryIsOpen = () => directoryOpen ?? (!snapshot && !compact.matches && prefs.directory);
+    function paintPanels() {
+        const directory = directoryIsOpen();
+        root.classList.toggle('sr-directory-open', directory);
+        $('#sr-directory').inert = !directory;
+        $('[data-sr="directory"]').setAttribute('aria-expanded', String(directory));
+        $('.sr-header').inert = compact.matches && directory;
+        $('.sr-drawers').inert = compact.matches && directory;
+        for (const name of ['goals','members']) {
+            const expanded = Boolean(snapshot && !prefs.minimal && openDrawers.has(name));
+            const toggle = $(`[data-sr="${name}"]`);
+            toggle.setAttribute('aria-expanded', String(expanded));
+            $(`#sr-${name}`).inert = !expanded;
+        }
+        const panelOpen = directory || Boolean(snapshot && !prefs.minimal && openDrawers.size);
+        root.classList.toggle('sr-panel-open', panelOpen);
+        $('.sr-lobby').inert = $('.sr-session').inert = compact.matches && panelOpen;
+    }
+    function closePanels(restoreFocus = false) {
+        const last = directoryIsOpen() ? 'directory' : [...openDrawers].at(-1);
+        directoryOpen = false;
+        openDrawers.clear();
+        paintPanels();
+        if (restoreFocus && last) {
+            const toggle = $(`[data-sr="${last}"]`);
+            if (!toggle.hidden && !toggle.closest('[hidden]')) toggle.focus({preventScroll:true});
+        }
+    }
     function paintPrefs() {
         const theme = prefs.theme === 'room' ? snapshot?.room.theme || 'library' : prefs.theme;
         root.dataset.themeRoom = Object.hasOwn(themes, theme) ? theme : 'library';
         root.classList.toggle('sr-contrast', Boolean(prefs.contrast));
-        root.classList.toggle('sr-minimal', Boolean(prefs.minimal));
-        root.classList.toggle('sr-collapsed', !prefs.directory);
-        const panel = $('#sr-directory');
-        panel.inert = !prefs.directory;
-        $('[data-sr="directory"]').setAttribute('aria-expanded', String(Boolean(prefs.directory)));
+        $('.sr-drawers').hidden = !snapshot || prefs.minimal;
+        if (prefs.minimal) openDrawers.clear();
+        paintPanels();
     }
     function paintDirectory() {
         setPressed('public', filter === 'public');
@@ -162,13 +211,16 @@ const StudyRooms = (() => {
         const room = snapshot?.room;
         $('.sr-lobby').hidden = Boolean(room);
         $('.sr-session').hidden = !room;
-        $('[data-sr="share"]').hidden = !room || (room.visibility === 'private' && !snapshot.host);
-        setHtml('.sr-room-label', room ? `<h2 dir="auto">${esc(room.name)}</h2><span class="sr-badge ${room.phase}"><i></i>${labels[room.phase]}</span><button class="sr-btn sr-leave" type="button" data-sr="leave">خروج</button>` : '<p>کتابخانهٔ آنلاین روند</p>');
+        $('[data-sr="more"]').hidden = !room;
+        setHtml('.sr-room-label', room ? `<h2 dir="auto">${esc(room.name)}</h2><span class="sr-badge ${room.phase}"><i></i>${labels[room.phase]}</span>` : '');
         if (!room) return;
         setPressed('group', snapshot.mode === 'group'); setPressed('solo', snapshot.mode === 'solo');
+        $('.sr-mode-label').textContent = snapshot.mode === 'solo' ? 'تایمر شخصی' : 'تایمر گروهی';
         setHtml('.sr-member-list', snapshot.people.map(person => {
             const name = esc(person.name);
-            return `<article class="sr-person"><span class="sr-avatar ${esc(person.phase)}" aria-hidden="true">${person.avatar && window.ProfileStudio ? ProfileStudio.avatarHTML(person.avatar) : esc(person.name.trim().slice(0,1))}<i></i></span><strong dir="auto">${name}${person.self ? ' (تو)' : ''}</strong><small title="زمان مطالعه در این اتاق">${hours(person.seconds)}</small><small>${labels[person.phase] || labels.idle}</small>${person.reaction ? `<span class="sr-reaction">${reactions[person.reaction]}</span>` : ''}${person.self ? '' : `<button type="button" data-sr="person" data-id="${esc(person.id)}" class="sr-person-more" aria-label="گزینه‌های ${name}">⋯</button>`}</article>`;
+            return `<article class="sr-person"><span class="sr-avatar ${esc(person.phase)}" aria-hidden="true">${person.avatar && window.ProfileStudio ? ProfileStudio.avatarHTML(person.avatar) : esc(person.name.trim().slice(0,1))}<i></i></span>
+                <div class="sr-person-details"><strong dir="auto">${name}${person.self ? ' (تو)' : ''}</strong><small title="زمان مطالعه در این اتاق">${hours(person.seconds)}</small><small>${labels[person.phase] || labels.idle}</small>${person.reaction ? `<span class="sr-reaction">${reactions[person.reaction]}</span>` : ''}</div>
+                ${person.self ? '' : `<button type="button" data-sr="person" data-id="${esc(person.id)}" class="sr-person-more" aria-label="گزینه‌های ${name}">${ico('more')}</button>`}</article>`;
         }).join(''));
         paintGoals(); displayClock();
     }
@@ -207,7 +259,7 @@ const StudyRooms = (() => {
             const result = await request(action, { id:snapshot?.room.id, ...data });
             if (epoch !== token || !active) return;
             if (result.room) accept(result);
-            else if (action === 'leave' || action === 'close') { snapshot = null; paint(); }
+            else if (action === 'leave' || action === 'close') { snapshot = null; openDrawers.clear(); directoryOpen = null; paint(); }
             status('');
             if (['join','create','settings','leave','close'].includes(action)) lastList = 0;
             return result;
@@ -219,7 +271,7 @@ const StudyRooms = (() => {
         if (owner !== user()) { owner = user(); snapshot = rooms = null; filter = 'public'; prefs = readPrefs(); goalDay = day(); }
         if (active) return;
         window.Pomodoro?.pauseTimer();
-        active = true; token++; lastList = 0; paint();
+        active = true; token++; lastList = 0; directoryOpen = null; openDrawers.clear(); paint();
         const invite = inviteFromHash();
         if (invite) await act('join', invite);
         if (!active) return;
@@ -283,13 +335,18 @@ const StudyRooms = (() => {
         const box = dialog();
         box.innerHTML = `<header><h2 id="sr-dialog-title">${title}</h2><button type="button" data-sr="dismiss" class="sr-btn sr-icon" aria-label="بستن">${ico('close')}</button></header>${content}`;
         if (!box.open) box.showModal();
+        else $('[autofocus], [data-sr="dismiss"]', box).focus({preventScroll:true});
     }
     const number = (name, label, min, max, value) => `<label>${label}<input name="${name}" type="number" min="${min}" max="${max}" value="${value}" required></label>`;
     const check = (name, label, value) => `<label class="sr-toggle"><span>${label}</span><input name="${name}" type="checkbox" ${value ? 'checked' : ''}></label>`;
     function settings() {
         const room = snapshot?.room;
         show('تنظیمات اتاق مطالعه', `<form data-form="prefs">
-            <fieldset><legend>ظاهر اتاق</legend><div class="sr-themes">${Object.entries(themes).map(([id, name]) => `<label><input type="radio" name="theme" value="${id}" ${prefs.theme===id?'checked':''}><img src="images/study-rooms/${id}-thumb.webp" alt="" width="320" height="180"><span>${name}</span></label>`).join('')}</div>
+            ${room ? `<fieldset><legend>حالت تایمر</legend><div class="sr-switch">
+                <button type="button" data-sr="group" aria-pressed="${snapshot.mode === 'group'}">${ico('people')} هم‌زمان با گروه</button>
+                <button type="button" data-sr="solo" aria-pressed="${snapshot.mode === 'solo'}">${ico('timer')} تایمر شخصی</button>
+            </div></fieldset>` : ''}
+            <fieldset><legend>ظاهر اتاق</legend><div class="sr-themes">${Object.entries(themes).map(([id, name]) => `<label><input type="radio" name="theme" value="${id}" ${prefs.theme===id?'checked':''}><picture><source media="(max-width: 900px) and (orientation: portrait)" srcset="images/study-rooms/${id}-phone-thumb.webp"><img src="images/study-rooms/${id}-thumb.webp" alt="" width="320" height="180"></picture><span>${name}</span></label>`).join('')}</div>
             <label class="sr-toggle"><span>پس‌زمینهٔ پیش‌فرض اتاق</span><input type="radio" name="theme" value="room" ${prefs.theme==='room'?'checked':''}></label>
             ${check('contrast','تیره‌تر کردن پس‌زمینه برای خوانایی',prefs.contrast)}${check('minimal','نمای خلوت (پنهان کردن اعضا و هدف‌ها)',prefs.minimal)}</fieldset>
             <fieldset><legend>صدا و تایمر شخصی</legend>${check('tick','صدای تیک‌تاک',prefs.tick)}${check('chime','صدای پایان بازه',prefs.chime)}<label>بلندی صدا<input type="range" name="volume" min="0" max="100" value="${Number(prefs.volume)||0}"></label>
@@ -317,24 +374,49 @@ const StudyRooms = (() => {
         show('دعوت دوستان', `<p>لینک را برای دوستانت بفرست. برای ورود باید وارد حساب روند باشند.</p><input type="url" id="sr-link" aria-label="لینک دعوت" dir="ltr" readonly value="${esc(url.href)}">${button('copy','کپی لینک','link','primary')}`);
     }
     async function clicked(event) {
+        if (event.target.matches('.sr-dimmer')) { closePanels(true); return; }
         const b = event.target.closest('button[data-sr]');
         if (!b) return;
         unlockAudio();
         const action = b.dataset.sr, id = b.dataset.id;
         switch (action) {
-            case 'directory': {
-                prefs.directory = !prefs.directory; paintPrefs();
-                if (!prefs.directory) $('[data-sr="directory"]').focus();
-                void Storage.saveConfirmed('study_room_preferences', prefs).catch(e=>status(e.message));
+            case 'directory': case 'close-directory': {
+                directoryOpen = action === 'directory' && !directoryIsOpen();
+                openDrawers.clear();
+                paintPanels();
+                $(`[data-sr="${directoryOpen ? 'close-directory' : 'directory'}"]`).focus({preventScroll:true});
+                if (!snapshot && !compact.matches) {
+                    prefs.directory = directoryOpen;
+                    void Storage.saveConfirmed('study_room_preferences', prefs).catch(e=>status(e.message));
+                }
                 return;
             }
-            case 'show-public': prefs.directory = true; filter='public'; paint(); $('#sr-directory').scrollIntoView({block:'nearest'}); return;
+            case 'show-public':
+                directoryOpen = true; filter = 'public'; paint();
+                $('[data-sr="close-directory"]').focus({preventScroll:true});
+                return;
+            case 'members': case 'goals':
+                if (openDrawers.has(action)) openDrawers.delete(action);
+                else {
+                    if (compact.matches) openDrawers.clear();
+                    openDrawers.add(action);
+                }
+                directoryOpen = false;
+                paintPanels();
+                return;
             case 'public': case 'private': filter=action; paintDirectory(); return;
             case 'settings': settings(); return;
             case 'host': roomForm(true); return;
             case 'create': roomForm(); return;
             case 'dismiss': dialog().close(); return;
             case 'fullscreen': try { await fullscreen(); } catch(e) { status(e.message); } return;
+            case 'more':
+                show('گزینه‌های اتاق', `<div class="sr-room-options">
+                    ${snapshot.room.visibility === 'public' || snapshot.host ? button('share','دعوت دوستان','link') : ''}
+                    ${snapshot.host ? button('host','مدیریت اتاق','settings') : ''}
+                    ${button('leave','خروج از اتاق',null,'danger')}
+                </div>`);
+                return;
             case 'share': share(); return;
             case 'copy': try { await navigator.clipboard.writeText($('#sr-link').value); toast('لینک کپی شد.'); } catch { $('#sr-link').select(); toast('لینک را دستی کپی کن.'); } return;
             case 'join-link': show('ورود با دعوت', '<form data-form="invite"><label>لینک دعوت<input name="link" type="url" required dir="ltr" placeholder="https://…"></label><button class="sr-btn primary" type="submit">ورود به اتاق</button></form>'); return;
@@ -342,7 +424,8 @@ const StudyRooms = (() => {
             case 'group': case 'solo':
                 if (snapshot.mode !== action) { lastPhase=undefined; await act('mode',{mode:action}); } return;
             case 'soloStart': await act(action,{focus:Number(prefs.focus),rest:Number(prefs.rest)}); return;
-            case 'soloPause': case 'soloResume': case 'soloReset': case 'start': case 'end': case 'leave': await act(action); return;
+            case 'soloPause': case 'soloResume': case 'soloReset': case 'start': case 'end': await act(action); return;
+            case 'leave': if (await act(action)) { dialog().close(); $('[data-sr="directory"]').focus(); } return;
             case 'invite': if (confirm('لینک‌های قبلی برای اعضای جدید دیگر معتبر نیستند. ادامه می‌دهی؟') && await act('invite')) share(); return;
             case 'close-room': if (confirm('اتاق برای همه بسته شود؟') && await act('close')) dialog().close(); return;
             case 'react': await act('react',{kind:id}); return;
