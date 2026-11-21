@@ -1,0 +1,11 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "routes": [
+    {
+      "src": "^/(?:index\\.html)?$",
+      "has": [{ "type": "host", "value": "^(?:www\\.)?ravandstudy\\.ir$" }],
+      "dest": "/landing/index.html"
+    },
+    { "handle": "filesystem" }
+  ]
+}
