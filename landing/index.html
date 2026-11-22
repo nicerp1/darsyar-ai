@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-    <meta name="theme-color" content="#f8f6f0">
+    <meta name="theme-color" content="#faf9f6">
     <meta name="description" content="با روند برنامهٔ هفتگی بساز، در اتاق مطالعه تمرکز کن، با هوش مصنوعی و فلش‌کارت درس بخوان و پیشرفتت را ببین.">
     <meta property="og:type" content="website">
     <meta property="og:locale" content="fa_IR">
@@ -13,38 +13,48 @@
     <meta property="og:image" content="https://ravandstudy.ir/landing/cover.webp">
     <link rel="canonical" href="https://ravandstudy.ir/">
     <link rel="icon" href="/icons/ravand-64.png">
-    <link rel="stylesheet" href="/landing/style.css?v=2">
+    <link rel="stylesheet" href="/landing/style.css?v=3">
     <script src="/landing/invite.js" defer></script>
-    <script src="/landing/gallery.js" defer></script>
+    <script src="/landing/gallery.js?v=3" defer></script>
     <title>روند | فضای مطالعهٔ تو</title>
 </head>
 <body>
     <a class="skip" href="#main">رفتن به محتوای صفحه</a>
     <header class="shell site-header">
         <a class="brand" href="/" aria-label="روند، صفحهٔ اصلی"><img src="/icons/ravand-64.png" width="40" height="40" alt=""><span>روند</span></a>
-        <nav aria-label="پیمایش صفحه"><a href="#features">گالری امکانات</a><a href="#start">مسیر مطالعه</a><a href="#faq">سوال‌ها</a></nav>
+        <nav aria-label="پیمایش صفحه"><a href="#features">امکانات</a><a href="#start">یک روز با روند</a><a href="#faq">سوال‌های رایج</a></nav>
         <a class="button header-link" href="https://app.ravandstudy.ir/">ورود به روند <span aria-hidden="true">↖</span></a>
     </header>
     <main id="main">
         <section class="shell hero" aria-labelledby="hero-title">
-            <picture class="hero-art">
-                <source media="(max-width: 650px)" srcset="/landing/cover-mobile.webp">
-                <img src="/landing/cover.webp" width="1440" height="960" alt="" fetchpriority="high">
-            </picture>
             <div class="hero-copy">
-                <p class="eyebrow"><span></span> فضای مطالعهٔ شخصی و گروهی</p>
-                <h1 id="hero-title">هر بار مطالعه،<br><em>یک قدم جلوتر.</em></h1>
-                <p>برنامه‌ات را بنویس، کنار دوستانت تمرکز کن، مطالب را مرور کن و ببین چقدر پیش رفته‌ای.</p>
+                <p class="eyebrow">فضای مطالعهٔ شخصی و گروهی</p>
+                <h1 id="hero-title">برنامه‌ریزی، تمرکز<br><em>و مرور در یک‌جا</em></h1>
+                <p>برای درس‌هایت برنامه بریز، تنها یا کنار دوستانت مطالعه کن و آخر هفته ببین چقدر پیش رفته‌ای.</p>
                 <div class="hero-actions">
                     <a class="button primary" href="https://app.ravandstudy.ir/">ورود به روند <span aria-hidden="true">↖</span></a>
-                    <a class="button secondary" href="#features">گالری امکانات <span aria-hidden="true">↓</span></a>
+                    <a class="button secondary" href="#features">دیدن امکانات <span aria-hidden="true">↓</span></a>
                 </div>
+            </div>
+            <div class="hero-visual">
+                <picture class="hero-art">
+                    <source media="(max-width: 650px)" srcset="/landing/cover-mobile.webp">
+                    <img src="/landing/cover.webp" width="1440" height="960" alt="" fetchpriority="high">
+                </picture>
+                <figure class="hero-preview">
+                    <figcaption><span><img src="/icons/ravand-64.png" width="23" height="23" alt=""> اتاق مطالعه</span><small>پیش‌نمایش ابزار</small></figcaption>
+                    <picture>
+                        <source media="(max-width: 650px)" srcset="/landing/room-compact.webp">
+                        <img src="/landing/room.webp" width="1176" height="826" alt="اتاق مطالعهٔ روند با تایمر گروهی در کتابخانهٔ شب">
+                    </picture>
+                </figure>
+                <a class="hero-shortcut" href="#feature-rooms">آشنایی با اتاق مطالعه <span aria-hidden="true">←</span></a>
             </div>
         </section>
         <section id="features" class="shell features" aria-labelledby="features-title">
             <header class="section-head">
-                <div><p class="section-label">گالری امکانات</p><h2 id="features-title">داخل روند را ببین</h2></div>
-                <p>ابزار دلخواهت را انتخاب کن. برای دیدن جزئیات بیشتر، روی تصویر بزن.</p>
+                <div><p class="section-label">گالری امکانات</p><h2 id="features-title">روند از نزدیک</h2></div>
+                <p>هر ابزار را انتخاب کن و برای دیدن تصویر در اندازهٔ بزرگ‌تر، روی آن بزن.</p>
             </header>
             <div class="gallery" aria-label="پیش‌نمایش امکانات روند">
                 <nav class="gallery-index" aria-label="انتخاب قابلیت">
@@ -60,171 +70,175 @@
                     <a href="#feature-league">لیگ و دوستان</a>
                     <a href="#feature-profile">پروفایل و تنظیمات</a>
                 </nav>
-                <div class="gallery-slides" id="gallery-slides">
-                    <article class="slide lilac" id="feature-plan" aria-labelledby="label-plan">
-                        <div class="slide-copy">
-                            <p class="section-label" id="label-plan">برنامه‌ریزی</p>
-                            <h3>برنامه‌ات را به کارهای کوچک تقسیم کن</h3>
-                            <p>درس، مدت، توضیح و وضعیت هر کار را مشخص کن. برنامه را روزانه یا هفتگی ببین و از جدول دسکتاپ برای مرور کل هفته استفاده کن.</p>
-                            <ul class="tags"><li>نمای روز و هفته</li><li>جدول دسکتاپ</li></ul>
+                <div class="gallery-main">
+                    <div class="gallery-controls" hidden>
+                        <p class="slide-count" role="status" aria-atomic="true"></p>
+                        <div class="gallery-arrows">
+                            <button type="button" data-previous aria-label="اسلاید قبلی" aria-controls="gallery-slides">→</button>
+                            <button type="button" data-next aria-label="اسلاید بعدی" aria-controls="gallery-slides">←</button>
                         </div>
-                        <figure class="slide-image wide">
-                            <a class="image-link" href="/landing/week.webp" aria-label="دیدن تصویر کامل برنامه‌ریزی">
-                                <img src="/landing/week.webp" decoding="async" alt="جدول هفتگی روند با درس‌ها و مدت مطالعه">
-                                <span class="magnify" aria-hidden="true">↗</span>
-                            </a>
-                        </figure>
-                    </article>
-                    <article class="slide night" id="feature-rooms" aria-labelledby="label-rooms">
-                        <div class="slide-copy">
-                            <p class="section-label" id="label-rooms">اتاق‌های مطالعه</p>
-                            <h3>کنار هم، با ریتم خودت</h3>
-                            <p>اتاق عمومی یا خصوصی بساز، دوستانت را دعوت کن و با تایمر گروهی یا شخصی درس بخوان. چند هدف را هم‌زمان از برنامهٔ مطالعه وارد کن.</p>
-                            <ul class="tags"><li>اتاق خصوصی و عمومی</li><li>تایمر گروهی و شخصی</li><li>چهار پس‌زمینه</li></ul>
-                        </div>
-                        <figure class="slide-image wide">
-                            <a class="image-link" href="/landing/room.webp" aria-label="دیدن تصویر کامل اتاق‌های مطالعه">
-                                <img src="/landing/room.webp" loading="lazy" decoding="async" alt="اتاق مطالعهٔ کتابخانه با تایمر گروهی">
-                                <span class="magnify" aria-hidden="true">↗</span>
-                            </a>
-                        </figure>
-                    </article>
-                    <article class="slide lilac" id="feature-assistant" aria-labelledby="label-assistant">
-                        <div class="slide-copy">
-                            <p class="section-label" id="label-assistant">هوش مصنوعی روند</p>
-                            <h3>سوال بپرس و بیشتر تمرین کن</h3>
-                            <p>از دستیار بخواه یک مفهوم را توضیح دهد، متن را خلاصه کند یا برای مرور از تو سوال تمرینی بپرسد.</p>
-                            <ul class="tags"><li>توضیح مفاهیم</li><li>خلاصه‌سازی</li><li>تمرین</li></ul>
-                        </div>
-                        <figure class="slide-image portrait">
-                            <a class="image-link" href="/landing/assistant.webp" aria-label="دیدن تصویر کامل هوش مصنوعی روند">
-                                <img src="/landing/assistant.webp" loading="lazy" decoding="async" alt="صفحهٔ پرسش و پیشنهادهای تمرین در هوش مصنوعی روند">
-                                <span class="magnify" aria-hidden="true">↗</span>
-                            </a>
-                        </figure>
-                    </article>
-                    <article class="slide lilac" id="feature-cards" aria-labelledby="label-cards">
-                        <div class="slide-copy">
-                            <p class="section-label" id="label-cards">فلش‌کارت و لایتنر</p>
-                            <h3>نکته‌ها را دوباره به یاد بیاور</h3>
-                            <p>از نکته‌های مهم کارت بساز، آن‌ها را بر اساس درس مرتب کن و با جعبهٔ لایتنر مواردی را که نیاز به مرور دارند پیدا کن.</p>
-                            <ul class="tags"><li>مرور دوره‌ای</li><li>دسته‌بندی بر اساس درس</li></ul>
-                        </div>
-                        <figure class="slide-image portrait">
-                            <a class="image-link" href="/landing/cards.webp" aria-label="دیدن تصویر کامل فلش‌کارت و لایتنر">
-                                <img src="/landing/cards.webp" loading="lazy" decoding="async" alt="فلش‌کارت زیست‌شناسی در مرور روزانه">
-                                <span class="magnify" aria-hidden="true">↗</span>
-                            </a>
-                        </figure>
-                    </article>
-                    <article class="slide mint" id="feature-progress" aria-labelledby="label-progress">
-                        <div class="slide-copy">
-                            <p class="section-label" id="label-progress">آمار و گزارش</p>
-                            <h3>پیشرفتت را در طول هفته ببین</h3>
-                            <p>ساعت‌های مطالعه، روزهای فعال و وضعیت اجرای برنامه را دنبال کن. می‌توانی گزارش مطالعه را هم دستی ثبت کنی.</p>
-                            <ul class="tags"><li>نمودار مطالعه</li><li>ثبت گزارش‌کار</li></ul>
-                        </div>
-                        <figure class="slide-image portrait">
-                            <a class="image-link" href="/landing/progress.webp" aria-label="دیدن تصویر کامل آمار و گزارش">
-                                <img src="/landing/progress.webp" loading="lazy" decoding="async" alt="نمای آمار هفتگی و روند مطالعهٔ روزانه">
-                                <span class="magnify" aria-hidden="true">↗</span>
-                            </a>
-                        </figure>
-                    </article>
-                    <article class="slide lilac" id="feature-messages" aria-labelledby="label-messages">
-                        <div class="slide-copy">
-                            <p class="section-label" id="label-messages">پیام‌رسان</p>
-                            <h3>با مشاورت در ارتباط بمان</h3>
-                            <p>در پیام‌رسان روند دربارهٔ برنامه و گزارش‌ها حرف بزن و در صورت نیاز پیام صوتی یا فایل بفرست.</p>
-                            <ul class="tags"><li>گفت‌وگو</li><li>پیام صوتی</li><li>ارسال فایل</li></ul>
-                        </div>
-                        <figure class="slide-image portrait">
-                            <a class="image-link" href="/landing/messages.webp" aria-label="دیدن تصویر کامل پیام‌رسان">
-                                <img src="/landing/messages.webp" loading="lazy" decoding="async" alt="گفت‌وگوی نمونه بین دانش‌آموز و مشاور">
-                                <span class="magnify" aria-hidden="true">↗</span>
-                            </a>
-                        </figure>
-                    </article>
-                    <article class="slide lilac" id="feature-today" aria-labelledby="label-today">
-                        <div class="slide-copy">
-                            <p class="section-label" id="label-today">میز مطالعه</p>
-                            <h3>روزت را از یک‌جا شروع کن</h3>
-                            <p>برنامهٔ امروز و وضعیت کارها را یک‌جا ببین و برای شروع مطالعه مستقیم سراغ درس بعدی برو.</p>
-                            <ul class="tags"><li>برنامهٔ امروز</li><li>خلاصهٔ فعالیت</li></ul>
-                        </div>
-                        <figure class="slide-image portrait">
-                            <a class="image-link" href="/landing/today.webp" aria-label="دیدن تصویر کامل میز مطالعه">
-                                <img src="/landing/today.webp" loading="lazy" decoding="async" alt="داشبورد روند با برنامهٔ امروز و خلاصهٔ فعالیت">
-                                <span class="magnify" aria-hidden="true">↗</span>
-                            </a>
-                        </figure>
-                    </article>
-                    <article class="slide peach" id="feature-focus" aria-labelledby="label-focus">
-                        <div class="slide-copy">
-                            <p class="section-label" id="label-focus">تایمر تمرکز</p>
-                            <h3>مطالعه و استراحت را زمان‌بندی کن</h3>
-                            <p>مدت تمرکز و استراحت را تنظیم کن، یک درس انتخاب کن و جلسهٔ تمرکزت را ثبت کن.</p>
-                            <ul class="tags"><li>پومودورو</li><li>ثبت جلسهٔ تمرکز</li></ul>
-                        </div>
-                        <figure class="slide-image portrait">
-                            <a class="image-link" href="/landing/focus.webp" aria-label="دیدن تصویر کامل تایمر تمرکز">
-                                <img src="/landing/focus.webp" loading="lazy" decoding="async" alt="زمان‌سنج تمرکز روند در نمای موبایل">
-                                <span class="magnify" aria-hidden="true">↗</span>
-                            </a>
-                        </figure>
-                    </article>
-                    <article class="slide peach" id="feature-advisor" aria-labelledby="label-advisor">
-                        <div class="slide-copy">
-                            <p class="section-label" id="label-advisor">پنل مشاوره</p>
-                            <h3>برنامه و پیگیری شاگردها در یک‌جا</h3>
-                            <p>مشاور می‌تواند دانش‌آموز را با نام کاربری اضافه کند، برنامهٔ هفتگی بدهد و گزارش مطالعهٔ او را بررسی کند.</p>
-                            <ul class="tags"><li>حساب مشاور</li><li>برنامهٔ اختصاصی</li><li>گزارش پیشرفت</li></ul>
-                        </div>
-                        <figure class="slide-image wide">
-                            <a class="image-link" href="/landing/advisor.webp" aria-label="دیدن تصویر کامل پنل مشاوره">
-                                <img src="/landing/advisor.webp" loading="lazy" decoding="async" alt="پنل مشاورهٔ روند با پروندهٔ نمونهٔ دانش‌آموز">
-                                <span class="magnify" aria-hidden="true">↗</span>
-                            </a>
-                        </figure>
-                    </article>
-                    <article class="slide mint" id="feature-league" aria-labelledby="label-league">
-                        <div class="slide-copy">
-                            <p class="section-label" id="label-league">لیگ و دوستان</p>
-                            <h3>با دوستانت پیوسته درس بخوان</h3>
-                            <p>دوست اضافه کن، امتیاز فعالیتت را ببین و انتخاب کن که در جدول لیگ نمایش داده شوی یا نه.</p>
-                            <ul class="tags"><li>جدول لیگ</li><li>درخواست دوستی</li></ul>
-                        </div>
-                        <figure class="slide-image wide">
-                            <a class="image-link" href="/landing/league.webp" aria-label="دیدن تصویر کامل لیگ و دوستان">
-                                <img src="/landing/league.webp" loading="lazy" decoding="async" alt="لیگ مطالعه و فهرست دوستان با حساب‌های نمونه">
-                                <span class="magnify" aria-hidden="true">↗</span>
-                            </a>
-                        </figure>
-                    </article>
-                    <article class="slide lilac" id="feature-profile" aria-labelledby="label-profile">
-                        <div class="slide-copy">
-                            <p class="section-label" id="label-profile">پروفایل و تنظیمات</p>
-                            <h3>روند را مطابق سلیقه‌ات تنظیم کن</h3>
-                            <p>تصویر حساب و تنظیمات ظاهر را تغییر بده و گزینه‌های مربوط به حساب کاربری را از پروفایل مدیریت کن.</p>
-                            <ul class="tags"><li>ظاهر روشن و تیره</li><li>تنظیمات حساب</li></ul>
-                        </div>
-                        <figure class="slide-image portrait">
-                            <a class="image-link" href="/landing/profile.webp" aria-label="دیدن تصویر کامل پروفایل و تنظیمات">
-                                <img src="/landing/profile.webp" loading="lazy" decoding="async" alt="نمای پروفایل و تنظیمات حساب روند">
-                                <span class="magnify" aria-hidden="true">↗</span>
-                            </a>
-                        </figure>
-                    </article>
-                </div>
-                <div class="gallery-controls" hidden>
-                    <button type="button" data-previous aria-label="اسلاید قبلی" aria-controls="gallery-slides">→</button>
-                    <p class="slide-count" role="status" aria-atomic="true"></p>
-                    <button type="button" data-next aria-label="اسلاید بعدی" aria-controls="gallery-slides">←</button>
+                    </div>
+                    <div class="gallery-slides" id="gallery-slides">
+                        <article class="slide lilac" id="feature-plan" aria-labelledby="label-plan">
+                            <div class="slide-copy">
+                                <p class="section-label" id="label-plan">برنامه‌ریزی</p>
+                                <h3>برنامه‌ات را به کارهای کوچک تقسیم کن</h3>
+                                <p>درس، مدت، توضیح و وضعیت هر کار را مشخص کن. برنامه را روزانه یا هفتگی ببین و از جدول دسکتاپ برای مرور کل هفته استفاده کن.</p>
+                                <ul class="tags"><li>نمای روز و هفته</li><li>جدول دسکتاپ</li></ul>
+                            </div>
+                            <figure class="slide-image wide">
+                                <a class="image-link" href="/landing/week.webp" aria-label="دیدن تصویر کامل برنامه‌ریزی">
+                                    <img src="/landing/week.webp" decoding="async" alt="جدول هفتگی روند با درس‌ها و مدت مطالعه">
+                                    <span class="magnify" aria-hidden="true">↗</span>
+                                </a>
+                            </figure>
+                        </article>
+                        <article class="slide night" id="feature-rooms" aria-labelledby="label-rooms">
+                            <div class="slide-copy">
+                                <p class="section-label" id="label-rooms">اتاق‌های مطالعه</p>
+                                <h3>کنار هم، با ریتم خودت</h3>
+                                <p>اتاق عمومی یا خصوصی بساز، دوستانت را دعوت کن و با تایمر گروهی یا شخصی درس بخوان. چند هدف را هم‌زمان از برنامهٔ مطالعه وارد کن.</p>
+                                <ul class="tags"><li>اتاق خصوصی و عمومی</li><li>تایمر گروهی و شخصی</li><li>چهار پس‌زمینه</li></ul>
+                            </div>
+                            <figure class="slide-image wide">
+                                <a class="image-link" href="/landing/room.webp" aria-label="دیدن تصویر کامل اتاق‌های مطالعه">
+                                    <img src="/landing/room.webp" loading="lazy" decoding="async" alt="اتاق مطالعهٔ کتابخانه با تایمر گروهی">
+                                    <span class="magnify" aria-hidden="true">↗</span>
+                                </a>
+                            </figure>
+                        </article>
+                        <article class="slide lilac" id="feature-assistant" aria-labelledby="label-assistant">
+                            <div class="slide-copy">
+                                <p class="section-label" id="label-assistant">هوش مصنوعی روند</p>
+                                <h3>سوال بپرس و بیشتر تمرین کن</h3>
+                                <p>از دستیار بخواه یک مفهوم را توضیح دهد، متن را خلاصه کند یا برای مرور از تو سوال تمرینی بپرسد.</p>
+                                <ul class="tags"><li>توضیح مفاهیم</li><li>خلاصه‌سازی</li><li>تمرین</li></ul>
+                            </div>
+                            <figure class="slide-image portrait">
+                                <a class="image-link" href="/landing/assistant.webp" aria-label="دیدن تصویر کامل هوش مصنوعی روند">
+                                    <img src="/landing/assistant.webp" loading="lazy" decoding="async" alt="صفحهٔ پرسش و پیشنهادهای تمرین در هوش مصنوعی روند">
+                                    <span class="magnify" aria-hidden="true">↗</span>
+                                </a>
+                            </figure>
+                        </article>
+                        <article class="slide lilac" id="feature-cards" aria-labelledby="label-cards">
+                            <div class="slide-copy">
+                                <p class="section-label" id="label-cards">فلش‌کارت و لایتنر</p>
+                                <h3>نکته‌ها را دوباره به یاد بیاور</h3>
+                                <p>از نکته‌های مهم کارت بساز، آن‌ها را بر اساس درس مرتب کن و با جعبهٔ لایتنر مواردی را که نیاز به مرور دارند پیدا کن.</p>
+                                <ul class="tags"><li>مرور دوره‌ای</li><li>دسته‌بندی بر اساس درس</li></ul>
+                            </div>
+                            <figure class="slide-image portrait">
+                                <a class="image-link" href="/landing/cards.webp" aria-label="دیدن تصویر کامل فلش‌کارت و لایتنر">
+                                    <img src="/landing/cards.webp" loading="lazy" decoding="async" alt="فلش‌کارت زیست‌شناسی در مرور روزانه">
+                                    <span class="magnify" aria-hidden="true">↗</span>
+                                </a>
+                            </figure>
+                        </article>
+                        <article class="slide mint" id="feature-progress" aria-labelledby="label-progress">
+                            <div class="slide-copy">
+                                <p class="section-label" id="label-progress">آمار و گزارش</p>
+                                <h3>پیشرفتت را در طول هفته ببین</h3>
+                                <p>ساعت‌های مطالعه، روزهای فعال و وضعیت اجرای برنامه را دنبال کن. می‌توانی گزارش مطالعه را هم دستی ثبت کنی.</p>
+                                <ul class="tags"><li>نمودار مطالعه</li><li>ثبت گزارش‌کار</li></ul>
+                            </div>
+                            <figure class="slide-image portrait">
+                                <a class="image-link" href="/landing/progress.webp" aria-label="دیدن تصویر کامل آمار و گزارش">
+                                    <img src="/landing/progress.webp" loading="lazy" decoding="async" alt="نمای آمار هفتگی و روند مطالعهٔ روزانه">
+                                    <span class="magnify" aria-hidden="true">↗</span>
+                                </a>
+                            </figure>
+                        </article>
+                        <article class="slide lilac" id="feature-messages" aria-labelledby="label-messages">
+                            <div class="slide-copy">
+                                <p class="section-label" id="label-messages">پیام‌رسان</p>
+                                <h3>با مشاورت در ارتباط بمان</h3>
+                                <p>در پیام‌رسان روند دربارهٔ برنامه و گزارش‌ها حرف بزن و در صورت نیاز پیام صوتی یا فایل بفرست.</p>
+                                <ul class="tags"><li>گفت‌وگو</li><li>پیام صوتی</li><li>ارسال فایل</li></ul>
+                            </div>
+                            <figure class="slide-image portrait">
+                                <a class="image-link" href="/landing/messages.webp" aria-label="دیدن تصویر کامل پیام‌رسان">
+                                    <img src="/landing/messages.webp" loading="lazy" decoding="async" alt="گفت‌وگوی نمونه بین دانش‌آموز و مشاور">
+                                    <span class="magnify" aria-hidden="true">↗</span>
+                                </a>
+                            </figure>
+                        </article>
+                        <article class="slide lilac" id="feature-today" aria-labelledby="label-today">
+                            <div class="slide-copy">
+                                <p class="section-label" id="label-today">میز مطالعه</p>
+                                <h3>روزت را از یک‌جا شروع کن</h3>
+                                <p>برنامهٔ امروز و وضعیت کارها را یک‌جا ببین و برای شروع مطالعه مستقیم سراغ درس بعدی برو.</p>
+                                <ul class="tags"><li>برنامهٔ امروز</li><li>خلاصهٔ فعالیت</li></ul>
+                            </div>
+                            <figure class="slide-image portrait">
+                                <a class="image-link" href="/landing/today.webp" aria-label="دیدن تصویر کامل میز مطالعه">
+                                    <img src="/landing/today.webp" loading="lazy" decoding="async" alt="داشبورد روند با برنامهٔ امروز و خلاصهٔ فعالیت">
+                                    <span class="magnify" aria-hidden="true">↗</span>
+                                </a>
+                            </figure>
+                        </article>
+                        <article class="slide peach" id="feature-focus" aria-labelledby="label-focus">
+                            <div class="slide-copy">
+                                <p class="section-label" id="label-focus">تایمر تمرکز</p>
+                                <h3>مطالعه و استراحت را زمان‌بندی کن</h3>
+                                <p>مدت تمرکز و استراحت را تنظیم کن، یک درس انتخاب کن و جلسهٔ تمرکزت را ثبت کن.</p>
+                                <ul class="tags"><li>پومودورو</li><li>ثبت جلسهٔ تمرکز</li></ul>
+                            </div>
+                            <figure class="slide-image portrait">
+                                <a class="image-link" href="/landing/focus.webp" aria-label="دیدن تصویر کامل تایمر تمرکز">
+                                    <img src="/landing/focus.webp" loading="lazy" decoding="async" alt="زمان‌سنج تمرکز روند در نمای موبایل">
+                                    <span class="magnify" aria-hidden="true">↗</span>
+                                </a>
+                            </figure>
+                        </article>
+                        <article class="slide peach" id="feature-advisor" aria-labelledby="label-advisor">
+                            <div class="slide-copy">
+                                <p class="section-label" id="label-advisor">پنل مشاوره</p>
+                                <h3>برنامه و پیگیری شاگردها در یک‌جا</h3>
+                                <p>مشاور می‌تواند دانش‌آموز را با نام کاربری اضافه کند، برنامهٔ هفتگی بدهد و گزارش مطالعهٔ او را بررسی کند.</p>
+                                <ul class="tags"><li>حساب مشاور</li><li>برنامهٔ اختصاصی</li><li>گزارش پیشرفت</li></ul>
+                            </div>
+                            <figure class="slide-image wide">
+                                <a class="image-link" href="/landing/advisor.webp" aria-label="دیدن تصویر کامل پنل مشاوره">
+                                    <img src="/landing/advisor.webp" loading="lazy" decoding="async" alt="پنل مشاورهٔ روند با پروندهٔ نمونهٔ دانش‌آموز">
+                                    <span class="magnify" aria-hidden="true">↗</span>
+                                </a>
+                            </figure>
+                        </article>
+                        <article class="slide mint" id="feature-league" aria-labelledby="label-league">
+                            <div class="slide-copy">
+                                <p class="section-label" id="label-league">لیگ و دوستان</p>
+                                <h3>با دوستانت پیوسته درس بخوان</h3>
+                                <p>دوست اضافه کن، امتیاز فعالیتت را ببین و انتخاب کن که در جدول لیگ نمایش داده شوی یا نه.</p>
+                                <ul class="tags"><li>جدول لیگ</li><li>درخواست دوستی</li></ul>
+                            </div>
+                            <figure class="slide-image wide">
+                                <a class="image-link" href="/landing/league.webp" aria-label="دیدن تصویر کامل لیگ و دوستان">
+                                    <img src="/landing/league.webp" loading="lazy" decoding="async" alt="لیگ مطالعه و فهرست دوستان با حساب‌های نمونه">
+                                    <span class="magnify" aria-hidden="true">↗</span>
+                                </a>
+                            </figure>
+                        </article>
+                        <article class="slide lilac" id="feature-profile" aria-labelledby="label-profile">
+                            <div class="slide-copy">
+                                <p class="section-label" id="label-profile">پروفایل و تنظیمات</p>
+                                <h3>روند را مطابق سلیقه‌ات تنظیم کن</h3>
+                                <p>تصویر حساب و تنظیمات ظاهر را تغییر بده و گزینه‌های مربوط به حساب کاربری را از پروفایل مدیریت کن.</p>
+                                <ul class="tags"><li>ظاهر روشن و تیره</li><li>تنظیمات حساب</li></ul>
+                            </div>
+                            <figure class="slide-image portrait">
+                                <a class="image-link" href="/landing/profile.webp" aria-label="دیدن تصویر کامل پروفایل و تنظیمات">
+                                    <img src="/landing/profile.webp" loading="lazy" decoding="async" alt="نمای پروفایل و تنظیمات حساب روند">
+                                    <span class="magnify" aria-hidden="true">↗</span>
+                                </a>
+                            </figure>
+                        </article>
+                    </div>
                 </div>
             </div>
         </section>
         <section id="start" class="shell journey" aria-labelledby="start-title">
-            <div class="section-head"><div><p class="section-label">مسیر مطالعه</p><h2 id="start-title">یک روز با روند</h2></div><p>از انتخاب اولین درس تا مرور آخر شب.</p></div>
+            <div class="section-head"><div><p class="section-label">مسیر مطالعه</p><h2 id="start-title">یک روز با روند</h2></div><p>از انتخاب اولین درس تا ثبت نتیجهٔ مطالعه.</p></div>
             <div class="journey-grid">
                 <article><a href="/landing/plan-mobile.webp"><img src="/landing/plan-mobile.webp" alt="نمای برنامهٔ روزانه روی گوشی" loading="lazy"></a><div><p class="section-label">قبل از مطالعه</p><h3>برای امروز برنامه بریز</h3><p>درس‌ها را اضافه کن و برای هر کدام زمان بگذار.</p></div></article>
                 <article><a href="/landing/rooms-mobile.webp"><img src="/landing/rooms-mobile.webp" alt="تایمر و پس‌زمینهٔ اتاق مطالعه روی گوشی" loading="lazy"></a><div><p class="section-label">حین مطالعه</p><h3>روی یک کار تمرکز کن</h3><p>وارد اتاق شو، هدف‌هایت را باز کن و تایمر را راه بینداز.</p></div></article>

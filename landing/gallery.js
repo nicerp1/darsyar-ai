@@ -1,6 +1,7 @@
 const gallery = document.querySelector('.gallery');
 const slides = Array.from(gallery.querySelectorAll('.slide'));
-const choices = Array.from(gallery.querySelectorAll('.gallery-index a'));
+const indexBar = gallery.querySelector('.gallery-index');
+const choices = Array.from(indexBar.querySelectorAll('a'));
 const indicator = gallery.querySelector('.slide-count');
 const dialog = document.querySelector('.image-viewer');
 const format = new Intl.NumberFormat('fa-IR');
@@ -14,6 +15,12 @@ function showSlide(index) {
         else link.removeAttribute('aria-current');
     });
     indicator.textContent = `${format.format(active + 1)} از ${format.format(slides.length)} · ${choices[active].textContent}`;
+    if (indexBar.scrollWidth > indexBar.clientWidth) {
+        const item = choices[active].getBoundingClientRect();
+        const bar = indexBar.getBoundingClientRect();
+        const offset = item.left + item.width / 2 - bar.left - bar.width / 2;
+        indexBar.scrollBy({left: offset, behavior: 'instant'});
+    }
 }
 
 function slideInHash() {
@@ -26,20 +33,25 @@ function selectSlide(index) {
 }
 
 gallery.querySelector('.gallery-controls').hidden = false;
+gallery.classList.add('gallery-ready');
 showSlide(Math.max(0, slideInHash()));
 addEventListener('hashchange', () => {
     const index = slideInHash();
-    if (index !== -1) showSlide(index);
+    if (index !== -1) {
+        showSlide(index);
+        if (!indexBar.contains(document.activeElement)) gallery.scrollIntoView({block: 'start'});
+    }
 });
 
 gallery.querySelector('[data-previous]').addEventListener('click', () => selectSlide(active - 1));
 gallery.querySelector('[data-next]').addEventListener('click', () => selectSlide(active + 1));
-gallery.querySelector('.gallery-index').addEventListener('keydown', event => {
+indexBar.addEventListener('keydown', event => {
+    const index = choices.indexOf(event.target);
     const offset = {ArrowLeft: 1, ArrowRight: -1}[event.key];
-    if (!offset) return;
+    if (!offset || index === -1) return;
     event.preventDefault();
-    selectSlide(choices.indexOf(event.target) + offset);
-    choices[active].focus();
+    selectSlide(index + offset);
+    choices[active].focus({preventScroll: true});
 });
 
 document.addEventListener('click', event => {
