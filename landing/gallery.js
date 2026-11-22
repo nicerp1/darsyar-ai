@@ -63,7 +63,7 @@ document.addEventListener('click', event => {
         selectSlide(choice);
         return;
     }
-    const preview = link.matches('.image-link, .journey-grid article > a') && link.querySelector('img');
+    const preview = link.matches('.image-link') && link.querySelector('img');
     if (!preview || !dialog?.showModal) return;
     event.preventDefault();
     const fullImage = dialog.querySelector('img');
