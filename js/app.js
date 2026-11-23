@@ -4,7 +4,42 @@
 
 const App = (function () {
     let currentView = 'dashboard';
+    let routeOwner = null;
+    const routeKey = 'ravandRoute';
     const features = Object.freeze({ exams: false, gamification: true, subscription: false });
+
+    function savedRoute(state = history.state) {
+        const route = state?.[routeKey];
+        return routeOwner && route?.owner === routeOwner ? route : null;
+    }
+
+    function saveRoute(view, peer = '', relative = true) {
+        if (!routeOwner) return;
+        const previous = relative ? savedRoute() : null;
+        if (previous?.view === view && previous.peer === peer) return;
+        const route = {
+            owner: routeOwner, view, peer,
+            depth: previous ? previous.depth + 1 : 0,
+            chatDepth: peer && previous?.view === 'chat' ? previous.chatDepth + 1 : 0
+        };
+        history[previous ? 'pushState' : 'replaceState']({...history.state, [routeKey]:route}, '');
+    }
+
+    function openConversation(peer) {
+        if (currentView === 'chat') saveRoute('chat', peer);
+    }
+
+    function back(chatAction) {
+        const route = savedRoute();
+        if (chatAction === 'list') {
+            if (route?.chatDepth) history.go(-route.chatDepth);
+            else window.Messenger?.showList();
+            return;
+        }
+        const steps = chatAction === 'exit' ? (route?.chatDepth || 0) + 1 : 1;
+        if (route?.depth >= steps) history.go(-steps);
+        else if (currentView !== 'dashboard') navigate('dashboard', {replace:true});
+    }
 
     async function init() {
         try {
@@ -71,6 +106,11 @@ const App = (function () {
         const appLayout = document.getElementById('app-main-layout');
 
         if (!user) {
+            if (routeOwner) {
+                history.replaceState({...history.state, [routeKey]:null}, '');
+                currentView = 'dashboard';
+            }
+            routeOwner = null;
             document.body.classList.add('auth-active');
             if (authView) authView.style.display = 'block';
             if (appLayout) appLayout.style.display = 'none';
@@ -82,7 +122,13 @@ const App = (function () {
 
             renderUserHeader();
             renderSidebarRolePermissions();
-            navigate(window.StudyRooms?.hasInvite() ? 'study-rooms' : currentView);
+            routeOwner = user.username;
+            const route = savedRoute();
+            if (window.StudyRooms?.hasInvite()) {
+                if (!route) saveRoute('dashboard', '', false);
+                navigate('study-rooms');
+            } else if (route) navigate(route.view, {restore:route});
+            else navigate('dashboard', {replace:true});
         }
     }
 
@@ -129,19 +175,20 @@ const App = (function () {
         }
     }
 
-    function navigate(viewName) {
+    function navigate(viewName, {restore,replace = false} = {}) {
         if(['ai-writing','ai-research'].includes(viewName))viewName='ai-assistant';
-        if(viewName!=='chat')window.Messenger?.leave();
         const previousView = currentView;
-        if (!isFeatureEnabled(viewName)) viewName = 'dashboard';
+        if (!isFeatureEnabled(viewName) || !document.getElementById(`view-${viewName}`)) viewName = 'dashboard';
         if (viewName === 'admin' && !Storage.isManager()) {
             currentView = 'dashboard';
             if (typeof Utils !== 'undefined') Utils.showToast('دسترسی به این بخش فقط برای مدیر اصلی مجاز است.', 'error');
             viewName = 'dashboard';
         }
+        if (previousView === 'chat' && viewName !== 'chat') window.Messenger?.leave();
         if (previousView === 'study-rooms' && viewName !== previousView) window.StudyRooms?.exit();
         if (window.WebStudio?.enabled()) WebStudio.beforeLeave(viewName, previousView);
         currentView = viewName;
+        if (!restore && (viewName !== previousView || !savedRoute())) saveRoute(viewName, '', !replace);
         document.body.classList.toggle('aw-chat-open',viewName==='ai-assistant'&&Boolean(window.WebStudio?.enabled()&&window.AIWorkspace));
         if (viewName==='chat'||window.WebStudio?.enabled()) Communications.close();
 
@@ -217,7 +264,7 @@ const App = (function () {
                 if (typeof Profile !== 'undefined') Profile.init();
                 break;
             case 'chat':
-                if(window.Messenger)void Messenger.enter();
+                if (window.Messenger) void Messenger.enter(restore?.peer || '', {restore:Boolean(restore)});
                 break;
         }
 
@@ -264,6 +311,11 @@ const App = (function () {
 
     function setupEventListeners() {
         matchMedia('(max-width: 720px)').addEventListener('change', applyTheme);
+        window.addEventListener('popstate', event => {
+            const route = savedRoute(event.state);
+            if (route) navigate(route.view, {restore:route});
+            else if (routeOwner) navigate('dashboard', {replace:true});
+        });
         document.addEventListener('keydown', event => {
             if (event.key === 'Escape' && document.body.classList.contains('web-mobile-drawer-open')) closeMobileSidebar();
         });
@@ -289,6 +341,8 @@ const App = (function () {
         init,
         toggleTheme,
         navigate,
+        back,
+        openConversation,
         toggleMobileSidebar,
         closeMobileSidebar,
         renderUserHeader,

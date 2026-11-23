@@ -40,7 +40,7 @@ window.MessengerDesk = (() => {
           <div id="im-shell" dir="rtl">
             <aside class="im-sidebar" aria-label="فهرست گفتگوها">
               <header class="desk-brand">
-                ${button('im-exit','arrow_forward','بازگشت به درسیار')}
+                ${button('im-exit','arrow_forward','بازگشت به صفحهٔ قبلی')}
                 <h1>پیام‌ها</h1>
                 ${button('im-account','account_circle','پروفایل و تنظیمات')}
                 ${button('im-new','edit_square','گفتگوی جدید')}
@@ -100,7 +100,24 @@ window.MessengerDesk = (() => {
     }
 
     function closeDialog() { if(overlay?.open)overlay.close(); }
-    function close() { closeDialog(); clearTimeout(presenceTimer); clearTimeout(searchTimer); searchSerial++; }
+    function close() {
+        closeDialog(); setDetails(false); closePalette();
+        clearTimeout(presenceTimer); clearTimeout(searchTimer); searchSerial++;
+    }
+    function closePalette() {
+        const picker=$('im-emojis');
+        if(!picker||picker.hidden)return false;
+        picker.hidden=true;
+        $('im-emoji-toggle').setAttribute('aria-expanded','false');
+        return true;
+    }
+    function dismissLayer() {
+        if(!document.body.classList.contains('im-open'))return false;
+        if(detailOpen){setDetails(false);$('im-person').focus({preventScroll:true});return true;}
+        if(!closePalette())return false;
+        $('im-emoji-toggle').focus({preventScroll:true});
+        return true;
+    }
     function actionButtons(actions) {
         return actions.map(([key,label,icon])=>'<button class="desk-action" type="button" data-desk-action="'+key+'">'+glyph(icon)+api.esc(label)+'</button>').join('');
     }
@@ -110,6 +127,7 @@ window.MessengerDesk = (() => {
         api = bridge;
         filter = 'all'; detailOpen = false; chatKey = null;
         const shell = $('im-shell'), log = $('im-log'), input = $('im-input');
+        setConversation(false);
         $('im-folders').onchange=event=>{filter=event.target.value;api.renderThreads();};
         $('im-account').onclick = () => {
             const node = dialog('پروفایل و تنظیمات', actionButtons([['profile','پروفایل من','person'],['theme','تغییر تم پیام‌رسان','dark_mode']]));
@@ -202,6 +220,38 @@ window.MessengerDesk = (() => {
     }
 
     const motion=()=>!matchMedia('(prefers-reduced-motion: reduce)').matches&&document.documentElement.dataset.motion!=='off';
+    const compact=matchMedia('(max-width: 720px)');
+    const playing=new WeakMap();
+    function animate(element, frames, duration, delay=0) {
+        if(!element)return;
+        playing.get(element)?.cancel();
+        if(!motion()||!element.animate)return;
+        playing.set(element,element.animate(frames,{duration,delay,fill:'backwards',easing:'cubic-bezier(.2,.75,.25,1)'}));
+    }
+    function syncPanes() {
+        const shell=$('im-shell');if(!shell)return;
+        const open=shell.classList.contains('im-mobile-chat');
+        shell.querySelector('.im-sidebar').inert=compact.matches&&open;
+        shell.querySelector('.im-conversation').inert=compact.matches&&!open;
+    }
+    compact.addEventListener('change',syncPanes);
+    function setConversation(open) {
+        const shell=$('im-shell');if(!shell)return;
+        shell.classList.toggle('im-mobile-chat',open);
+        syncPanes();
+    }
+    function animateOpen() {
+        animate($('im-shell'),[{opacity:.55,transform:'translateY(8px)'},{opacity:1,transform:'none'}],240);
+    }
+    function animateConversation() {
+        if(!compact.matches)animate($('im-log'),[{opacity:.6,transform:'translateX(-7px)'},{opacity:1,transform:'none'}],250);
+    }
+    function animateMessages(nodes) {
+        nodes.forEach((node,index)=>animate(node,[
+            {opacity:.15,transform:`translate(${node.classList.contains('mine')?'-7px':'7px'}, 9px) scale(.987)`},
+            {opacity:1,transform:'none'}
+        ],245,index*22));
+    }
     function threads(items) {
         const query=$('im-search').value.trim().toLocaleLowerCase();
         const folders=[...new Set(items.map(item=>item.settings?.folder).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'fa'));
@@ -306,7 +356,6 @@ window.MessengerDesk = (() => {
         const state=api.state(), shell=$('im-shell');
         if(chatKey!==state.peer){
             chatKey=state.peer;selected(false);setDetails(false);close();
-            if(motion())$('im-log').animate?.([{opacity:.2,transform:'translateX(-9px)'},{opacity:1,transform:'none'}],{duration:240,easing:'cubic-bezier(.2,.8,.25,1)'});
         }
         shell.dataset.wall=state.settings.wallpaper||'plain';
         const pin=state.settings.messagePin;
@@ -318,7 +367,9 @@ window.MessengerDesk = (() => {
         if(state.person?.group){
             $('im-subtitle').textContent=Number(state.person.memberCount||0).toLocaleString('fa-IR')+' عضو';
         }else if(!state.peer.startsWith('~')&&at&&age<45000){
-            if(typing&&age<6500)$('im-subtitle').innerHTML='<span class="desk-typing"><i></i><i></i><i></i></span> در حال نوشتن';
+            if(typing&&age<6500){
+                if(!$('im-subtitle').querySelector('.desk-typing'))$('im-subtitle').innerHTML='<span class="desk-typing" aria-hidden="true"><i></i><i></i><i></i></span> در حال نوشتن';
+            }
             else $('im-subtitle').textContent='اکنون در این گفتگو';
             presenceTimer=setTimeout(()=>header(),(typing&&age<6500?6500:45000)-age+20);
         }else if(!state.peer.startsWith('~'))$('im-subtitle').textContent=state.peer?'@'+state.peer:'';
@@ -613,5 +664,5 @@ window.MessengerDesk = (() => {
     function loading() {
         $('im-log').innerHTML='<div class="desk-loading" role="status" aria-label="در حال بارگیری گفتگو"><i></i><i></i><i></i></div>';
     }
-    return {layout,mount,threads,header,messageMarkup,afterMessages,loading,close};
+    return {layout,mount,threads,header,messageMarkup,afterMessages,loading,close,dismissLayer,setConversation,animateOpen,animateConversation,animateMessages};
 })();
