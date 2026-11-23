@@ -13,22 +13,26 @@
     <meta property="og:image" content="https://ravandstudy.ir/landing/study-window.webp">
     <link rel="canonical" href="https://ravandstudy.ir/">
     <link rel="icon" href="/icons/ravand-64.png">
-    <link rel="stylesheet" href="/landing/style.css?v=6">
+    <link rel="stylesheet" href="/landing/style.css?v=7">
     <script src="/landing/invite.js" defer></script>
-    <script src="/landing/gallery.js?v=4" defer></script>
+    <script src="/landing/gallery.js?v=5" defer></script>
     <title>روند | فضای مطالعهٔ تو</title>
 </head>
 <body>
     <a class="skip" href="#main">رفتن به محتوای صفحه</a>
-    <header class="shell site-header">
+    <header class="shell site-header" id="top">
         <a class="brand" href="/" aria-label="روند، صفحهٔ اصلی"><img src="/icons/ravand-64.png" width="40" height="40" alt=""><span>روند</span></a>
         <nav aria-label="پیمایش صفحه"><a href="#start">مسیر مطالعه</a><a href="#features">امکانات</a><a href="#faq">سوال‌های رایج</a></nav>
         <a class="button header-link" href="https://app.ravandstudy.ir/">ورود به روند <span aria-hidden="true">↖</span></a>
+        <details class="mobile-menu">
+            <summary aria-label="منوی صفحه"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"/></svg></summary>
+            <nav aria-label="پیمایش موبایل"><a href="#start">مسیر مطالعه</a><a href="#features">همهٔ امکانات</a><a href="#faq">سوال‌های رایج</a></nav>
+        </details>
     </header>
     <main id="main">
         <section class="shell hero" aria-labelledby="hero-title">
             <picture class="hero-art" aria-hidden="true">
-                <source media="(max-width: 650px)" srcset="/landing/study-window-mobile.webp">
+                <source media="(max-width: 650px)" srcset="/landing/mobile-desk.webp">
                 <img src="/landing/study-window.webp" width="1536" height="1024" alt="" fetchpriority="high">
             </picture>
             <div class="hero-copy">
@@ -40,6 +44,11 @@
                     <a class="button secondary" href="#start">دیدن مسیر مطالعه <span aria-hidden="true">↓</span></a>
                 </div>
             </div>
+            <nav class="hero-quick" aria-label="دسترسی سریع به ابزارها">
+                <a href="#feature-plan"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="4"/><path d="M7 3v4m10-4v4M3 10h18m-14 4h3m4 0h3"/></svg>برنامه</a>
+                <a href="#feature-rooms"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="13" r="8"/><path d="M9 2h6m-3 7v4l3 2"/></svg>اتاق مطالعه</a>
+                <a href="#feature-assistant"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M11 2c1 5 2 7 7 8-5 1-6 3-7 8-1-5-2-7-7-8 5-1 6-3 7-8Zm8 13v6m-3-3h6"/></svg>هوش مصنوعی</a>
+            </nav>
         </section>
         <section id="start" class="shell journey" aria-labelledby="start-title">
             <header class="section-head">
@@ -49,7 +58,7 @@
             <ol class="journey-grid">
                 <li>
                     <div class="journey-copy"><p class="section-label">قبل از مطالعه</p><h3>امروز چه درس‌هایی می‌خوانم؟</h3><p>اول درس‌ها و زمان هرکدام را در برنامه بنویس. هر روز چک کن چه کارهایی مانده و در نمای هفتگی برای روزهای بعد جا بگذار.</p><a class="journey-link" href="#feature-plan">دیدن برنامه‌ریزی <span aria-hidden="true">←</span></a></div>
-                    <a class="image-link journey-image" href="/landing/week.webp" aria-label="بزرگ‌نمایی جدول هفتگی"><img src="/landing/week.webp" width="1022" height="473" alt="جدول برنامهٔ هفتگی با نام درس‌ها و زمان مطالعه" loading="lazy"><span class="magnify" aria-hidden="true">↗</span></a>
+                    <a class="image-link journey-image" href="/landing/week.webp" aria-label="بزرگ‌نمایی پیش‌نمایش برنامه"><picture><source media="(max-width: 650px)" srcset="/landing/plan-mobile.webp"><img src="/landing/week.webp" width="1022" height="473" alt="پیش‌نمایش برنامهٔ مطالعه با نام درس‌ها و مدت مطالعه" loading="lazy"></picture><span class="magnify" aria-hidden="true">↗</span></a>
                 </li>
                 <li>
                     <div class="journey-copy"><p class="section-label">حین مطالعه</p><h3>وقت تمرکز روی یک درس</h3><p>هدفت را از برنامه بردار و تایمر را روشن کن. می‌توانی در اتاق با دوستانت هم‌زمان درس بخوانی یا زمان مطالعه و استراحت خودت را تنظیم کنی.</p><a class="journey-link" href="#feature-rooms">دیدن اتاق مطالعه <span aria-hidden="true">←</span></a></div>
@@ -83,6 +92,7 @@
                 <div class="gallery-main">
                     <div class="gallery-controls" hidden>
                         <p class="slide-count" role="status" aria-atomic="true"></p>
+                        <label class="gallery-picker"><span>انتخاب ابزار</span><select aria-controls="gallery-slides"></select></label>
                         <div class="gallery-arrows">
                             <button type="button" data-previous aria-label="اسلاید قبلی" aria-controls="gallery-slides">→</button>
                             <button type="button" data-next aria-label="اسلاید بعدی" aria-controls="gallery-slides">←</button>

@@ -3,6 +3,8 @@ const slides = Array.from(gallery.querySelectorAll('.slide'));
 const indexBar = gallery.querySelector('.gallery-index');
 const choices = Array.from(indexBar.querySelectorAll('a'));
 const indicator = gallery.querySelector('.slide-count');
+const picker = gallery.querySelector('.gallery-picker select');
+const mobileMenu = document.querySelector('.mobile-menu');
 const dialog = document.querySelector('.image-viewer');
 const format = new Intl.NumberFormat('fa-IR');
 let active = 0;
@@ -15,6 +17,7 @@ function showSlide(index) {
         else link.removeAttribute('aria-current');
     });
     indicator.textContent = `${format.format(active + 1)} از ${format.format(slides.length)} · ${choices[active].textContent}`;
+    picker.selectedIndex = active;
     if (indexBar.scrollWidth > indexBar.clientWidth) {
         const item = choices[active].getBoundingClientRect();
         const bar = indexBar.getBoundingClientRect();
@@ -32,6 +35,8 @@ function selectSlide(index) {
     history.replaceState(history.state, '', '#' + slides[active].id);
 }
 
+picker.replaceChildren(...choices.map((link, index) => new Option(link.textContent, String(index))));
+picker.addEventListener('change', () => selectSlide(picker.selectedIndex));
 gallery.querySelector('.gallery-controls').hidden = false;
 gallery.classList.add('gallery-ready');
 showSlide(Math.max(0, slideInHash()));
@@ -57,6 +62,7 @@ indexBar.addEventListener('keydown', event => {
 document.addEventListener('click', event => {
     const link = event.target.closest('a');
     if (!link || event.defaultPrevented || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+    if (mobileMenu.contains(link)) mobileMenu.open = false;
     const choice = choices.indexOf(link);
     if (choice !== -1) {
         event.preventDefault();
@@ -68,7 +74,7 @@ document.addEventListener('click', event => {
     event.preventDefault();
     const fullImage = dialog.querySelector('img');
     fullImage.alt = preview.alt;
-    fullImage.src = link.href;
+    fullImage.src = preview.currentSrc || link.href;
     dialog.showModal();
 });
 
