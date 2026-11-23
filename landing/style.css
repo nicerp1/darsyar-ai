@@ -41,7 +41,7 @@ button { color: inherit; font: inherit; cursor: pointer; }
 h1, h2, h3, p, figure, ul { margin: 0; }
 h1, h2, h3 { line-height: 1.22; }
 section[id], article[id] { scroll-margin-top: 20px; }
-.shell { width: min(1240px, calc(100% - 60px)); margin-inline: auto; }
+.shell { width: min(2048px, calc(100% - 2 * clamp(20px, 2vw, 48px))); margin-inline: auto; }
 .skip { position: fixed; inset: 8px auto auto 8px; translate: 0 -180%; z-index: 5; background: white; padding: 8px 16px; }
 .skip:focus { translate: none; }
 .site-header, .footer { display: flex; align-items: center; justify-content: space-between; gap: 14px; min-height: 82px; }
@@ -70,7 +70,7 @@ section[id], article[id] { scroll-margin-top: 20px; }
     border: 1px solid #3d294d; box-shadow: 0 23px 58px -32px #362042a8;
 }
 .hero-art, .hero::before { position: absolute; inset: 0; z-index: -1; }
-.hero-art img { width: 100%; height: 100%; object-fit: cover; object-position: center 58%; }
+.hero-art img { width: 100%; height: 100%; object-fit: cover; object-position: center 66%; }
 .hero::before { content: ''; z-index: 0; pointer-events: none; background: linear-gradient(to left,#1b1224e8 0%,#1b1224a6 39%,transparent 74%); }
 .hero-copy { position: relative; width: min(57%, 660px); animation: enter .48s ease-out; }
 .eyebrow { display: inline-flex; align-items: center; gap: 9px; color: #f4d3ff; font-weight: 700; }
@@ -145,6 +145,7 @@ section[id], article[id] { scroll-margin-top: 20px; }
 .journey-image img { border-radius: 10px; width: auto; height: auto; max-height: 100%; box-shadow: 0 12px 28px -14px #31173baa; }
 .journey-grid h3 { font-size: clamp(1.55rem, 3vw, 2.45rem); margin-block: 6px 12px; }
 .journey-grid p:not(.section-label), .questions p { color: var(--muted); }
+.slide-copy > p:not(.section-label), .journey-copy > p:not(.section-label), .questions p { max-inline-size: 65ch; }
 .journey-link { display: inline-flex; align-items: center; gap: 8px; min-height: 44px; margin-top: 8px; color: var(--purple); font-weight: 700; }
 .journey-link:hover { text-decoration: underline; }
 .faq .section-head a, .questions a { color: var(--purple); text-decoration: underline; text-underline-offset: 3px; }
@@ -175,8 +176,10 @@ section[id], article[id] { scroll-margin-top: 20px; }
 .image-viewer .button { background: #e7d5ff; color: var(--deep); }
 .image-viewer > img { margin-inline: auto; width: auto; max-height: calc(100dvh - 115px); object-fit: contain; border-radius: 7px; }
 @keyframes enter { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+@media (min-width: 1200px) {
+    .wide .image-link img { max-height: clamp(385px, 25vw, 480px); }
+}
 @media (max-width: 950px) {
-    .shell { width: calc(100% - 40px); }
     .slide { min-height: 420px; }
 }
 @media (max-width: 790px) {
