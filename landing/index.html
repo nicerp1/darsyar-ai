@@ -10,10 +10,10 @@
     <meta property="og:url" content="https://ravandstudy.ir/">
     <meta property="og:title" content="روند | برنامه‌ریزی و تمرکز برای مطالعه">
     <meta property="og:description" content="از برنامه‌ریزی تا تمرکز، مرور و گزارش مطالعه. امکانات روند را تصویری ببین.">
-    <meta property="og:image" content="https://ravandstudy.ir/landing/cover.webp">
+    <meta property="og:image" content="https://ravandstudy.ir/landing/study-window.webp">
     <link rel="canonical" href="https://ravandstudy.ir/">
     <link rel="icon" href="/icons/ravand-64.png">
-    <link rel="stylesheet" href="/landing/style.css?v=4">
+    <link rel="stylesheet" href="/landing/style.css?v=5">
     <script src="/landing/invite.js" defer></script>
     <script src="/landing/gallery.js?v=4" defer></script>
     <title>روند | فضای مطالعهٔ تو</title>
@@ -27,30 +27,18 @@
     </header>
     <main id="main">
         <section class="shell hero" aria-labelledby="hero-title">
+            <picture class="hero-art" aria-hidden="true">
+                <source media="(max-width: 650px)" srcset="/landing/study-window-mobile.webp">
+                <img src="/landing/study-window.webp" width="1536" height="1024" alt="" fetchpriority="high">
+            </picture>
             <div class="hero-copy">
                 <p class="eyebrow">فضای مطالعهٔ شخصی و گروهی</p>
-                <h1 id="hero-title">برنامه‌ریزی، تمرکز <em>و مرور در یک‌جا</em></h1>
-                <p>برای درس‌هایت برنامه بریز، تنها یا کنار دوستانت مطالعه کن و آخر هفته ببین چقدر پیش رفته‌ای.</p>
+                <h1 id="hero-title">وقتِ مطالعه،<br><em>همه‌چیز سر جاشه.</em></h1>
+                <p>برنامهٔ هفتگی‌ات را بچین، تنها یا با دوستانت درس بخوان و پیشرفتت را ثبت کن.</p>
                 <div class="hero-actions">
                     <a class="button primary" href="https://app.ravandstudy.ir/">ورود به روند <span aria-hidden="true">↖</span></a>
                     <a class="button secondary" href="#start">دیدن مسیر مطالعه <span aria-hidden="true">↓</span></a>
                 </div>
-            </div>
-            <div class="hero-visual">
-                <picture class="hero-art">
-                    <source media="(max-width: 650px)" srcset="/landing/cover-mobile.webp">
-                    <img src="/landing/cover.webp" width="1440" height="960" alt="" fetchpriority="high">
-                </picture>
-                <figure class="hero-preview">
-                    <figcaption><span><img src="/icons/ravand-64.png" width="23" height="23" alt=""> اتاق مطالعه</span><small>پیش‌نمایش ابزار</small></figcaption>
-                    <picture>
-                        <source media="(max-width: 650px)" srcset="/landing/room-compact.webp">
-                        <img src="/landing/room.webp" width="1176" height="826" alt="اتاق مطالعهٔ روند با تایمر گروهی در کتابخانهٔ شب">
-                    </picture>
-                </figure>
-                <figure class="hero-phone" aria-hidden="true">
-                    <img src="/landing/rooms-mobile.webp" alt="" decoding="async">
-                </figure>
             </div>
         </section>
         <section id="start" class="shell journey" aria-labelledby="start-title">
@@ -260,12 +248,47 @@
             </div>
         </section>
         <section id="faq" class="shell faq" aria-labelledby="faq-title">
-            <div class="section-head"><div><p class="section-label">راهنما</p><h2 id="faq-title">سوال‌های رایج</h2></div></div>
-            <div class="questions">
-                <details><summary>روند روی گوشی هم کار می‌کند؟</summary><p>بله. ابزار روند از مرورگر گوشی و کامپیوتر در دسترس است. جدول کامل برنامه روی دسکتاپ و نمای روز و هفته روی گوشی در دسترس‌اند.</p></details>
-                <details><summary>برای استفاده از اتاق باید با گروه درس بخوانم؟</summary><p>می‌توانی از تنظیمات اتاق تایمر شخصی را انتخاب کنی یا با تایمر گروه هم‌زمان شوی. اتاق خصوصی هم با لینک دعوت باز می‌شود.</p></details>
-                <details><summary>آیا با حساب قبلی می‌توانم وارد شوم؟</summary><p>بله. از همان نام کاربری و رمز عبور در صفحهٔ ورود استفاده کن.</p></details>
-                <details><summary>حساب دانش‌آموز و مشاور چه فرقی دارند؟</summary><p>دانش‌آموز برنامه و ابزارهای مطالعه‌اش را دارد. مشاور از پنل مشاوره برای برنامه‌ریزی و پیگیری دانش‌آموزان متصل استفاده می‌کند.</p></details>
+            <header class="section-head">
+                <div><p class="section-label">راهنمای روند</p><h2 id="faq-title">سوال‌های رایج</h2></div>
+                <p>اگر جواب سوالت را اینجا پیدا نکردی، از <a href="https://t.me/DarsyarStu">پشتیبانی روند</a> بپرس.</p>
+            </header>
+            <div class="faq-groups">
+                <section class="faq-group" aria-labelledby="faq-account">
+                    <h3 id="faq-account">شروع و حساب کاربری</h3>
+                    <div class="questions">
+                        <details><summary>از کجا وارد روند شوم؟</summary><p>دکمهٔ «ورود به روند» صفحهٔ ابزار را در <a href="https://app.ravandstudy.ir/">app.ravandstudy.ir</a> باز می‌کند. از همان صفحه وارد حساب شو یا حساب بساز.</p></details>
+                        <details><summary>روند روی گوشی هم کار می‌کند؟</summary><p>بله، می‌توانی در مرورگر گوشی و کامپیوتر وارد شوی. نمای روز و هفته روی هر دو در دسترس است و جدول کامل برنامه روی دسکتاپ نمایش داده می‌شود.</p></details>
+                        <details><summary>آیا با حساب قبلی می‌توانم وارد شوم؟</summary><p>بله. همان نام کاربری و رمز عبور را وارد کن. اگر اولین بار است از نشانی جدید وارد می‌شوی، لازم است دوباره وارد حساب شوی.</p></details>
+                        <details><summary>چطور ظاهر روند را عوض کنم؟</summary><p>از دکمهٔ تغییر ظاهر در نوار بالای ابزار، حالت روشن یا تیره را انتخاب کن.</p></details>
+                    </div>
+                </section>
+                <section class="faq-group" aria-labelledby="faq-plan">
+                    <h3 id="faq-plan">برنامه‌ریزی و گزارش</h3>
+                    <div class="questions">
+                        <details><summary>تا حالا برنامه نساخته‌ام. از کجا شروع کنم؟</summary><p>در «برنامه من»، روز دلخواه را انتخاب کن و یک درس با مدت پیشنهادی اضافه کن. بعد از مطالعه می‌توانی وضعیت انجام آن را ثبت کنی.</p></details>
+                        <details><summary>می‌توانم برنامهٔ کل هفته را یک‌جا ببینم؟</summary><p>بله. نمای هفته روزها را کنار هم نشان می‌دهد. در نمای جدول دسکتاپ می‌توانی روی هر درس بزنی و جزئیاتش را ببینی.</p></details>
+                        <details><summary>اگر با تایمر درس نخواندم، چطور زمانم را ثبت کنم؟</summary><p>در «آمار و گزارش‌ها» از گزینهٔ ثبت گزارش استفاده کن و درس، تاریخ و مدت مطالعه را دستی وارد کن.</p></details>
+                        <details><summary>می‌توانم روند مطالعه‌ام را در چند روز مقایسه کنم؟</summary><p>بله. در «آمار و گزارش‌ها» بازهٔ ۷ روز، ۳۰ روز یا همهٔ دوره را انتخاب کن تا زمان مطالعه و روزهای فعال را ببینی.</p></details>
+                    </div>
+                </section>
+                <section class="faq-group" aria-labelledby="faq-rooms">
+                    <h3 id="faq-rooms">اتاق مطالعه و تمرکز</h3>
+                    <div class="questions">
+                        <details><summary>اتاق عمومی و خصوصی چه فرقی دارند؟</summary><p>اتاق عمومی در فهرست اتاق‌ها دیده می‌شود. برای پیوستن به اتاق خصوصی، میزبان باید لینک دعوت را برایت بفرستد.</p></details>
+                        <details><summary>برای استفاده از اتاق باید با گروه درس بخوانم؟</summary><p>در تنظیمات اتاق می‌توانی «تایمر شخصی» یا «هم‌زمان با گروه» را انتخاب کنی. تایمر شخصی جدا از تایمر گروه کار می‌کند.</p></details>
+                        <details><summary>می‌شود چند هدف برای یک جلسه داشت؟</summary><p>بله. کشوی «هدف‌های من» را باز کن. کارهای یک روز را از برنامه ببین، کار تازه اضافه کن و هر هدف را بعد از انجام علامت بزن.</p></details>
+                        <details><summary>چطور پس‌زمینه یا صدای اتاق را عوض کنم؟</summary><p>روی آیکون چرخ‌دنده بزن. در تنظیمات اتاق می‌توانی پس‌زمینه را عوض کنی و تیک‌تاک یا صدای پایان بازه را روشن و خاموش کنی.</p></details>
+                    </div>
+                </section>
+                <section class="faq-group" aria-labelledby="faq-tools">
+                    <h3 id="faq-tools">ابزارهای یادگیری و مشاوره</h3>
+                    <div class="questions">
+                        <details><summary>هوش مصنوعی روند چه کمکی می‌کند؟</summary><p>می‌توانی توضیح یک مفهوم، خلاصهٔ متن یا سوال تمرینی بخواهی. نکته‌های مهم پاسخ را با کتاب یا منبع درسی‌ات بررسی کن.</p></details>
+                        <details><summary>جعبهٔ لایتنر چطور به مرور کمک می‌کند؟</summary><p>برای هر نکته یک کارت پرسش و پاسخ بساز. بعد از دیدن جواب بگو آن را به یاد آوردی یا نه تا روند زمان مرور بعدی را تنظیم کند.</p></details>
+                        <details><summary>حساب دانش‌آموز و مشاور چه فرقی دارند؟</summary><p>دانش‌آموز برنامه‌اش را اجرا و گزارش مطالعه ثبت می‌کند. مشاور می‌تواند با نام کاربری دانش‌آموز به او متصل شود، برنامه بدهد و گزارش‌هایش را پیگیری کند.</p></details>
+                        <details><summary>می‌توانم برای مشاور پیام صوتی بفرستم؟</summary><p>بله. در پیام‌رسان روند، گفت‌وگو را باز کن و برای ضبط پیام صوتی به مرورگر اجازهٔ استفاده از میکروفون بده.</p></details>
+                    </div>
+                </section>
             </div>
         </section>
         <section class="shell end">
