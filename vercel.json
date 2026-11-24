@@ -2,9 +2,26 @@
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "routes": [
     {
-      "src": "^/(?:index\\.html)?$",
+      "src": "^/(?:index\\.html|landing(?:/index\\.html|/)?)$",
+      "has": [{ "type": "host", "value": "^(?:www\\.)?ravandstudy\\.ir$" }],
+      "status": 308,
+      "headers": { "Location": "https://ravandstudy.ir/" }
+    },
+    {
+      "src": "^/$",
       "has": [{ "type": "host", "value": "^(?:www\\.)?ravandstudy\\.ir$" }],
       "dest": "/landing/index.html"
+    },
+    {
+      "src": "^/(robots\\.txt|sitemap\\.xml)$",
+      "has": [{ "type": "host", "value": "^ravandstudy\\.ir$" }],
+      "dest": "/landing/$1"
+    },
+    {
+      "src": "^/(?:index\\.html)?$",
+      "has": [{ "type": "host", "value": "^(?:app\\.ravandstudy\\.ir|darsyar-ai\\.vercel\\.app)$" }],
+      "headers": { "X-Robots-Tag": "noindex, follow" },
+      "continue": true
     },
     { "handle": "filesystem" }
   ]
