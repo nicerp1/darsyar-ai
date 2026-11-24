@@ -89,9 +89,11 @@ jobs:
         run: |
           apk="ravand-study.apk"
           cp android/app/build/outputs/apk/release/app-release.apk "$apk"
+          # Existing app notifications still link to this asset name.
+          cp "$apk" darsyar.apk
           tag="android-build-${GITHUB_RUN_NUMBER}"
           if gh release view "$tag" >/dev/null 2>&1; then
-            gh release upload "$tag" "$apk" --clobber
+            gh release upload "$tag" "$apk" darsyar.apk --clobber
           else
-            gh release create "$tag" "$apk" --target "$GITHUB_SHA" --title "روند Android ${DARSYAR_VERSION_NAME}" --notes "نسخهٔ امضاشدهٔ اندروید روند. شناسه: ir.ravandstudy.app؛ نسخه ساخت: ${DARSYAR_VERSION_CODE}. به‌صورت یک برنامهٔ مستقل نصب می‌شود. ورود با نام کاربری و رمز عبور. استفاده از روند فعلاً رایگان است."
+            gh release create "$tag" "$apk" darsyar.apk --target "$GITHUB_SHA" --title "روند Android ${DARSYAR_VERSION_NAME}" --notes "نسخهٔ امضاشدهٔ اندروید روند. شناسه: ir.ravandstudy.app؛ نسخه ساخت: ${DARSYAR_VERSION_CODE}. به‌صورت یک برنامهٔ مستقل نصب می‌شود. ورود با نام کاربری و رمز عبور. استفاده از روند فعلاً رایگان است."
           fi
