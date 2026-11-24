@@ -1,5 +1,5 @@
 {
-  "appId": "ir.darsyar.app",
+  "appId": "ir.ravandstudy.app",
   "appName": "روند",
   "webDir": "www",
   "server": { "androidScheme": "https", "hostname": "localhost", "cleartext": false },

@@ -7,10 +7,12 @@ const [pkg, gradle, workflow, app, auth, dataApi, chatApi, socialApi, game, inde
 ]);
 
 assert.equal(pkg.version, '1.0.10');
-assert.match(gradle, /DARSYAR_VERSION_CODE.*10101/);
-assert.match(gradle, /DARSYAR_VERSION_NAME.*1\.1\.1/);
+assert.match(gradle, /DARSYAR_VERSION_CODE.*10102/);
+assert.match(gradle, /DARSYAR_VERSION_NAME.*1\.1\.2/);
 assert.match(workflow, /Publish public APK release/);
-assert.equal(capacitor.appId, 'ir.darsyar.app');
+assert.equal(capacitor.appId, 'ir.ravandstudy.app');
+assert(gradle.includes(`applicationId "${capacitor.appId}"`));
+assert(gradle.includes(`namespace "${capacitor.appId}"`));
 assert.match(app, /exams: false, gamification: true, subscription: false/);
 assert.match(auth, /parentalConsent/);
 assert.match(auth, /legal_consent/);
@@ -41,4 +43,4 @@ assert.match(index, /رقابت اجتماعی/);
 assert.match(index, /id="view-gamification"/);
 assert.doesNotMatch(stats, /league|leaderboard|لیگ/);
 assert.match(manifest, /android\.permission\.INTERNET/);
-console.log('Release checks passed for Ravand 1.1.1 (base versionCode 10101).');
+console.log('Release checks passed for Ravand 1.1.2 (base versionCode 10102).');

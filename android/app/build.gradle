@@ -1,14 +1,14 @@
 apply plugin: 'com.android.application'
 
 android {
-    namespace "ir.darsyar.app"
+    namespace "ir.ravandstudy.app"
     compileSdk rootProject.ext.compileSdkVersion
     defaultConfig {
-        applicationId "ir.darsyar.app"
+        applicationId "ir.ravandstudy.app"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode (System.getenv("DARSYAR_VERSION_CODE")?.toInteger() ?: 10101)
-        versionName (System.getenv("DARSYAR_VERSION_NAME") ?: "1.1.1")
+        versionCode (System.getenv("DARSYAR_VERSION_CODE")?.toInteger() ?: 10102)
+        versionName (System.getenv("DARSYAR_VERSION_NAME") ?: "1.1.2")
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         aaptOptions {
              // Files and dirs to omit from the packaged assets dir, modified to accommodate modern web apps.

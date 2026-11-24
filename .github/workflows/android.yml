@@ -75,7 +75,7 @@ jobs:
           build_tools="$ANDROID_HOME/build-tools/$(ls "$ANDROID_HOME/build-tools" | sort -V | tail -1)"
           apk="android/app/build/outputs/apk/release/app-release.apk"
           "$build_tools/apksigner" verify --verbose --print-certs "$apk"
-          "$build_tools/aapt2" dump badging "$apk" | grep -F "package: name='ir.darsyar.app' versionCode='${DARSYAR_VERSION_CODE}' versionName='${DARSYAR_VERSION_NAME}'"
+          "$build_tools/aapt2" dump badging "$apk" | grep -F "package: name='ir.ravandstudy.app' versionCode='${DARSYAR_VERSION_CODE}' versionName='${DARSYAR_VERSION_NAME}'"
       - name: Upload signed APK
         uses: actions/upload-artifact@v4
         with:
@@ -87,10 +87,11 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          cp android/app/build/outputs/apk/release/app-release.apk darsyar.apk
+          apk="ravand-study.apk"
+          cp android/app/build/outputs/apk/release/app-release.apk "$apk"
           tag="android-build-${GITHUB_RUN_NUMBER}"
           if gh release view "$tag" >/dev/null 2>&1; then
-            gh release upload "$tag" darsyar.apk --clobber
+            gh release upload "$tag" "$apk" --clobber
           else
-            gh release create "$tag" darsyar.apk --target "$GITHUB_SHA" --title "روند Android ${DARSYAR_VERSION_NAME}" --notes "نسخهٔ امضاشدهٔ اندروید روند. شناسه: ir.darsyar.app؛ نسخه ساخت: ${DARSYAR_VERSION_CODE}. ورود با نام کاربری و رمز عبور. استفاده از روند فعلاً رایگان است."
+            gh release create "$tag" "$apk" --target "$GITHUB_SHA" --title "روند Android ${DARSYAR_VERSION_NAME}" --notes "نسخهٔ امضاشدهٔ اندروید روند. شناسه: ir.ravandstudy.app؛ نسخه ساخت: ${DARSYAR_VERSION_CODE}. به‌صورت یک برنامهٔ مستقل نصب می‌شود. ورود با نام کاربری و رمز عبور. استفاده از روند فعلاً رایگان است."
           fi
