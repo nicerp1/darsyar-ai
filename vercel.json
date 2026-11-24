@@ -19,9 +19,15 @@
       "headers": { "Location": "https://ravandstudy.ir/study-planner" }
     },
     {
-      "src": "^/study-planner$",
+      "src": "^/(?:advisors(?:/|\\.html)|landing/advisors\\.html)$",
       "has": [{ "type": "host", "value": "^ravandstudy\\.ir$" }],
-      "dest": "/landing/study-planner.html"
+      "status": 308,
+      "headers": { "Location": "https://ravandstudy.ir/advisors" }
+    },
+    {
+      "src": "^/(study-planner|advisors)$",
+      "has": [{ "type": "host", "value": "^ravandstudy\\.ir$" }],
+      "dest": "/landing/$1.html"
     },
     {
       "src": "^/(robots\\.txt|sitemap\\.xml|googlef6a6bb91e5999d54\\.html)$",

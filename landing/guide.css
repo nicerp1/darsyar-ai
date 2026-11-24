@@ -2,7 +2,7 @@
     max-width: 1080px;
 }
 
-.planner-guide {
+.study-guide {
     display: grid;
     gap: clamp(14px, 2.5vw, 24px);
     padding-block: clamp(16px, 3vw, 36px);

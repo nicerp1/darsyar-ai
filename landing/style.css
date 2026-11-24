@@ -50,6 +50,7 @@ section[id], article[id] { scroll-margin-top: 20px; }
 .brand { display: inline-flex; align-items: center; gap: 9px; font-size: 1.52rem; font-weight: 900; line-height: 1; }
 .brand img { border-radius: 11px; }
 .site-header nav, .footer div { display: flex; gap: clamp(14px, 3vw, 38px); }
+.footer div { flex-wrap: wrap; row-gap: 0; }
 .site-header nav a, .footer a:not(.brand) { padding-block: 10px; color: var(--muted); }
 .site-header nav a:hover, .footer a:hover { color: var(--purple); }
 .button {
