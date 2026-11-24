@@ -4,7 +4,6 @@
 
 const Auth = (function () {
     let currentTab = 'login';
-    let loginMethod = 'username';
     let registerStep = 1;
     let registerDraft = { accountType: 'student', name: '', grade: 'دوازدهم تجربی', ageGroup: 'adult', legalAccepted: false, parentalConsent: false };
 
@@ -20,7 +19,7 @@ const Auth = (function () {
         if (!authContainer) return;
 
         const heading = currentTab === 'login' ? 'ورود به روند' : (registerStep === 1 ? 'حساب تازه بساز' : registerStep === 2 ? 'حریم خصوصی و رضایت' : 'راه ورودت را بساز');
-        const intro = currentTab === 'login' ? 'به برنامهٔ درسی، تایمر تمرکز و گزارش مطالعه‌ات دسترسی پیدا کن.' : (registerStep === 1 ? 'برای شروع، چند مشخصات کوتاه ازت می‌گیریم.' : registerStep === 2 ? 'این موارد برای امن و شفاف بودن تجربه ضروری‌اند.' : 'یک نام کاربری و رمز امن انتخاب کن.');
+        const intro = currentTab === 'login' ? 'به برنامهٔ درسی، تایمر تمرکز و گزارش مطالعه‌ات دسترسی پیدا کن.' : (registerStep === 1 ? 'نوع حساب را انتخاب کن و رایگان از روند استفاده کن.' : registerStep === 2 ? 'این موارد برای امن و شفاف بودن تجربه ضروری‌اند.' : 'یک نام کاربری و رمز امن انتخاب کن.');
         authContainer.innerHTML = `
             <main class="auth-shell">
                 <section class="auth-story" aria-label="درباره روند">
@@ -40,12 +39,8 @@ const Auth = (function () {
                         <button type="button" role="tab" aria-selected="${currentTab === 'login'}" class="auth-tab-btn ${currentTab === 'login' ? 'active' : ''}" onclick="Auth.switchTab('login')">ورود</button>
                         <button type="button" role="tab" aria-selected="${currentTab === 'register'}" class="auth-tab-btn ${currentTab === 'register' ? 'active' : ''}" onclick="Auth.switchTab('register')">ثبت‌نام</button>
                     </div>
-                    ${currentTab === 'register' ? `<div class="auth-step-indicator" aria-label="مرحله ${registerStep} از ۳"><span class="${registerStep >= 1 ? 'active' : ''}"></span><span class="${registerStep >= 2 ? 'active' : ''}"></span><span class="${registerStep >= 3 ? 'active' : ''}"></span><small>${registerStep} / ۳</small></div>` : `
-                    <div class="auth-method-tabs" role="tablist" aria-label="روش ورود">
-                        <button type="button" role="tab" aria-selected="${loginMethod === 'username'}" class="${loginMethod === 'username' ? 'active' : ''}" onclick="Auth.switchLoginMethod('username')"><span class="material-symbols-outlined" aria-hidden="true">person</span> نام کاربری</button>
-                        <button type="button" role="tab" aria-selected="${loginMethod === 'phone'}" class="${loginMethod === 'phone' ? 'active' : ''}" onclick="Auth.switchLoginMethod('phone')"><span class="material-symbols-outlined" aria-hidden="true">smartphone</span> شماره موبایل</button>
-                    </div>`}
-                    <form id="auth-form" class="auth-form" onsubmit="event.preventDefault(); ${currentTab === 'register' && registerStep < 3 ? `Auth.goToRegisterStep(${registerStep + 1})` : currentTab === 'login' && loginMethod === 'phone' ? 'Auth.handlePhoneContinue()' : 'Auth.handleAuthSubmit()'};">
+                    ${currentTab === 'register' ? `<div class="auth-step-indicator" aria-label="مرحله ${registerStep} از ۳"><span class="${registerStep >= 1 ? 'active' : ''}"></span><span class="${registerStep >= 2 ? 'active' : ''}"></span><span class="${registerStep >= 3 ? 'active' : ''}"></span><small>${registerStep} / ۳</small></div>` : ''}
+                    <form id="auth-form" class="auth-form" onsubmit="event.preventDefault(); ${currentTab === 'register' && registerStep < 3 ? `Auth.goToRegisterStep(${registerStep + 1})` : 'Auth.handleAuthSubmit()'};">
                         ${currentTab === 'register' && registerStep === 1 ? `
                             <fieldset class="auth-role-picker"><legend>نوع حساب کاربری</legend>
                                 <label class="auth-role-option ${registerDraft.accountType === 'student' ? 'active' : ''}"><input type="radio" name="auth-account-type" value="student" ${registerDraft.accountType === 'student' ? 'checked' : ''} onchange="Auth.updateRoleFields()"><span class="material-symbols-outlined" aria-hidden="true">school</span><span><strong>دانش‌آموز</strong><small>برنامه و گزارش مطالعه</small></span></label>
@@ -61,8 +56,7 @@ const Auth = (function () {
                             <label id="auth-parental-consent-row" class="auth-check ${registerDraft.ageGroup === 'under18' ? '' : 'hidden'}"><input id="auth-parental-consent" type="checkbox" ${registerDraft.parentalConsent ? 'checked' : ''}><span>والد یا سرپرست قانونی با ساخت حساب و پردازش داده‌ها موافق است.</span></label>
                             <div class="auth-submit-row"><button type="button" class="auth-back-button" onclick="Auth.goToRegisterStep(1)" aria-label="بازگشت"><span class="material-symbols-outlined" aria-hidden="true">arrow_forward</span></button><button type="submit" class="auth-primary-button">ادامه <span class="material-symbols-outlined" aria-hidden="true">arrow_back</span></button></div>
                         </div>` : ''}
-                        ${currentTab === 'login' && loginMethod === 'phone' ? `<div class="auth-field"><label class="form-label" for="auth-phone">شماره موبایل</label><div class="auth-input-wrap"><span class="material-symbols-outlined" aria-hidden="true">call</span><input type="tel" inputmode="tel" id="auth-phone" class="form-control" dir="ltr" placeholder="۰۹۱۲۱۲۳۴۵۶۷" autocomplete="tel" aria-describedby="phone-login-note" required></div><p id="phone-login-note" class="auth-phone-note"><span class="material-symbols-outlined" aria-hidden="true">info</span> ورود پیامکی در مرحله‌ی بعد فعال می‌شود؛ هنوز کدی ارسال نمی‌شود.</p><button type="submit" id="btn-phone-auth" class="auth-primary-button">ادامه با شماره موبایل <span class="material-symbols-outlined" aria-hidden="true">arrow_back</span></button></div>` : ''}
-                        ${(currentTab === 'login' && loginMethod === 'username') || (currentTab === 'register' && registerStep === 3) ? `
+                        ${currentTab === 'login' || registerStep === 3 ? `
                             <div class="auth-field"><label class="form-label" for="auth-username">نام کاربری</label><div class="auth-input-wrap"><span class="material-symbols-outlined" aria-hidden="true">person</span><input type="text" id="auth-username" class="form-control" placeholder="نام کاربری‌ات را وارد کن" required autocomplete="username" autocapitalize="none"></div></div>
                             <div class="auth-field"><label class="form-label" for="auth-password">رمز عبور${currentTab === 'register' ? '؛ حداقل ۸ نویسه' : ''}</label><div class="auth-input-wrap"><span class="material-symbols-outlined" aria-hidden="true">lock</span><input type="password" id="auth-password" class="form-control" placeholder="رمز عبور" required minlength="${currentTab === 'register' ? '8' : '1'}" autocomplete="${currentTab === 'login' ? 'current-password' : 'new-password'}"><button type="button" onclick="Auth.togglePassword()" aria-label="نمایش یا پنهان کردن رمز عبور"><span class="material-symbols-outlined" id="auth-password-icon" aria-hidden="true">visibility</span></button></div></div>
                             ${currentTab === 'login' ? '<button class="auth-forgot" type="button" onclick="Utils.showToast(\'برای بازیابی رمز با پشتیبانی روند تماس بگیرید.\', \'info\')">رمز عبور را فراموش کرده‌ای؟</button>' : ''}
@@ -76,30 +70,8 @@ const Auth = (function () {
 
     function switchTab(tab) {
         currentTab = tab;
-        if (tab === 'login') loginMethod = 'username';
         registerStep = 1;
         renderAuthUI();
-    }
-
-    function switchLoginMethod(method) {
-        loginMethod = method === 'phone' ? 'phone' : 'username';
-        renderAuthUI();
-        if (loginMethod === 'phone') document.getElementById('auth-phone')?.focus({ preventScroll: true });
-    }
-
-    function handlePhoneContinue() {
-        const input = document.getElementById('auth-phone');
-        const phone = String(input?.value || '')
-            .replace(/[۰-۹]/g, digit => String.fromCharCode(digit.charCodeAt(0) - 0x06f0))
-            .replace(/[٠-٩]/g, digit => String.fromCharCode(digit.charCodeAt(0) - 0x0660))
-            .replace(/[\s()-]/g, '').replace(/^\+98/, '0');
-        if (!/^09\d{9}$/.test(phone)) {
-            input?.setCustomValidity('شماره موبایل باید با ۰۹ شروع شود و ۱۱ رقم باشد.');
-            input?.reportValidity();
-            input?.addEventListener('input', () => input.setCustomValidity(''), { once: true });
-            return;
-        }
-        if (typeof Utils !== 'undefined') Utils.showToast('ورود پیامکی هنوز فعال نشده است؛ بعد از اتصال سرویس پیامک در دسترس قرار می‌گیرد.', 'info');
     }
 
     function escapeHtml(value) {
@@ -219,8 +191,6 @@ const Auth = (function () {
     return {
         init,
         switchTab,
-        switchLoginMethod,
-        handlePhoneContinue,
         updateRoleFields,
         updateConsentFields,
         goToRegisterStep,

@@ -49,11 +49,11 @@ jobs:
         run: npm run android:sync
       - name: Set monotonic Android version
         run: |
-          code=$((GITHUB_RUN_NUMBER - 38))
-          patch=$((GITHUB_RUN_NUMBER - 39))
-          test "$code" -ge 11
+          patch=$((GITHUB_RUN_NUMBER - 77))
+          test "$patch" -ge 1
+          code=$((10100 + patch))
           echo "DARSYAR_VERSION_CODE=$code" >> "$GITHUB_ENV"
-          echo "DARSYAR_VERSION_NAME=1.0.$patch" >> "$GITHUB_ENV"
+          echo "DARSYAR_VERSION_NAME=1.1.$patch" >> "$GITHUB_ENV"
       - name: Restore release signing key
         env:
           DARSYAR_KEYSTORE_BASE64: ${{ secrets.DARSYAR_KEYSTORE_BASE64 }}
@@ -70,8 +70,12 @@ jobs:
         run: |
           chmod +x gradlew
           ./gradlew assembleRelease --no-daemon
-      - name: Verify APK signature
-        run: $ANDROID_HOME/build-tools/$(ls $ANDROID_HOME/build-tools | sort -V | tail -1)/apksigner verify --verbose android/app/build/outputs/apk/release/app-release.apk
+      - name: Verify APK signature and version
+        run: |
+          build_tools="$ANDROID_HOME/build-tools/$(ls "$ANDROID_HOME/build-tools" | sort -V | tail -1)"
+          apk="android/app/build/outputs/apk/release/app-release.apk"
+          "$build_tools/apksigner" verify --verbose --print-certs "$apk"
+          "$build_tools/aapt2" dump badging "$apk" | grep -F "package: name='ir.darsyar.app' versionCode='${DARSYAR_VERSION_CODE}' versionName='${DARSYAR_VERSION_NAME}'"
       - name: Upload signed APK
         uses: actions/upload-artifact@v4
         with:
@@ -88,5 +92,5 @@ jobs:
           if gh release view "$tag" >/dev/null 2>&1; then
             gh release upload "$tag" darsyar.apk --clobber
           else
-            gh release create "$tag" darsyar.apk --target "$GITHUB_SHA" --title "درسیار Android ${DARSYAR_VERSION_NAME}" --notes "نسخه امضاشده اندروید درسیار. شناسه: ir.darsyar.app؛ نسخه ساخت: ${DARSYAR_VERSION_CODE}."
+            gh release create "$tag" darsyar.apk --target "$GITHUB_SHA" --title "روند Android ${DARSYAR_VERSION_NAME}" --notes "نسخهٔ امضاشدهٔ اندروید روند. شناسه: ir.darsyar.app؛ نسخه ساخت: ${DARSYAR_VERSION_CODE}. ورود با نام کاربری و رمز عبور. استفاده از روند فعلاً رایگان است."
           fi

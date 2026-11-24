@@ -39,10 +39,6 @@ body.auth-active{overflow:auto!important;background:#0e1020}
 #auth-view .auth-tab-btn{min-height:44px;border:0;border-radius:11px;color:#aaa9bd;background:transparent;font:700 13px Kalameh,sans-serif;cursor:pointer;transition:background .2s,color .2s,transform .2s}
 #auth-view .auth-tab-btn:hover{color:#fff}
 #auth-view .auth-tab-btn.active{color:#fff;background:linear-gradient(120deg,#6457bd,#85559a);box-shadow:0 5px 16px rgba(79,61,154,.28)}
-#auth-view .auth-method-tabs{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:0 0 22px}
-#auth-view .auth-method-tabs button{display:flex;align-items:center;justify-content:center;gap:8px;min-height:43px;border:1px solid rgba(255,255,255,.09);border-radius:12px;color:#aaa9bd;background:rgba(255,255,255,.025);font:600 12px Kalameh,sans-serif;cursor:pointer;transition:all .2s ease}
-#auth-view .auth-method-tabs button .material-symbols-outlined{font-size:17px}
-#auth-view .auth-method-tabs button.active{color:#e7ddff;border-color:rgba(172,145,255,.52);background:rgba(123,99,206,.14)}
 #auth-view .auth-form{display:grid;gap:15px;width:100%;text-align:right}
 #auth-view .auth-field,.auth-panel .form-group{display:grid;gap:7px;margin:0;text-align:right}
 #auth-view .form-label,#auth-view .auth-role-picker legend{margin:0;color:#dedbea;font-size:12px;font-weight:700}
@@ -71,8 +67,6 @@ body.auth-active{overflow:auto!important;background:#0e1020}
 #auth-view .auth-submit-row .auth-primary-button{flex:1}
 #auth-view .auth-back-button{display:grid;place-items:center;flex:0 0 52px;width:52px;height:52px;border:1px solid rgba(255,255,255,.11);border-radius:13px;color:#ddd9ea;background:#191a2b;cursor:pointer}
 #auth-view .auth-forgot{justify-self:start;min-height:34px;margin:-8px 0 -4px;padding:0;border:0;color:#c7b9ff;background:transparent;font:600 11px Kalameh,sans-serif;cursor:pointer}
-#auth-view .auth-phone-note{display:flex;align-items:flex-start;gap:6px;margin:1px 0 0;color:#a5a3b8;font-size:11px;line-height:1.8}
-#auth-view .auth-phone-note .material-symbols-outlined{flex:0 0 auto;color:#c4b9fa;font-size:17px}
 #auth-view .auth-step-indicator{display:grid;grid-template-columns:1fr 1fr 1fr auto;align-items:center;gap:7px;margin:0 0 15px;color:#aaa9bd;font-size:10px}
 #auth-view .auth-step-indicator span{height:4px;border-radius:9px;background:#28293b}
 #auth-view .auth-step-indicator span.active{background:linear-gradient(90deg,#6759bf,#d27791)}
@@ -90,14 +84,12 @@ html[data-theme="light"] #auth-view .auth-kicker{color:#6654ad}
 html[data-theme="light"] #auth-view .auth-tabs{border-color:#e5e2ef;background:#eae8f2}
 html[data-theme="light"] #auth-view .auth-tab-btn{color:#666477}
 html[data-theme="light"] #auth-view .auth-tab-btn.active{color:#fff}
-html[data-theme="light"] #auth-view .auth-method-tabs button{border-color:#e1deea;color:#69687c;background:#fff}
-html[data-theme="light"] #auth-view .auth-method-tabs button.active{color:#5f4da6;border-color:#a696db;background:#f0ecfb}
 html[data-theme="light"] #auth-view .form-label,html[data-theme="light"] #auth-view .auth-role-picker legend{color:#333248}
 html[data-theme="light"] #auth-view .auth-input-wrap .form-control,html[data-theme="light"] #auth-view .form-control{border-color:#dedbe8;color:#27263a;background:#fff}
 html[data-theme="light"] #auth-view .auth-input-wrap .form-control:focus,html[data-theme="light"] #auth-view .form-control:focus{border-color:#8e7bc9;background:#fff}
 html[data-theme="light"] #auth-view .auth-role-option,html[data-theme="light"] #auth-view .auth-check{border-color:#e3e0eb;background:#fff}
 html[data-theme="light"] #auth-view .auth-role-option strong{color:#29283b}
-html[data-theme="light"] #auth-view .auth-role-option small,html[data-theme="light"] #auth-view .auth-phone-note{color:#69687c}
+html[data-theme="light"] #auth-view .auth-role-option small{color:#69687c}
 html[data-theme="light"] #auth-view .auth-role-option.active{background:#f0ecfb}
 html[data-theme="light"] #auth-view .auth-check{color:#4f4e60}
 html[data-theme="light"] #auth-view .auth-back-button{border-color:#e0ddea;color:#48465e;background:#fff}
