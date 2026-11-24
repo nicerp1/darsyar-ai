@@ -1,11 +1,11 @@
 const {db,getSession,getDataValue,getAccountType} = require('./_supabase');
 const {notify} = require('./_notifications');
 const androidReleaseNotice={
-    id:'news_111bbab6-8ccd-42bf-a943-a5e96874405f',
+    id:'news_3da8560b-3a45-4bad-9d91-83da6226557e',
     type:'news',
-    title:'نسخه جدید اپلیکیشن اندروید روند آماده است. برای دریافت و نصب، این اعلان را باز کنید.',
+    title:'اپ اندروید روند آمادهٔ دانلود است. برای دانلود مستقیم APK این اعلان را باز کن. این نسخه جدا از نسخهٔ قدیمی نصب می‌شود و می‌توانی با همان حساب روند وارد شوی.',
     target:'https://github.com/nicerp1/darsyar-ai/releases/latest/download/darsyar.apk',
-    createdAt:'2026-11-01T16:45:00.000Z'
+    createdAt:'2026-11-24T20:08:00.000Z'
 };
 module.exports = async(req,res) => {
     if (req.query?.rooms === '1') return require('../lib/study-rooms').handler(req, res);
