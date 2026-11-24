@@ -13,7 +13,7 @@
       "dest": "/landing/index.html"
     },
     {
-      "src": "^/(robots\\.txt|sitemap\\.xml)$",
+      "src": "^/(robots\\.txt|sitemap\\.xml|googlef6a6bb91e5999d54\\.html)$",
       "has": [{ "type": "host", "value": "^ravandstudy\\.ir$" }],
       "dest": "/landing/$1"
     },
