@@ -5,10 +5,28 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <meta name="theme-color" content="#17142B">
     <meta name="application-name" content="روند">
-    <meta property="og:title" content="روند | همراه مسیر یادگیری">
-    <meta property="og:description" content="برنامه‌ریزی، تمرکز و مشاوره هوشمند تحصیلی">
-    <meta property="og:image" content="https://darsyar-ai.vercel.app/icons/ravand-social.png?v=2">
-    <title>روند | برنامه‌ریزی و همراهی تحصیلی</title>
+    <title>ورود به روند | وب‌اپ برنامه‌ریزی درسی</title>
+    <meta name="description" content="وارد وب‌اپ روند شو یا حساب بساز و برنامهٔ روزانه و هفتگی درس‌ها، تایمر تمرکز و گزارش مطالعه‌ات را یک‌جا داشته باش.">
+    <link rel="canonical" href="https://app.ravandstudy.ir/">
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="روند">
+    <meta property="og:locale" content="fa_IR">
+    <meta property="og:url" content="https://app.ravandstudy.ir/">
+    <meta property="og:title" content="ورود به روند | وب‌اپ برنامه‌ریزی درسی">
+    <meta property="og:description" content="وارد وب‌اپ روند شو یا حساب بساز و برنامهٔ روزانه و هفتگی درس‌ها، تایمر تمرکز و گزارش مطالعه‌ات را یک‌جا داشته باش.">
+    <meta property="og:image" content="https://ravandstudy.ir/icons/ravand-social.png">
+    <meta property="og:image:alt" content="نشان روند">
+    <meta name="twitter:card" content="summary_large_image">
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "WebSite",
+        "name": "روند",
+        "alternateName": ["وب‌اپ روند", "Ravand Study"],
+        "url": "https://app.ravandstudy.ir/",
+        "inLanguage": "fa"
+    }
+    </script>
 
     <!-- Local Kalameh Font & Stylesheet -->
     <link rel="preload" href="fonts/KalamehWeb-Regular.woff2" as="font" type="font/woff2" crossorigin>
@@ -60,12 +78,19 @@
     <link rel="apple-touch-icon" sizes="192x192" href="icons/ravand-192.png?v=2">
 </head>
 <body>
+    <noscript>
+        <main class="auth-noscript">
+            <h1>ورود به روند</h1>
+            <p>روند وب‌اپ برنامه‌ریزی درسی، تایمر تمرکز و ثبت گزارش مطالعه است. برای ورود یا ساخت حساب، جاوااسکریپت مرورگر را فعال و صفحه را دوباره باز کن.</p>
+            <a href="https://ravandstudy.ir/">آشنایی با امکانات روند</a>
+        </main>
+    </noscript>
 
     <!-- Auth View (Shown when not logged in) -->
     <div id="auth-view" style="display: none;"></div>
 
     <!-- App Main Layout -->
-    <div id="app-main-layout" class="app-layout" style="display: none;">
+    <div id="app-main-layout" class="app-layout" style="display: none;" data-nosnippet>
 
         <!-- Mobile Backdrop Overlay -->
         <div id="sidebar-overlay" class="sidebar-overlay" onclick="App.closeMobileSidebar()"></div>

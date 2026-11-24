@@ -19,15 +19,15 @@ const Auth = (function () {
         const authContainer = document.getElementById('auth-view');
         if (!authContainer) return;
 
-        const heading = currentTab === 'login' ? 'خوش برگشتی' : (registerStep === 1 ? 'حساب تازه بساز' : registerStep === 2 ? 'حریم خصوصی و رضایت' : 'راه ورودت را بساز');
-        const intro = currentTab === 'login' ? 'ادامه‌ی مسیرت از همین‌جا شروع می‌شود.' : (registerStep === 1 ? 'برای شروع، چند مشخصات کوتاه ازت می‌گیریم.' : registerStep === 2 ? 'این موارد برای امن و شفاف بودن تجربه ضروری‌اند.' : 'یک نام کاربری و رمز امن انتخاب کن.');
+        const heading = currentTab === 'login' ? 'ورود به روند' : (registerStep === 1 ? 'حساب تازه بساز' : registerStep === 2 ? 'حریم خصوصی و رضایت' : 'راه ورودت را بساز');
+        const intro = currentTab === 'login' ? 'به برنامهٔ درسی، تایمر تمرکز و گزارش مطالعه‌ات دسترسی پیدا کن.' : (registerStep === 1 ? 'برای شروع، چند مشخصات کوتاه ازت می‌گیریم.' : registerStep === 2 ? 'این موارد برای امن و شفاف بودن تجربه ضروری‌اند.' : 'یک نام کاربری و رمز امن انتخاب کن.');
         authContainer.innerHTML = `
             <main class="auth-shell">
                 <section class="auth-story" aria-label="درباره روند">
                     <div class="auth-story-brand"><img src="icons/ravand-192.png?v=2" alt="" width="48" height="48"><span><strong>روند</strong><small>همراه مسیر یادگیری</small></span></div>
                     <div class="auth-story-content">
                         <span class="auth-eyebrow"><i></i> مسیر خودت را بساز</span>
-                        <h1>هر روز،<br><em>یک قدم جلوتر.</em></h1>
+                        <div class="auth-story-title">هر روز،<br><em>یک قدم جلوتر.</em></div>
                         <p>برنامه‌ریزی، تمرکز و همراهی تحصیلی؛ همه در یک فضای شخصی برای رشد تو.</p>
                         <div class="auth-story-points"><span><b>01</b> برنامه‌ی منعطف</span><span><b>02</b> تمرکز هوشمند</span><span><b>03</b> پیشرفت قابل‌دیدن</span></div>
                     </div>
@@ -35,7 +35,7 @@ const Auth = (function () {
                 </section>
                 <section class="auth-panel" aria-labelledby="auth-heading">
                     <div class="auth-mobile-brand"><img src="icons/ravand-192.png?v=2" alt="" width="42" height="42"><strong>روند</strong></div>
-                    <div class="auth-panel-heading"><span class="auth-kicker">فضای یادگیری شخصی</span><h2 id="auth-heading">${heading}</h2><p>${intro}</p></div>
+                    <div class="auth-panel-heading"><span class="auth-kicker">فضای یادگیری شخصی</span><h1 id="auth-heading">${heading}</h1><p>${intro}</p></div>
                     <div class="auth-tabs" role="tablist" aria-label="نوع دسترسی">
                         <button type="button" role="tab" aria-selected="${currentTab === 'login'}" class="auth-tab-btn ${currentTab === 'login' ? 'active' : ''}" onclick="Auth.switchTab('login')">ورود</button>
                         <button type="button" role="tab" aria-selected="${currentTab === 'register'}" class="auth-tab-btn ${currentTab === 'register' ? 'active' : ''}" onclick="Auth.switchTab('register')">ثبت‌نام</button>

@@ -30,9 +30,14 @@
     },
     {
       "src": "^/(?:index\\.html)?$",
-      "has": [{ "type": "host", "value": "^(?:app\\.ravandstudy\\.ir|darsyar-ai\\.vercel\\.app)$" }],
+      "has": [{ "type": "host", "value": "^darsyar-ai\\.vercel\\.app$" }],
       "headers": { "X-Robots-Tag": "noindex, follow" },
       "continue": true
+    },
+    {
+      "src": "^/(robots\\.txt|sitemap\\.xml)$",
+      "has": [{ "type": "host", "value": "^app\\.ravandstudy\\.ir$" }],
+      "dest": "/seo/app/$1"
     },
     { "handle": "filesystem" }
   ]
