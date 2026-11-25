@@ -186,7 +186,7 @@ const App = (function () {
         }
         if (previousView === 'chat' && viewName !== 'chat') window.Messenger?.leave();
         if (previousView === 'study-rooms' && viewName !== previousView) window.StudyRooms?.exit();
-        if (window.WebStudio?.enabled()) WebStudio.beforeLeave(viewName, previousView);
+        if (previousView === 'schedule' && viewName !== previousView) window.PlanLog?.close();
         currentView = viewName;
         if (!restore && (viewName !== previousView || !savedRoute())) saveRoute(viewName, '', !replace);
         document.body.classList.toggle('aw-chat-open',viewName==='ai-assistant'&&Boolean(window.WebStudio?.enabled()&&window.AIWorkspace));
@@ -268,7 +268,7 @@ const App = (function () {
                 break;
         }
 
-        if (window.WebStudio?.enabled()) WebStudio.enter(viewName, previousView);
+        if (window.WebStudio?.enabled()) WebStudio.enter(viewName);
         window.scrollTo({ top: 0, behavior: 'instant' });
         if (window.WebStudio?.enabled()) document.body.scrollTo({ top: 0, behavior: 'instant' });
     }

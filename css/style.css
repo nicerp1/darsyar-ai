@@ -770,7 +770,6 @@ a {
 
 .view-section {
     display: none;
-    animation: fadeIn 0.3s ease-out;
 }
 
 .view-section.active {

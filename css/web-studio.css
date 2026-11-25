@@ -51,7 +51,6 @@ html:not(.capacitor-app) .header-streak-badge { display:none; }
 html:not(.capacitor-app) .icon-btn { min-width:44px;min-height:44px;background:var(--studio-surface); }
 html:not(.capacitor-app) .content-body { max-width:1560px;padding:32px clamp(20px,3.2vw,48px) 56px;margin-inline:auto;width:100%; }
 html:not(.capacitor-app) .view-section { animation:none; }
-html:not(.capacitor-app) .view-section.studio-leaving { display:block!important;position:fixed;top:var(--leave-top);left:var(--leave-left);width:var(--leave-width);height:var(--leave-height);max-height:100dvh;overflow:hidden;pointer-events:none;z-index:2;contain:paint; }
 html:not(.capacitor-app) button { cursor:pointer; }
 html:not(.capacitor-app) button:disabled { cursor:not-allowed;opacity:.5; }
 html:not(.capacitor-app) :is(button,a,[role="button"],input,textarea,select):focus-visible { outline:3px solid var(--studio-accent);outline-offset:4px; }
@@ -457,7 +456,6 @@ html:not(.capacitor-app) #view-ai-assistant .prompt-chip { background:var(--stud
     html:not(.capacitor-app) .studio-focus-ready .btn-pomo-main { min-width:143px;font-size:13px; }
 }
 @media (prefers-reduced-motion:no-preference) {
-    html:not(.capacitor-app) .studio-web-enter .studio-bar-column i { animation:studio-bar-rise .7s cubic-bezier(.16,1,.3,1) both; }
     html:not(.capacitor-app) .advisor-message { animation:studio-message-in .32s cubic-bezier(.16,1,.3,1); }
     @keyframes studio-bar-rise { from { transform:scaleY(.01); } to { transform:scaleY(1); } }
     @keyframes studio-message-in { from { opacity:0;transform:translateY(9px); } to { opacity:1;transform:none; } }

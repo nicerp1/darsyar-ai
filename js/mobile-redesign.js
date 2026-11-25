@@ -208,54 +208,6 @@
     }
 
     /* ------------------------------------------------------------------ */
-    /* Study report: folded by default on phones, trimmed recent list       */
-    /* ------------------------------------------------------------------ */
-    function expandReport(open) {
-        const card = $('.manual-report-card');
-        if (!card) return;
-        card.classList.toggle('m-collapsed', !open);
-        $('.manual-report-heading', card)?.setAttribute('aria-expanded', String(open));
-        if (open) raf(() => card.scrollIntoView({ behavior: reduced() ? 'auto' : 'smooth', block: 'start' }));
-    }
-
-    function enhanceReport() {
-        const card = $('.manual-report-card');
-        if (!card) return;
-        const heading = $('.manual-report-heading', card);
-        if (heading && !heading.dataset.mBound) {
-            heading.dataset.mBound = 'true';
-            heading.setAttribute('role', 'button');
-            heading.tabIndex = 0;
-            heading.insertAdjacentHTML('beforeend', '<i class="m-chevron" aria-hidden="true"></i>');
-            const flip = () => { const open = card.classList.contains('m-collapsed'); card.classList.toggle('m-collapsed', !open); heading.setAttribute('aria-expanded', String(open)); };
-            heading.addEventListener('click', flip);
-            heading.addEventListener('keydown', event => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); flip(); } });
-            if (phone.matches) { card.classList.add('m-collapsed'); heading.setAttribute('aria-expanded', 'false'); }
-            else heading.setAttribute('aria-expanded', 'true');
-        }
-        const list = $('#manual-report-list', card);
-        if (list && !list.dataset.mObserved) {
-            list.dataset.mObserved = 'true';
-            const sync = () => {
-                const items = $$(':scope > .sf-report, :scope > .manual-report-item', list);
-                let more = $(':scope ~ .m-more', card);
-                if (items.length <= 3) { more?.remove(); list.classList.remove('m-trimmed'); return; }
-                if (!more) {
-                    more = document.createElement('button');
-                    more.type = 'button';
-                    more.className = 'm-more';
-                    more.addEventListener('click', () => { list.classList.toggle('m-trimmed'); more.textContent = list.classList.contains('m-trimmed') ? `نمایش همه (${pd(items.length)})` : 'نمایش کمتر'; });
-                    list.after(more);
-                    list.classList.add('m-trimmed');
-                }
-                more.textContent = list.classList.contains('m-trimmed') ? `نمایش همه (${pd(items.length)})` : 'نمایش کمتر';
-            };
-            new MutationObserver(sync).observe(list, { childList: true });
-            sync();
-        }
-    }
-
-    /* ------------------------------------------------------------------ */
     /* Statistics chart: tap a bar to read its exact value                  */
     /* ------------------------------------------------------------------ */
     function bindChartReadout() {
@@ -341,7 +293,7 @@
     /* Page entrance (only when navigating, never on in-page re-renders)    */
     /* ------------------------------------------------------------------ */
     let kickFrame = 0;
-    function kick() { cancelAnimationFrame(kickFrame); kickFrame = raf(() => { observePlan(); enhanceReport(); bindSheets(); }); }
+    function kick() { cancelAnimationFrame(kickFrame); kickFrame = raf(() => { observePlan(); bindSheets(); }); }
 
     function watchPages() {
         const pages = ['view-stats', 'view-schedule', 'view-profile'];
@@ -371,14 +323,8 @@
         trackViewport();
         watchPages();
         bindSheets();
-        enhanceReport();
+
         observePlan();
-        // Opening the report from elsewhere must reveal its form.
-        if (window.WebStudio && typeof WebStudio.report === 'function' && !WebStudio.report.mPatched) {
-            const original = WebStudio.report;
-            WebStudio.report = function () { const result = original.apply(this, arguments); setTimeout(() => expandReport(true), 60); return result; };
-            WebStudio.report.mPatched = true;
-        }
         phone.addEventListener?.('change', () => { schedulePlan(); });
         // Views render after login/navigation, so keep looking until the DOM we enhance exists.
         const content = $('.content-body');

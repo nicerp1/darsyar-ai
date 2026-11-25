@@ -688,6 +688,7 @@
                             </h2>
                             <p style="font-size: 12px; color: var(--text-muted);">با مشاور یا مستقل؛ تسک‌های هر روز را با مدت پیشنهادی و وضعیت انجام مدیریت کنید</p>
                         </div>
+                        <button type="button" class="log-launch" data-open-plan-log>ثبت گزارش</button>
                         <button class="btn-gold schedule-print-button" onclick="Schedule.printSchedule()" aria-label="چاپ برنامه هفتگی">
                             <span class="material-symbols-outlined" aria-hidden="true">print</span>
                             <span>چاپ برنامه</span>
@@ -715,19 +716,21 @@
 
                     <div id="schedule-printable-area" class="schedule-days-list"><div id="schedule-days-list"></div></div>
 
-                    <div class="content-card manual-report-card">
-                        <div class="manual-report-heading"><span class="manual-report-heading-icon material-symbols-outlined" aria-hidden="true">fact_check</span><div><h3>گزارش مطالعه</h3><p>مطالعه واقعی را ثبت کن تا آمار تو دقیق ساخته شود.</p></div><output id="report-duration-preview"><strong>۰</strong><small>دقیقه</small></output></div>
-                        <form id="manual-report-form" class="manual-report-form" onsubmit="event.preventDefault(); Schedule.saveManualReport();">
-                            <div class="form-group"><label class="form-label" for="report-date">تاریخ</label><input id="report-date" class="form-control" type="date" required></div>
-                            <div class="form-group"><label class="form-label" for="report-subject">درس یا فعالیت</label><input id="report-subject" class="form-control" maxlength="100" required placeholder="مثلاً زیست‌شناسی"></div>
-                            <div class="form-group"><label class="form-label" for="report-start">از ساعت</label><input id="report-start" class="form-control" type="time" onchange="Schedule.updateReportDuration()" required></div>
-                            <div class="form-group"><label class="form-label" for="report-end">تا ساعت</label><input id="report-end" class="form-control" type="time" onchange="Schedule.updateReportDuration()" required></div>
-                            <div class="form-group"><label class="form-label" for="report-status">وضعیت انجام</label><select id="report-status" class="form-control"><option value="completed">کامل انجام شد</option><option value="partial">بخشی انجام شد</option><option value="missed">انجام نشد</option></select></div>
-                            <div class="form-group manual-report-notes"><label class="form-label" for="report-notes">توضیحات</label><textarea id="report-notes" class="form-control" maxlength="500" rows="2" placeholder="مبحث، تعداد تست یا نکته‌ای که باید پیگیری شود"></textarea></div>
-                            <button id="manual-report-submit" class="btn-gold" type="submit"><span class="material-symbols-outlined" aria-hidden="true">add_task</span> ثبت گزارش در دیتابیس</button>
+                    <dialog id="plan-log" aria-labelledby="plan-log-title" dir="rtl">
+                        <header><div><small>برنامهٔ من</small><h2 id="plan-log-title">ثبت گزارش مطالعه</h2></div><button class="log-close" type="button" aria-label="بستن">×</button></header>
+                        <form id="plan-log-form">
+                            <fieldset class="log-source"><legend>انتخاب تسک</legend><label><input type="radio" name="mode" value="plan" checked>از برنامه</label><label><input type="radio" name="mode" value="manual">تسک دستی</label></fieldset>
+                            <label data-log-source="plan">تسک برنامه<select name="task"></select></label>
+                            <label data-log-source="manual" hidden>عنوان تسک جدید<input name="manualSubject" maxlength="100" placeholder="مثلاً مرور فصل دوم زیست"></label>
+                            <div class="log-period"><label>تاریخ مطالعه<input name="date" type="date" required><small id="log-persian-date" class="log-persian-date"></small></label><output id="log-duration" aria-live="polite"></output></div>
+                            <div class="log-times"><label>از ساعت<input name="start" type="time" required></label><label>تا ساعت<input name="end" type="time" required></label></div>
+                            <div class="log-presets" aria-label="مدت مطالعه"><small>مدت آماده</small><button type="button" data-min="25">۲۵ دقیقه</button><button type="button" data-min="45">۴۵ دقیقه</button><button type="button" data-min="60">۱ ساعت</button></div>
+                            <label>وضعیت مطالعه<select name="status"><option value="completed">کامل انجام شد</option><option value="partial">بخشی انجام شد</option><option value="missed">انجام نشد</option></select></label>
+                            <label>یادداشت (اختیاری)<textarea name="notes" rows="2" maxlength="500"></textarea></label>
+                            <p class="log-error" role="alert"></p><button class="log-save" type="submit">ذخیرهٔ گزارش</button>
                         </form>
-                        <div id="manual-report-list" class="manual-report-list" aria-live="polite"></div>
-                    </div>
+                        <details class="log-history"><summary>گزارش‌های قبلی من</summary><div id="manual-report-list"></div></details>
+                    </dialog>
                 </section>
 
                 <!-- 8. EXAMS & ONLINE TESTING VIEW -->

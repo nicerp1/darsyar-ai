@@ -73,7 +73,7 @@
         if (button.dataset.focus != null) return window.Schedule?.launchPomoForTask(indexToday(), Number(button.dataset.focus));
         if (button.dataset.act === 'goal') return window.Dashboard?.openEditGoalModal();
         if (button.dataset.act === 'addtask') return window.Schedule?.openEditTaskModal(indexToday(), -1);
-        if (button.dataset.act === 'report') { if (window.WebStudio?.report) return WebStudio.report(); return window.App?.navigate('stats'); }
+        if (button.dataset.act === 'report') { if (window.WebStudio?.report) return WebStudio.report(); window.App?.navigate('schedule'); return window.PlanLog?.open(); }
         if (button.dataset.act === 'story') return window.ShareCard?.open();
     }
     document.addEventListener('dashboard:rendered', paint);

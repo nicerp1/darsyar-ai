@@ -4,7 +4,6 @@ const WebStudio = (() => {
     const esc = value => String(value ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
     const pd = value => Utils.toPersianDigits(value);
     const localDate = (date = new Date()) => new Date(date.getTime() - date.getTimezoneOffset() * 60000).toISOString().slice(0, 10);
-    const reduced = () => matchMedia('(prefers-reduced-motion: reduce)').matches || Storage.getSettings().motion === 'off';
     const paths = {
         home:'<path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1Z"/>',
         timer:'<circle cx="12" cy="13" r="8"/><path d="M9 2h6m-3 7v5l3 2M18 5l2-2"/>',
@@ -36,8 +35,6 @@ const WebStudio = (() => {
     };
     const icon = (name, cls = '') => `<svg class="studio-icon ${cls}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${paths[name] || paths.spark}</svg>`;
     let ready = false;
-    let outgoing = null;
-    let routeAnimations = [];
     const mobileTabForRoute = route => {
         if (['dashboard','stats','pomodoro','schedule','profile'].includes(route)) return route;
         if (route === 'study-rooms') return 'pomodoro';
@@ -108,60 +105,16 @@ const WebStudio = (() => {
         if(hint)hint.textContent = '';
     }
 
-    function clearTransition() {
-        routeAnimations.forEach(animation => animation.cancel());
-        routeAnimations = [];
-        if (outgoing) {
-            outgoing.classList.remove('studio-leaving');
-            outgoing.inert = false;
-            outgoing.removeAttribute('aria-hidden');
-            ['top','left','width','height'].forEach(key => outgoing.style.removeProperty(`--leave-${key}`));
-            outgoing = null;
-        }
-        document.querySelectorAll('.studio-web-enter').forEach(view => view.classList.remove('studio-web-enter'));
-    }
-
-    function beforeLeave(name, previous) {
-        clearTransition();
-        if (reduced() || name === previous) return;
-        const view = document.getElementById(`view-${previous}`);
-        if (!view?.classList.contains('active') || !view.animate) return;
-        const rect = view.getBoundingClientRect();
-        outgoing = view;
-        ['top','left','width','height'].forEach(key => view.style.setProperty(`--leave-${key}`, `${rect[key]}px`));
-    }
-
-    function enter(name, previous) {
+    function enter(name) {
         const mobileTab = mobileTabForRoute(name);
         document.querySelectorAll('.studio-mobile-nav button').forEach(button=>{
             const active=button.dataset.mobileRoute===mobileTab;
             button.classList.toggle('active',active);
             if(active)button.setAttribute('aria-current','page');else button.removeAttribute('aria-current');
         });
-        if(name==='chat'&&window.Messenger){clearTransition();return;}
-        const view = document.getElementById(`view-${name}`);
         const crumb = document.getElementById('studio-page-name'); if (crumb) crumb.textContent = window.DarsyarPlatform?.native ? 'روند' : (viewLabels[name] || 'روند');
         document.querySelectorAll('.sidebar .nav-item').forEach(item => item.setAttribute('aria-current', item.classList.contains('active') ? 'page' : 'false'));
-        if (!view || reduced() || !view.animate || name === previous) return;
-        const navs = [...document.querySelectorAll('.sidebar .nav-item')];
-        const direction = navs.findIndex(item => item.id === `nav-${name}`) >= navs.findIndex(item => item.id === `nav-${previous}`) ? 1 : -1;
-        if (outgoing) {
-            const leaving = outgoing;
-            if (leaving.contains(document.activeElement)) { view.tabIndex = -1; view.focus({preventScroll:true}); }
-            leaving.classList.add('studio-leaving'); leaving.inert = true; leaving.setAttribute('aria-hidden','true');
-            const exit = leaving.animate([{opacity:.65,transform:'none'},{opacity:0,transform:`translateX(${-direction * 30}px) scale(.975)`}], {duration:180,easing:'cubic-bezier(.4,0,1,1)',fill:'forwards'});
-            routeAnimations.push(exit);
-            exit.finished.then(() => {
-                leaving.classList.remove('studio-leaving'); leaving.inert = false; leaving.removeAttribute('aria-hidden');
-            }).catch(() => {});
-        }
-        view.classList.add('studio-web-enter');
-        routeAnimations.push(view.animate([{opacity:0,transform:`translateX(${direction * 24}px) translateY(14px) scale(.985)`,filter:'blur(3px)'},{opacity:1,transform:'none',filter:'blur(0px)'}], {duration:540,easing:'cubic-bezier(.16,1,.3,1)'}));
-        const marked = view.querySelectorAll('[data-reveal]');
-        const items = marked.length ? marked : view.querySelectorAll('.page-header,.content-card,.studio-chat-aside,#studio-chat-host,.ai-chat-container');
-        [...items].slice(0,12).forEach((item, i) => routeAnimations.push(item.animate([{opacity:0,transform:'translateY(22px)'},{opacity:1,transform:'none'}], {duration:580,delay:60+Math.min(i,7)*42,easing:'cubic-bezier(.16,1,.3,1)',fill:'backwards'})));
-        const activeIcon = document.querySelector('.sidebar .nav-item.active .studio-icon');
-        activeIcon?.animate([{transform:'scale(.75) rotate(-12deg)'},{transform:'scale(1.12) rotate(3deg)'},{transform:'none'}], {duration:440,easing:'ease-out'});
+
     }
 
     function studyData() {
@@ -229,7 +182,7 @@ const WebStudio = (() => {
     }
     function metric(glyph,label,value,unit,tone) { return `<article class="studio-metric ${tone}"><span class="studio-metric-icon">${icon(glyph)}</span><div><small>${label}</small><strong>${value}<em>${unit}</em></strong></div>${icon('arrow','studio-metric-arrow')}</article>`; }
     function editTask(index) { const {day} = todayTasks(); App.navigate('schedule'); Schedule.openEditTaskModal(day,index); }
-    function report() { App.navigate('stats'); requestAnimationFrame(()=>{ document.querySelector('.manual-report-card')?.scrollIntoView({behavior:reduced()?'instant':'smooth',block:'center'}); document.getElementById('report-subject')?.focus({preventScroll:true}); }); }
+    function report() { App.navigate('schedule'); window.PlanLog.open(); }
     function focusNext() { const task = todayTasks().tasks.find(row=>row.status!=='completed'); App.navigate('pomodoro'); if (task) Pomodoro.setTaskFromExternal(task.subject,task.durationMinutes,task.id); }
 
     function preparePomodoro() {
@@ -270,6 +223,6 @@ const WebStudio = (() => {
         const label = view.querySelector('.pomo-status-label');
         if (label) label.textContent = state==='running' ? (mode==='work'?'در حال تمرکز':'نوبت استراحت توست') : state==='paused'?'هر وقت آماده‌ای، ادامه بده':'آماده یک شروع تازه';
     }
-    return { enabled, init, icon, dashboard, refreshGoal, beforeLeave, enter, chatContext, editTask, report, focusNext, preparePomodoro, timerState };
+    return { enabled, init, icon, dashboard, refreshGoal, enter, chatContext, editTask, report, focusNext, preparePomodoro, timerState };
 })();
 window.WebStudio = WebStudio;

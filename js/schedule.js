@@ -5,7 +5,6 @@ const Schedule = (function () {
     const statuses = { pending: ['در انتظار', 'schedule-status-pending'], completed: ['انجام شد', 'schedule-status-completed'], partial: ['بخشی انجام شد', 'schedule-status-partial'], missed: ['انجام نشد', 'schedule-status-missed'] };
     const esc = value => String(value ?? '').replace(/[&<>'"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[c]));
     const blank = () => days.map((day, dayIndex) => ({ day, dayIndex, tasks: [] }));
-    const localDate = () => { const now = new Date(), offset = now.getTimezoneOffset(); return new Date(now.getTime() - offset * 60000).toISOString().slice(0, 10); };
 
     function normalize(source) {
         const stored = source || Storage.get('schedule', []);
@@ -25,11 +24,9 @@ const Schedule = (function () {
     const current = () => normalize(adminTarget ? adminSchedule : null);
 
     async function init() {
-        window.StudyFlow?.mountReport();
         const isAdmin = Storage.isManager();
         document.getElementById('schedule-admin-tools')?.classList.toggle('hidden', !isAdmin);
         populateStudents();
-        const date = document.getElementById('report-date'); if (date && date.type === 'date') { date.max = localDate(); if (!date.value) date.value = date.max; }
         if (isAdmin && requestedTarget) { const target = requestedTarget; requestedTarget = null; await selectAdminStudent(target); }
         else { adminTarget = null; adminSchedule = null; updateContext(); renderDays(); renderReports(); }
     }
@@ -58,7 +55,6 @@ const Schedule = (function () {
         const banner = document.getElementById('schedule-context-banner'), currentLabel = document.getElementById('schedule-admin-current');
         if (currentLabel) currentLabel.textContent = adminTarget ? `در حال ویرایش: ${adminTarget.name || adminTarget.username}` : 'در حال مشاهده برنامه خودم';
         if (banner) { banner.classList.toggle('hidden', !adminTarget); banner.innerHTML = adminTarget ? `<span class="material-symbols-outlined" aria-hidden="true">school</span><span>تسک‌های روزانه <strong>${esc(adminTarget.name || adminTarget.username)}</strong> را تنظیم می‌کنید.</span>` : ''; }
-        document.querySelector('.manual-report-card')?.classList.toggle('hidden', Boolean(adminTarget));
     }
     function renderDays() {
         const root = document.getElementById('schedule-days-list'); if (!root) return;
@@ -111,24 +107,18 @@ const Schedule = (function () {
         } catch (error) { Utils.showToast(error.message, 'error'); }
     }
     function launchPomoForTask(dayIndex, taskIndex) { const task = current()[dayIndex]?.tasks?.[taskIndex]; if (!task || adminTarget) return; Pomodoro?.setTaskFromExternal(task.subject, task.durationMinutes, task.id); App?.navigate('pomodoro'); }
-    function minutesBetween(start, end) { const plain=v=>String(v).replace(/[۰-۹]/g,c=>'۰۱۲۳۴۵۶۷۸۹'.indexOf(c)).replace(/[٠-٩]/g,c=>'٠١٢٣٤٥٦٧٨٩'.indexOf(c)); const [sh, sm] = plain(start).split(':').map(Number), [eh, em] = plain(end).split(':').map(Number); const n=eh * 60 + em - sh * 60 - sm; return Number.isFinite(n)?n:0; }
-    function updateReportDuration() {
-        const start = document.getElementById('report-start')?.value, end = document.getElementById('report-end')?.value, output = document.getElementById('report-duration-preview');
-        const minutes = start && end ? Math.max(0, minutesBetween(start, end)) : 0;
-        if (output) output.innerHTML = `<strong>${Utils.toPersianDigits(minutes)}</strong><small>دقیقه</small>`;
-    }
-    function saveManualReport() {
-        if (adminTarget) return Utils.showToast('گزارش کار را خود دانش‌آموز ثبت می‌کند.', 'warning');
-        const date = document.getElementById('report-date').value, subject = document.getElementById('report-subject').value.trim(), start = document.getElementById('report-start').value, end = document.getElementById('report-end').value, minutes = minutesBetween(start, end);
-        if (!date || !subject || !start || !end || minutes <= 0) return Utils.showToast('زمان و اطلاعات گزارش را درست کامل کنید.', 'warning');
-        const reports = Array.isArray(Storage.get('manual_reports', [])) ? Storage.get('manual_reports', []) : [];
-        reports.push({ id: `report-${Date.now()}`, date, subject: subject.slice(0,100), start, end, minutes, status: document.getElementById('report-status').value, notes: document.getElementById('report-notes').value.trim().slice(0,500), createdAt: new Date().toISOString() });
-        Storage.set('manual_reports', reports); document.getElementById('manual-report-form').reset(); document.getElementById('report-date').value = localDate(); updateReportDuration(); renderReports(); Utils.showToast('گزارش در دیتابیس ثبت شد.', 'success');
-    }
     function renderReports() {
         const box = document.getElementById('manual-report-list'); if (!box || adminTarget) return; const reports = Storage.get('manual_reports', []) || [];
-        box.innerHTML = reports.slice().reverse().map(report => { const status = statuses[report.status] || statuses.completed; return `<article class="manual-report-item"><span class="manual-report-subject-icon material-symbols-outlined" aria-hidden="true">menu_book</span><div class="manual-report-copy"><div><strong>${esc(report.subject)}</strong><span class="schedule-status ${status[1]}">${status[0]}</span></div><span><span class="material-symbols-outlined" aria-hidden="true">calendar_today</span>${esc(report.date)}<span class="material-symbols-outlined" aria-hidden="true">schedule</span>${esc(report.start)} تا ${esc(report.end)}</span><small>${esc(report.notes || 'بدون توضیح')}</small></div><div class="manual-report-duration"><strong>${Utils.toPersianDigits(Math.round(Number(report.minutes)||0))}</strong><small>دقیقه</small><button class="admin-icon-button" type="button" aria-label="حذف گزارش" onclick="Schedule.removeManualReport('${esc(report.id)}')"><span class="material-symbols-outlined" aria-hidden="true">delete</span></button></div></article>`; }).join('') || '<div class="admin-list-empty">هنوز گزارشی ثبت نشده است؛ اولین مطالعه واقعی خود را ثبت کنید.</div>';
+        const displayDate = value => {
+            const day = new Date(value + 'T12:00:00');
+            return Number.isNaN(day.getTime()) ? value : StudyFlow.jalali(day);
+        };
+        box.innerHTML = reports.slice().reverse().map(report => { const status = statuses[report.status] || statuses.completed; return `<article class="manual-report-item"><span class="manual-report-subject-icon material-symbols-outlined" aria-hidden="true">menu_book</span><div class="manual-report-copy"><div><strong>${esc(report.subject)}</strong><span class="schedule-status ${status[1]}">${status[0]}</span></div><span><span class="material-symbols-outlined" aria-hidden="true">calendar_today</span>${esc(displayDate(report.date))}<span class="material-symbols-outlined" aria-hidden="true">schedule</span>${esc(report.start)} تا ${esc(report.end)}</span><small>${esc(report.notes || 'بدون توضیح')}</small></div><div class="manual-report-duration"><strong>${Utils.toPersianDigits(Math.round(Number(report.minutes)||0))}</strong><small>دقیقه</small><button class="admin-icon-button" type="button" aria-label="حذف گزارش" data-remove-report="${esc(report.id)}"><span class="material-symbols-outlined" aria-hidden="true">delete</span></button></div></article>`; }).join('') || '<div class="admin-list-empty">هنوز گزارشی ثبت نشده است؛ اولین مطالعه واقعی خود را ثبت کنید.</div>';
     }
+    document.getElementById('manual-report-list')?.addEventListener('click', event => {
+        const button = event.target.closest('[data-remove-report]');
+        if (button && !adminTarget) void removeManualReport(button.dataset.removeReport);
+    });
     async function removeManualReport(id) { if (!confirm('این گزارش حذف شود؟')) return; try { await Storage.saveConfirmed('manual_reports', (Storage.get('manual_reports',[])||[]).filter(item => item.id !== id)); renderReports(); } catch(error) { Utils.showToast(error.message,'error'); } }
     function openForStudent(username) { requestedTarget = username; App.navigate('schedule'); toggleAdminDrawer(true); }
     function printSchedule() { Utils?.printElement('schedule-printable-area', adminTarget ? `برنامه ${adminTarget.name || adminTarget.username}` : 'برنامه مطالعاتی هفتگی روند'); }
@@ -148,6 +138,6 @@ const Schedule = (function () {
         task.status = done ? 'completed' : 'pending';
         await Storage.saveConfirmed('schedule', schedule);
     }
-    return { getState, getOwnDays, addOwnTask, setOwnTaskDone, init, toggleAdminDrawer, selectAdminStudent, openEditTaskModal, saveTaskSubmit, deleteCurrentTask, launchPomoForTask, updateReportDuration, saveManualReport, removeManualReport, openForStudent, printSchedule };
+    return { getState, getOwnDays, addOwnTask, setOwnTaskDone, init, toggleAdminDrawer, selectAdminStudent, openEditTaskModal, saveTaskSubmit, deleteCurrentTask, launchPomoForTask, renderReports, openForStudent, printSchedule };
 })();
 window.Schedule = Schedule;

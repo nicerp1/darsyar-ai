@@ -60,7 +60,7 @@
         root.innerHTML = `
         <header class="scm-head">
             <div class="scm-title"><h2 id="scm-title">برنامه مطالعه</h2><p id="scm-sub"></p></div>
-            <div class="scm-tools">
+            <div class="scm-tools"><button class="log-launch" type="button" data-open-plan-log>ثبت گزارش</button>
                 <button type="button" class="scm-icon" data-act="print" aria-label="چاپ برنامه">${ico('print')}</button>
                 <button type="button" class="scm-icon is-primary" data-act="add" aria-label="افزودن تسک">${ico('add')}</button>
             </div>

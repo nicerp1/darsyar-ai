@@ -33,7 +33,6 @@
             <div class="stx-title"><h2>آمار و گزارش‌ها</h2><p>روند مطالعه و عملکرد تحصیلی تو</p></div>
             <div class="stx-tools">
                 <button type="button" class="stx-icon" data-act="pdf" aria-label="دانلود گزارش جامع">${ico('download')}</button>
-                <button type="button" class="stx-icon is-primary" data-act="report" aria-label="ثبت گزارش مطالعه">${ico('edit_note')}</button>
             </div>
         </header>
         <div class="stx-seg" role="group" aria-label="بازه زمانی" data-i="0">
@@ -216,10 +215,6 @@
         const a = e.target.closest('[data-act]')?.dataset.act;
         if (a === 'pdf') window.Stats?.exportPDFReport();
         if (a === 'plan') window.App?.navigate('schedule');
-        if (a === 'report') {
-            const card = document.querySelector('.manual-report-card');
-            if (card) { card.classList.remove('m-collapsed'); card.querySelector('.manual-report-heading')?.setAttribute('aria-expanded', 'true'); card.scrollIntoView({ behavior: reduced() ? 'auto' : 'smooth', block: 'start' }); card.querySelector('input,select,textarea')?.focus({ preventScroll: true }); }
-        }
     }
 
     function refresh() { if (!mount()) return; document.documentElement.classList.add('stx-on'); paint(); }
