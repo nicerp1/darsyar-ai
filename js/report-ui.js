@@ -62,7 +62,7 @@
         if (!ownPlan) close();
     }
 
-    function open() {
+    function open(selection) {
         if (dialog.open || saving || Schedule.getState().manager || !document.getElementById('view-schedule').classList.contains('active')) return;
         tasks = Schedule.getOwnDays().flatMap(day => day.tasks.map(task => ({ ...task, dayIndex: day.dayIndex, day: day.day })));
         form.reset();
@@ -79,6 +79,10 @@
         });
         fields.mode[0].disabled = !tasks.length;
         fields.mode.value = tasks.length ? 'plan' : 'manual';
+        if (selection) {
+            const index = tasks.findIndex(task => task.dayIndex === selection.dayIndex && task.id === selection.taskId);
+            if (index >= 0) fields.task.value = String(index);
+        }
         fields.date.max = dateKey();
         fields.date.value = fields.date.max;
         fields.end.value = clockNow();
@@ -154,8 +158,10 @@
                 ...(task ? { taskId: task.id, dayIndex: task.dayIndex } : { subject })
             });
             if (owner !== Storage.getCurrentUser()?.username) return;
-            Schedule.renderReports();
             close();
+            if (document.getElementById('view-schedule').classList.contains('active') && !Schedule.getState().manager) {
+                await Schedule.init();
+            }
             if (document.getElementById('view-stats').classList.contains('active')) Stats.init();
             Utils.showToast('گزارش مطالعه ثبت شد.', 'success');
         } catch (failure) {

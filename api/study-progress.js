@@ -8,7 +8,8 @@ module.exports=async(req,res)=>{
         const dayTasks = Array.isArray(day?.tasks) ? day.tasks.filter(Boolean) : (Array.isArray(day?.slots) ? day.slots.filter(item => item?.subject) : []);
         const task = body.taskId ? dayTasks.find((item, index) => item && (item.id || `task-${Number(body.dayIndex)}-${index}`) === body.taskId) : null;
         const reportOnly = body.source === 'plan-report';
-        if (task && !task.id && !reportOnly) task.id = body.taskId;
+        const completesTask = task && task.status !== 'completed' && (!reportOnly || body.status === 'completed');
+        if (completesTask && !task.id) task.id = body.taskId;
         if (body.taskId && !task) return res.status(409).json({error:'تسک تغییر کرده است؛ برنامه را دوباره باز کنید.'});
         if (!reportOnly && task?.status === 'completed') return res.status(409).json({error:'این تسک قبلاً تکمیل شده است.'});
         const reports=await getDataValue(actor.username,'manual_reports',[]);
@@ -31,7 +32,7 @@ module.exports=async(req,res)=>{
             const report={id:crypto.randomUUID(),date,subject,start,end,minutes,status:task&&!reportOnly?'completed':(['completed','partial','missed'].includes(body.status)?body.status:'completed'),notes:String(body.notes||'').slice(0,500),createdAt:new Date().toISOString(),...(task?{taskId:body.taskId}:{})};
             reports.push(report);writes.push({key:'manual_reports',value:reports});proof={source:'manual',reportId:report.id};
         }
-        if(task&&!reportOnly){task.status='completed';completions.push({id:crypto.randomUUID(),taskId:task.id,dayIndex:Number(body.dayIndex),...proof,createdAt:new Date().toISOString()});writes.push({key:'schedule',value:schedule},{key:'task_completions',value:completions});}
+        if(completesTask){task.status='completed';completions.push({id:crypto.randomUUID(),taskId:task.id,dayIndex:Number(body.dayIndex),...proof,createdAt:new Date().toISOString()});writes.push({key:'schedule',value:schedule},{key:'task_completions',value:completions});}
         await db('app_data?on_conflict=username,key',{method:'POST',prefer:'resolution=merge-duplicates,return=minimal',body:JSON.stringify(writes.map(row=>({...row,username:actor.username,updated_at:new Date().toISOString()})))});
         return res.status(200).json({ok:true,data:Object.fromEntries(writes.map(r=>[r.key,r.value]))});
     }catch(error){console.error('study progress failed',error);res.status(500).json({error:'گزارش ذخیره نشد؛ دوباره تلاش کنید.'});}
