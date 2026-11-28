@@ -1,0 +1,1414 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="theme-color" content="#17142B">
+    <meta name="application-name" content="روند">
+    <title>ورود به روند | وب‌اپ برنامه‌ریزی درسی</title>
+    <meta name="description" content="وارد وب‌اپ روند شو یا حساب بساز و برنامهٔ روزانه و هفتگی درس‌ها، تایمر تمرکز و گزارش مطالعه‌ات را یک‌جا داشته باش.">
+    <link rel="canonical" href="https://app.ravandstudy.ir/">
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="روند">
+    <meta property="og:locale" content="fa_IR">
+    <meta property="og:url" content="https://app.ravandstudy.ir/">
+    <meta property="og:title" content="ورود به روند | وب‌اپ برنامه‌ریزی درسی">
+    <meta property="og:description" content="وارد وب‌اپ روند شو یا حساب بساز و برنامهٔ روزانه و هفتگی درس‌ها، تایمر تمرکز و گزارش مطالعه‌ات را یک‌جا داشته باش.">
+    <meta property="og:image" content="https://ravandstudy.ir/icons/ravand-social.png">
+    <meta property="og:image:alt" content="نشان روند">
+    <meta name="twitter:card" content="summary_large_image">
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "WebSite",
+        "name": "روند",
+        "alternateName": ["وب‌اپ روند", "Ravand Study"],
+        "url": "https://app.ravandstudy.ir/",
+        "inLanguage": "fa"
+    }
+    </script>
+
+    <!-- Local Kalameh Font & Stylesheet -->
+    <link rel="preload" href="fonts/KalamehWeb-Regular.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="stylesheet" href="fonts/kalameh.css">
+
+    <!-- Material Symbols Google Icons -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0&display=swap">
+
+    <!-- KaTeX CDN -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/web-studio.css">
+    <link rel="stylesheet" href="css/ai-workspace.css">
+    <link rel="stylesheet" href="css/study-workspace.css">
+    <link rel="stylesheet" href="css/profile-studio.css">
+    <link rel="stylesheet" href="css/community.css">
+    <link rel="stylesheet" href="css/messenger-desk.css?v=2">
+    <link rel="stylesheet" href="css/messenger-extras.css">
+    <link rel="stylesheet" href="css/study-flow.css">
+    <link rel="stylesheet" href="css/mobile-web.css">
+    <link rel="stylesheet" href="css/side-menu.css">
+    <link rel="stylesheet" href="css/mobile-redesign.css">
+    <link rel="stylesheet" href="css/profile-v2.css">
+    <link rel="stylesheet" href="css/schedule-mobile.css">
+    <link rel="stylesheet" href="css/schedule-table.css">
+    <link rel="stylesheet" href="css/stats-ui.css">
+    <link rel="stylesheet" href="css/report-card.css">
+    <link rel="stylesheet" href="css/pomodoro-ui.css">
+    <link rel="stylesheet" href="css/focus-fs.css">
+    <link rel="stylesheet" href="css/flashcards-ui.css">
+    <link rel="stylesheet" href="css/league-ui.css">
+    <link rel="stylesheet" href="css/header-ui.css">
+    <link rel="stylesheet" href="css/dashboard-ui.css">
+    <link rel="stylesheet" href="css/share-card.css">
+    <link rel="stylesheet" href="css/native-shell.css">
+    <link rel="stylesheet" href="css/password-reset.css">
+    <link rel="stylesheet" href="css/auth-redesign.css">
+    <link rel="stylesheet" href="css/motion.css">
+    <link rel="stylesheet" href="css/study-rooms.css">
+    <link rel="manifest" href="manifest.json">
+    <link rel="icon" type="image/png" sizes="64x64" href="icons/ravand-64.png?v=2">
+    <link rel="apple-touch-icon" sizes="192x192" href="icons/ravand-192.png?v=2">
+</head>
+<body>
+    <noscript>
+        <main class="auth-noscript">
+            <h1>ورود به روند</h1>
+            <p>روند وب‌اپ برنامه‌ریزی درسی، تایمر تمرکز و ثبت گزارش مطالعه است. برای ورود یا ساخت حساب، جاوااسکریپت مرورگر را فعال و صفحه را دوباره باز کن.</p>
+            <a href="https://ravandstudy.ir/">آشنایی با امکانات روند</a>
+        </main>
+    </noscript>
+
+    <!-- Auth View (Shown when not logged in) -->
+    <div id="auth-view" style="display: none;"></div>
+
+    <!-- App Main Layout -->
+    <div id="app-main-layout" class="app-layout" style="display: none;" data-nosnippet>
+
+        <!-- Mobile Backdrop Overlay -->
+        <div id="sidebar-overlay" class="sidebar-overlay" onclick="App.closeMobileSidebar()"></div>
+
+        <!-- Right Sidebar (240px - 260px) -->
+        <aside id="sidebar" class="sidebar">
+            <div class="sidebar-header">
+                <div class="brand-logo" onclick="App.navigate('dashboard')" style="cursor: pointer;">
+                    <div class="brand-icon">
+                        <img src="icons/ravand-64.png?v=2" alt="نشان روند" width="42" height="42">
+                    </div>
+                    <div class="brand-text">
+                        <div class="brand-name">روند</div>
+                        <div class="brand-tagline">قدم‌به‌قدم تا پیشرفت</div>
+                    </div>
+                </div>
+            </div>
+
+            <nav class="sidebar-nav">
+                <div class="nav-section-title">فضای یادگیری</div>
+                <div class="nav-item active" id="nav-dashboard" onclick="App.navigate('dashboard')">
+                    <span class="material-symbols-outlined">dashboard</span>
+                    <span>داشبورد اصلی</span>
+                </div>
+                <div class="nav-item" id="nav-study-rooms" onclick="App.navigate('study-rooms')">
+                    <span class="material-symbols-outlined" aria-hidden="true">groups</span>
+                    <span>اتاق مطالعه</span>
+                </div>
+                <div class="nav-item" id="nav-pomodoro" onclick="App.navigate('pomodoro')">
+                    <span class="material-symbols-outlined">timer</span>
+                    <span>پومودورو و تمرکز</span>
+                    <span class="nav-item-badge badge-gold">تمرکز</span>
+                </div>
+                <div class="nav-item" id="nav-flashcards" onclick="App.navigate('flashcards')">
+                    <span class="material-symbols-outlined">style</span>
+                    <span>فلش‌کارت و لایتنر</span>
+                    <span class="nav-item-badge">۵ جعبه</span>
+                </div>
+
+                <div class="nav-section-title">ابزارهای هوش مصنوعی</div>
+                <div class="nav-item" id="nav-ai-assistant" onclick="App.navigate('ai-assistant')">
+                    <span class="material-symbols-outlined">smart_toy</span>
+                    <span>هوش مصنوعی روند</span>
+                </div>
+
+                <div class="nav-section-title">برنامه‌ریزی و ارزیابی</div>
+                <div class="nav-item" id="nav-schedule" onclick="App.navigate('schedule')">
+                    <span class="material-symbols-outlined">calendar_month</span>
+                    <span>برنامه مطالعاتی هفتگی</span>
+                </div>
+                <div class="nav-item" id="nav-exams" data-feature="exams" onclick="App.navigate('exams')">
+                    <span class="material-symbols-outlined">assignment</span>
+                    <span>آزمون‌ها و کارنامه</span>
+                </div>
+                <div class="nav-item" id="nav-stats" onclick="App.navigate('stats')">
+                    <span class="material-symbols-outlined">analytics</span>
+                    <span>آمار و گزارش‌ها</span>
+                </div>
+                <button type="button" class="nav-item web-only" id="nav-chat" onclick="App.navigate('chat')">
+                    <span class="material-symbols-outlined" aria-hidden="true">forum</span>
+                    <span>گفت‌وگو و یادداشت‌ها</span>
+                </button>
+
+                <div class="nav-section-title" data-feature="gamification">رقابت اجتماعی</div>
+                <div class="nav-item" id="nav-gamification" data-feature="gamification" onclick="App.navigate('gamification')">
+                    <span class="material-symbols-outlined">military_tech</span>
+                    <span>لیگ و دوستان</span>
+                </div>
+                <div class="nav-section-title">حساب کاربری</div>
+                <div class="nav-item" id="nav-subscription" data-feature="subscription" onclick="App.navigate('subscription')">
+                    <span class="material-symbols-outlined">workspace_premium</span>
+                    <span>ارتقای اشتراک VIP</span>
+                </div>
+                <div class="nav-item" id="nav-admin" onclick="App.navigate('admin')">
+                    <span class="material-symbols-outlined">admin_panel_settings</span>
+                    <span>پنل مدیریت ادمین</span>
+                </div>
+                <div class="nav-item" id="nav-profile" onclick="App.navigate('profile')">
+                    <span class="material-symbols-outlined">account_circle</span>
+                    <span>پروفایل کاربری</span>
+                </div>
+            </nav>
+
+            <div class="sidebar-footer">
+                <div class="user-xp-widget" data-feature="gamification" onclick="App.navigate('gamification')" style="cursor: pointer;">
+                    <div class="user-xp-header">
+                        <span class="user-level-badge" id="sidebar-user-level">سطح ۲</span>
+                        <span style="font-size: 11px; color: var(--gold-light);">امتیاز XP ⚡</span>
+                    </div>
+                    <div class="xp-progress-bg">
+                        <div class="xp-progress-bar" id="sidebar-xp-bar" style="width: 45%;"></div>
+                    </div>
+                </div>
+                <button class="btn-sidebar-logout" onclick="Auth.logout()">
+                    <span class="material-symbols-outlined">logout</span>
+                    <span>خروج از حساب</span>
+                </button>
+            </div>
+        </aside>
+
+        <!-- Main Wrapper -->
+        <div class="main-wrapper">
+
+            <!-- Top Sticky Header -->
+            <header class="top-header">
+                <div class="header-right">
+                    <button class="menu-toggle-btn" onclick="App.toggleMobileSidebar()">
+                        <span class="material-symbols-outlined">menu</span>
+                    </button>
+                    <div class="header-search">
+                        <span class="material-symbols-outlined">search</span>
+                        <input type="text" id="global-search-input" placeholder="جستجوی سریع درس، ابزار یا فرمول...">
+                    </div>
+                </div>
+
+                <div class="header-left">
+                    <div class="header-streak-badge" title="زنجیره روزهای متوالی مطالعه">
+                        <span class="material-symbols-outlined" style="font-size: 18px;">local_fire_department</span>
+                        <span id="header-streak-count">۵ روز</span>
+                    </div>
+
+                    <button class="icon-btn" onclick="App.toggleTheme()" title="تغییر حالت روز و شب">
+                        <span class="material-symbols-outlined" id="theme-toggle-icon">light_mode</span>
+                    </button>
+
+                    <button class="icon-btn" onclick="Communications.open('notes')" title="یادداشت‌ها" aria-label="باز کردن یادداشت‌ها">
+                        <span class="material-symbols-outlined" aria-hidden="true">sticky_note_2</span>
+                    </button>
+
+                    <button class="icon-btn" onclick="App.navigate('chat')" title="پیام‌رسان" aria-label="باز کردن پیام‌رسان">
+                        <span class="material-symbols-outlined" aria-hidden="true">forum</span>
+                        <span id="header-chat-dot" class="notification-dot hidden"></span>
+                    </button>
+
+                    <div class="user-profile-menu" onclick="App.navigate('profile')">
+                        <div class="avatar-badge" id="header-user-avatar">👩‍🎓</div>
+                        <span class="user-meta-name" id="header-user-name">سارا محمدی</span>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Main Content Container -->
+            <main class="content-body">
+                <section id="view-chat" class="view-section" aria-label="پیام‌رسان"></section>
+
+                <!-- 1. DASHBOARD VIEW -->
+                <section id="view-dashboard" class="view-section active">
+
+                    <!-- Welcome & Quote Banner -->
+                    <div class="dashboard-header-banner">
+                        <div class="banner-sparkle"></div>
+                        <div class="banner-content">
+                            <div>
+                                <h1 class="welcome-title" id="dash-greeting-text">وقت‌بخیر، سارا محمدی عزیز! 🌟</h1>
+                                <div class="welcome-subtitle" id="dash-date-text">📅 امروز چهارشنبه، ۲۷ شهریور ۱۴۰۵</div>
+                            </div>
+
+                            <div class="quote-box">
+                                <span class="material-symbols-outlined">format_quote</span>
+                                <div>
+                                    <div class="quote-text" id="dash-quote-text">«موفقیت مجموعه‌ای از تلاش‌های کوچک است که هر روز تکرار می‌شوند.»</div>
+                                    <div class="quote-author" id="dash-quote-author">— رابرت کالیر</div>
+                                </div>
+                                <button class="btn-refresh-quote" onclick="Dashboard.refreshQuote()" title="نقل قول بعدی">
+                                    <span class="material-symbols-outlined">sync</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 3 KPI Cards -->
+                    <div class="kpi-grid">
+                        <div class="kpi-card">
+                            <div>
+                                <div class="kpi-info-label">مطالعه امروز شما</div>
+                                <div class="kpi-value"><span id="kpi-today-hours">۳.۵</span> <span class="kpi-unit">ساعت</span></div>
+                            </div>
+                            <div class="kpi-icon-wrapper kpi-icon-blue">
+                                <span class="material-symbols-outlined">schedule</span>
+                            </div>
+                        </div>
+
+                        <div class="kpi-card">
+                            <div>
+                                <div class="kpi-info-label">میانگین نمرات آزمون‌ها</div>
+                                <div class="kpi-value"><span id="kpi-avg-score">۷۸</span> <span class="kpi-unit">درصد</span></div>
+                            </div>
+                            <div class="kpi-icon-wrapper kpi-icon-gold">
+                                <span class="material-symbols-outlined">grade</span>
+                            </div>
+                        </div>
+
+                        <div class="kpi-card">
+                            <div>
+                                <div class="kpi-info-label">روزهای پیوسته (استریک)</div>
+                                <div class="kpi-value"><span id="kpi-streak-days">۵</span> <span class="kpi-unit">روز</span></div>
+                            </div>
+                            <div class="kpi-icon-wrapper kpi-icon-green">
+                                <span class="material-symbols-outlined">local_fire_department</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Daily Goal Progress -->
+                    <div class="daily-goal-card">
+                        <div class="daily-goal-header">
+                            <div class="daily-goal-title">
+                                <span class="material-symbols-outlined" style="color: var(--gold);">flag</span>
+                                <span>پیشرفت هدف مطالعه امروز</span>
+                            </div>
+                            <button class="btn-edit-goal" onclick="Dashboard.openEditGoalModal()">
+                                <span class="material-symbols-outlined" style="font-size: 16px;">tune</span>
+                                تنظیم هدف
+                            </button>
+                        </div>
+                        <div class="goal-progress-track">
+                            <div class="goal-progress-fill" id="goal-progress-bar" style="width: 70%;"></div>
+                        </div>
+                        <div class="goal-progress-labels">
+                            <span id="goal-current-text">۳.۵ ساعت مطالعه</span>
+                            <span id="goal-percent-text" style="color: var(--gold-light); font-weight: 700;">۷۰٪ تکمیل شده</span>
+                            <span id="goal-target-text">هدف: ۴.۰ ساعت</span>
+                        </div>
+                    </div>
+
+                    <!-- Quick Start 6-Button Grid -->
+                    <div class="quick-actions-section">
+                        <div class="section-heading-bar">
+                            <h2 class="section-heading-title">
+                                <span class="material-symbols-outlined" style="color: var(--gold);">bolt</span>
+                                شروع سریع ابزارهای تحصیلی
+                            </h2>
+                            <button class="btn-edit-goal" id="btn-toggle-edit-widgets" onclick="Dashboard.toggleEditWidgets()">
+                                <span class="material-symbols-outlined" style="font-size: 16px;">dashboard_customize</span>
+                                سفارشی‌سازی ویجت‌ها
+                            </button>
+                        </div>
+                        <div class="quick-grid" id="quick-actions-grid"></div>
+                    </div>
+
+                    <!-- 2 Column Split Grid: Chart + Reminders & Continue -->
+                    <div class="dashboard-split-grid">
+
+                        <!-- 7-Day Trend Chart -->
+                        <div class="content-card">
+                            <div class="content-card-header">
+                                <div class="content-card-title">
+                                    <span class="material-symbols-outlined" style="color: var(--gold);">trending_up</span>
+                                    <span>روند ساعات مطالعه ۷ روز اخیر</span>
+                                </div>
+                                <span style="font-size: 12px; color: var(--text-dim);">بروزرسانی لحظه‌ای</span>
+                            </div>
+                            <div style="height: 250px; position: relative;">
+                                <canvas id="chart-dashboard-trend"></canvas>
+                            </div>
+                        </div>
+
+                        <!-- Right Column: Exam Countdown & Continue Learning -->
+                        <div style="display: flex; flex-direction: column; gap: 20px;">
+
+                            <!-- Exam Countdown -->
+                            <div class="content-card">
+                                <div class="content-card-header">
+                                    <div class="content-card-title">
+                                        <span class="material-symbols-outlined" style="color: var(--danger);">alarm</span>
+                                        <span>یادآور آزمون‌های پیش‌رو</span>
+                                    </div>
+                                    <button class="btn-edit-goal" onclick="Dashboard.openAddExamReminderModal()">+ افزودن</button>
+                                </div>
+                                <div id="dashboard-exam-reminders-list"></div>
+                            </div>
+
+                            <!-- Continue Learning Card -->
+                            <div class="content-card" style="background: linear-gradient(135deg, var(--bg-card) 0%, rgba(5,49,158,0.2) 100%);">
+                                <div class="content-card-title" style="margin-bottom: 8px;">
+                                    <span class="material-symbols-outlined" style="color: var(--gold-light);">play_circle</span>
+                                    <span>ادامه مسیر یادگیری</span>
+                                </div>
+                                <p style="font-size: 12.5px; color: var(--text-muted); margin-bottom: 14px;">
+                                    آخرین جلسه: زیست‌شناسی دوازدهم (پروتئین‌سازی)
+                                </p>
+                                <button class="btn-gold" style="width: 100%; font-size: 13px;" onclick="App.navigate('pomodoro')">
+                                    ادامه جلسه در پومودورو 🚀
+                                </button>
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </section>
+
+                <!-- 2. POMODORO VIEW -->
+                <section id="view-study-rooms" class="view-section" aria-label="اتاق مطالعه"></section>
+                <section id="view-pomodoro" class="view-section">
+                    <div class="pomodoro-container">
+                        <div class="pomo-page-heading">
+                            <div>
+                                <h2>تمرکز</h2>
+                                <p>یک بازه آرام برای مطالعه عمیق</p>
+                            </div>
+                            <button class="pomo-settings-button" type="button" onclick="Pomodoro.openSettings()" aria-label="تنظیم زمان‌های پومودورو">
+                                <span class="material-symbols-outlined" aria-hidden="true">settings</span>
+                            </button>
+                        </div>
+
+                        <div class="pomodoro-modes-nav">
+                            <button class="pomo-tab-btn active" id="pomo-tab-work" onclick="Pomodoro.switchMode('work')">تمرکز</button>
+                            <button class="pomo-tab-btn" id="pomo-tab-shortBreak" onclick="Pomodoro.switchMode('shortBreak')">استراحت کوتاه</button>
+                            <button class="pomo-tab-btn" id="pomo-tab-longBreak" onclick="Pomodoro.switchMode('longBreak')">استراحت بلند</button>
+                        </div>
+
+                        <!-- Active Task Pill -->
+                        <div style="margin-bottom: 20px; display: inline-flex; align-items: center; gap: 8px; background: var(--bg-surface); border: 1px solid var(--border-color); padding: 8px 18px; border-radius: var(--radius-full);">
+                            <span class="material-symbols-outlined" style="color: var(--gold); font-size: 18px;">bookmark</span>
+                            <span>تسک جاری:</span>
+                            <strong id="pomo-active-task-label" style="color: var(--gold-light);">مطالعه و تمرکز آزاد</strong>
+                        </div>
+
+                        <!-- Circular SVG Timer -->
+                        <div class="pomo-dial-wrap">
+                            <svg class="pomo-svg" viewBox="0 0 280 280">
+                                <defs>
+                                    <linearGradient id="goldGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                                        <stop offset="0%" stop-color="#05319e" />
+                                        <stop offset="50%" stop-color="#c9a03e" />
+                                        <stop offset="100%" stop-color="#f59e0b" />
+                                    </linearGradient>
+                                </defs>
+                                <circle class="pomo-circle-bg" cx="140" cy="140" r="120"></circle>
+                                <circle id="pomo-circle-progress" class="pomo-circle-progress" cx="140" cy="140" r="120"></circle>
+                            </svg>
+                            <div class="pomo-time-display">
+                                <div class="pomo-time-digits" id="pomo-display-time">۲۵:۰۰</div>
+                                <div class="pomo-status-label">آماده برای شروع</div>
+                            </div>
+                        </div>
+
+                        <!-- Timer Controls -->
+                        <div class="pomo-controls-row">
+                            <button class="btn-pomo-secondary" onclick="Pomodoro.resetTimer()" title="بازنشانی">
+                                <span class="material-symbols-outlined">replay</span>
+                            </button>
+                            <button class="btn-pomo-main" id="btn-pomo-play" onclick="Pomodoro.toggleTimer()">
+                                <span class="material-symbols-outlined">play_arrow</span>
+                                شروع تمرکز
+                            </button>
+                            <button class="btn-pomo-secondary" onclick="Pomodoro.enterFullscreenFocus()" title="حالت تمام‌صفحه بدون حواس‌پرتی">
+                                <span class="material-symbols-outlined">fullscreen</span>
+                            </button>
+                        </div>
+
+                        <!-- Task Selector & Checklist Grid -->
+                        <div class="dashboard-split-grid" style="text-align: right; margin-top: 30px;">
+
+                            <!-- Task Checklist -->
+                            <div class="content-card">
+                                <div class="content-card-header">
+                                    <div class="content-card-title">
+                                        <span class="material-symbols-outlined" style="color: var(--gold);">checklist</span>
+                                        <span>لیست کارهای امروز</span>
+                                    </div>
+                                </div>
+                                <div style="display: flex; gap: 8px; margin-bottom: 14px;">
+                                    <input type="text" id="input-pomo-new-task" class="form-control" placeholder="افزودن تسک جدید...">
+                                    <button class="btn-gold" style="padding: 0 16px;" onclick="Pomodoro.addTaskSubmit()">+</button>
+                                </div>
+                                <div id="pomo-tasks-list"></div>
+                            </div>
+
+                            <!-- Task from Schedule & Live Stats -->
+                            <div style="display: flex; flex-direction: column; gap: 20px;">
+                                <div class="content-card">
+                                    <div class="content-card-title" style="margin-bottom: 12px;">
+                                        <span class="material-symbols-outlined" style="color: var(--primary-light);">calendar_today</span>
+                                        <span>انتخاب تسک از برنامه هفتگی</span>
+                                    </div>
+                                    <select id="pomo-task-selector" class="form-control" style="margin-bottom: 12px;"></select>
+                                </div>
+
+                                <div class="content-card">
+                                    <div class="content-card-title" style="margin-bottom: 12px;">
+                                        <span class="material-symbols-outlined" style="color: var(--gold);">query_stats</span>
+                                        <span>آمار لحظه‌ای تمرکز</span>
+                                    </div>
+                                    <div style="display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 8px;">
+                                        <span>جلسات تکمیل شده امروز:</span>
+                                        <strong id="pomo-stat-today-sessions" style="color: var(--gold-light);">۴ جلسه</strong>
+                                    </div>
+                                    <div style="display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 8px;">
+                                        <span>مجموع ساعات این هفته:</span>
+                                        <strong id="pomo-stat-week-hours" style="color: var(--gold-light);">۲۹.۵ ساعت</strong>
+                                    </div>
+                                    <div style="display: flex; justify-content: space-between; font-size: 13px;">
+                                        <span>زنجیره مداومت (استریک):</span>
+                                        <strong id="pomo-stat-streak" style="color: #f59e0b;">۵ روز 🔥</strong>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+
+                    </div>
+                </section>
+
+                <!-- 3. FLASHCARDS & LEITNER VIEW -->
+                <section id="view-flashcards" class="view-section">
+
+                    <div class="section-heading-bar">
+                        <div>
+                            <h2 class="section-heading-title">
+                                <span class="material-symbols-outlined" style="color: var(--gold);">style</span>
+                                فلش‌کارت و جعبه لایتنر ۵ مرحله‌ای
+                            </h2>
+                            <p style="font-size: 12px; color: var(--text-muted);">سیستم مرور مبتنی بر فاصله‌گذاری زمانی (Spaced Repetition)</p>
+                        </div>
+                        <div style="display: flex; gap: 10px;">
+                            <button class="btn-primary" onclick="Flashcards.openAIModal()">
+                                <span class="material-symbols-outlined">auto_awesome</span>
+                                استخراج با هوش مصنوعی
+                            </button>
+                            <button class="btn-gold" onclick="Flashcards.openAddModal()">
+                                + کارت جدید
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- 5 Leitner Boxes Status -->
+                    <div class="leitner-boxes-bar">
+                        <div class="leitner-box-item active" onclick="Flashcards.filterBox('all')">
+                            <div class="leitner-box-title">همه جعبه‌ها</div>
+                            <div class="leitner-box-count" id="leitner-count-total">📚</div>
+                            <div class="leitner-box-days">کل کارت‌ها</div>
+                        </div>
+                        <div class="leitner-box-item" onclick="Flashcards.filterBox(1)">
+                            <div class="leitner-box-title">جعبه ۱</div>
+                            <div class="leitner-box-count" id="leitner-count-box-1">۰</div>
+                            <div class="leitner-box-days">مرور ۱ روزه</div>
+                        </div>
+                        <div class="leitner-box-item" onclick="Flashcards.filterBox(2)">
+                            <div class="leitner-box-title">جعبه ۲</div>
+                            <div class="leitner-box-count" id="leitner-count-box-2">۰</div>
+                            <div class="leitner-box-days">مرور ۲ روزه</div>
+                        </div>
+                        <div class="leitner-box-item" onclick="Flashcards.filterBox(3)">
+                            <div class="leitner-box-title">جعبه ۳</div>
+                            <div class="leitner-box-count" id="leitner-count-box-3">۰</div>
+                            <div class="leitner-box-days">مرور ۴ روزه</div>
+                        </div>
+                        <div class="leitner-box-item" onclick="Flashcards.filterBox(4)">
+                            <div class="leitner-box-title">جعبه ۴</div>
+                            <div class="leitner-box-count" id="leitner-count-box-4">۰</div>
+                            <div class="leitner-box-days">مرور ۷ روزه</div>
+                        </div>
+                        <div class="leitner-box-item" onclick="Flashcards.filterBox(5)">
+                            <div class="leitner-box-title">جعبه ۵</div>
+                            <div class="leitner-box-count" id="leitner-count-box-5">۰</div>
+                            <div class="leitner-box-days">مرور ۱۵ روزه</div>
+                        </div>
+                    </div>
+
+                    <!-- Categories Filter -->
+                    <div id="flashcard-category-pills" class="flashcard-categories-pills"></div>
+
+                    <!-- 3D Interactive Card Stage -->
+                    <div style="text-align: center; margin-bottom: 12px; font-size: 13px; color: var(--text-dim);" id="flashcard-index-info">
+                        کارت ۱ از ۱۱
+                    </div>
+
+                    <div id="flashcard-stage" class="flip-card-stage" onclick="Flashcards.flipCard()">
+                        <div class="flip-card-inner">
+
+                            <!-- Front Side (Question) -->
+                            <div class="flip-card-front">
+                                <div class="card-top-tag">
+                                    <span class="brand-badge" id="flashcard-category-front">زیست‌شناسی</span>
+                                    <span style="font-size: 11px; color: var(--gold-light);" id="flashcard-box-front">جعبه ۱</span>
+                                </div>
+                                <div class="card-main-text" id="flashcard-question-text">
+                                    صورت سوال در اینجا نمایش داده می‌شود...
+                                </div>
+                                <div class="card-hint-text">
+                                    💡 برای مشاهده پاسخ، روی کارت کلیک کنید (چرخش ۳D)
+                                </div>
+                            </div>
+
+                            <!-- Back Side (Answer) -->
+                            <div class="flip-card-back">
+                                <div class="card-top-tag">
+                                    <span style="background: rgba(255,255,255,0.2); padding: 2px 8px; border-radius: 4px; font-size: 11px;">پاسخ و تحلیل</span>
+                                    <span style="font-size: 11px; color: var(--gold-light);" id="flashcard-box-back">جعبه ۱</span>
+                                </div>
+                                <div class="card-main-text" id="flashcard-answer-text">
+                                    پاسخ تشریحی فلش‌کارت در این قسمت قرار دارد.
+                                </div>
+                                <div class="card-hint-text">
+                                    میزان تسلط خود را با دکمه‌های زیر ثبت کنید:
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+
+                    <!-- Empty State -->
+                    <div id="flashcard-empty-state" style="display: none; text-align: center; padding: 50px; background: var(--bg-card); border-radius: var(--radius-lg); border: 1px solid var(--border-subtle); max-width: 620px; margin: 0 auto 24px;">
+                        <span class="material-symbols-outlined" style="font-size: 48px; color: var(--gold-light);">check_circle</span>
+                        <h3 style="margin-top: 10px;">آفرین! کارت فعالی برای مرور باقی نمانده است.</h3>
+                        <p style="font-size: 13px; color: var(--text-muted); margin-top: 6px;">می‌توانید دسته دیگری را انتخاب کنید یا کارت‌های جدید بیافزایید.</p>
+                    </div>
+
+                    <!-- Rating Action Buttons -->
+                    <div class="flashcard-rating-actions" id="flashcard-action-buttons">
+                        <button class="btn-rate btn-rate-wrong" onclick="Flashcards.rateCard('wrong')">
+                            <span class="material-symbols-outlined">close</span>
+                            اصلاً بلد نبودم
+                        </button>
+                        <button class="btn-rate btn-rate-med" onclick="Flashcards.rateCard('medium')">
+                            <span class="material-symbols-outlined">help</span>
+                            تا حدی بلد بودم
+                        </button>
+                        <button class="btn-rate btn-rate-easy" onclick="Flashcards.rateCard('easy')">
+                            <span class="material-symbols-outlined">done_all</span>
+                            کاملاً مسلط بودم
+                        </button>
+                    </div>
+
+                </section>
+
+                <!-- 4. AI STUDY ASSISTANT (CHATBOT) VIEW -->
+                <section id="view-ai-assistant" class="view-section" aria-label="هوش مصنوعی روند">
+                    <div class="ai-chat-container">
+
+                        <div class="ai-chat-header">
+                            <div class="ai-chat-persona">
+                                <div class="ai-avatar">🤖</div>
+                                <div>
+                                    <div style="font-weight: 700; font-size: 15px;">هوش مصنوعی روند</div>
+                                    <div style="font-size: 11.5px; color: var(--success); display: flex; align-items: center; gap: 4px;">
+                                        <span style="width: 7px; height: 7px; background: var(--success); border-radius: 50%;"></span>
+                                        پاسخ‌گویی به فرمول‌های KaTeX و متون علمی
+                                    </div>
+                                </div>
+                            </div>
+                            <div style="display: flex; align-items: center; gap: 14px;">
+                                <div id="ai-quota-text" style="font-size: 12px; color: var(--text-muted);"></div>
+                                <button class="btn-edit-goal" onclick="AIAssistant.clearChat()" style="color: var(--danger);">
+                                    <span class="material-symbols-outlined" style="font-size: 16px;">delete_sweep</span>
+                                    پاک کردن چت
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Chat Messages Feed -->
+                        <div class="ai-messages-feed" id="ai-chat-messages"></div>
+
+                        <!-- Prompt Preset Chips -->
+                        <div class="prompt-chips-row">
+                            <div class="prompt-chip" onclick="AIAssistant.sendMessage('لطفاً فرمول مشتق و انتگرال توابع مثلثاتی را با فرمول ریاضی توضیح دهید.')">📐 فرمول‌های ریاضی و مشتق</div>
+                            <div class="prompt-chip" onclick="AIAssistant.sendMessage('قوانین حرکت نیوتن و فرمول شتاب را با مثال فیزیک توضیح بده.')">⚡ قوانین نیوتن و فیزیک</div>
+                            <div class="prompt-chip" onclick="AIAssistant.sendMessage('فرآیند رونویسی و ترجمه ژن در زیست‌شناسی را خلاصه کن.')">🧬 رونویسی زیست‌شناسی</div>
+                            <div class="prompt-chip" onclick="AIAssistant.sendMessage('یک روش برنامه‌ریزی ۳۰ روزه برای مرور تست‌های کنکور پیشنهاد بده.')">🎯 برنامه‌ریزی تستی کنکور</div>
+                        </div>
+
+                        <!-- Input Bar -->
+                        <div class="ai-input-bar">
+                            <textarea id="ai-chat-input" placeholder="سوال درسی، مسئله ریاضی یا ابهام خود را بنویسید..." onkeydown="if(event.key==='Enter' && !event.shiftKey){event.preventDefault(); AIAssistant.sendMessage();}"></textarea>
+                            <button class="btn-send-ai" onclick="AIAssistant.sendMessage()">
+                                <span class="material-symbols-outlined">send</span>
+                            </button>
+                        </div>
+
+                    </div>
+                </section>
+
+                <!-- 5. AI ESSAY WRITING VIEW -->
+                <section id="view-legal" class="view-section legal-view">
+                    <div class="section-heading-bar"><div><h2 class="section-heading-title"><span class="material-symbols-outlined" aria-hidden="true">policy</span> قوانین و حریم خصوصی</h2><p>نسخه لازم‌الاجرا از ۳۰ شهریور ۱۴۰۵</p></div><button type="button" class="btn-primary" onclick="App.navigate('profile')"><span class="material-symbols-outlined" aria-hidden="true">arrow_forward</span> بازگشت</button></div>
+                    <div class="legal-grid">
+                        <article class="content-card"><h3>داده‌هایی که نگهداری می‌کنیم</h3><p>نام کاربری، نام نمایشی، مقطع، نوع حساب، برنامه‌ها، گزارش مطالعه، تنظیمات تمرکز، فلش‌کارت‌ها و پیام‌های مشاوره‌ای برای ارائه خدمت در پایگاه داده روند ذخیره می‌شوند. رمز عبور به‌صورت رمزنگاری‌شده نگهداری می‌شود.</p></article>
+                        <article class="content-card"><h3>کاربرد هوش مصنوعی</h3><p>متنی که در ابزارهای هوشمند وارد می‌کنید برای تولید پاسخ به ارائه‌دهنده پردازش هوش مصنوعی ارسال می‌شود. اطلاعات هویتی، رمز عبور، شماره تماس و نشانی خود را در این ابزارها وارد نکنید.</p></article>
+                        <article class="content-card"><h3>کودکان و رضایت والدین</h3><p>ساخت حساب برای افراد زیر ۱۸ سال فقط با اطلاع و رضایت والد یا سرپرست قانونی مجاز است. والدین می‌توانند از طریق پشتیبانی درخواست بررسی یا حذف حساب را مطرح کنند.</p></article>
+                        <article class="content-card"><h3>گفت‌وگوی مشاوره‌ای</h3><p>گفت‌وگو فقط میان دانش‌آموز و مشاور متصل‌شده انجام می‌شود. پیام نامناسب را گزارش کنید و در صورت نیاز گفت‌وگو را متوقف کنید. روند جایگزین خدمات پزشکی، روان‌شناسی یا فوریتی نیست.</p></article>
+                        <article class="content-card"><h3>حقوق شما</h3><p>می‌توانید اطلاعات پروفایل را ویرایش یا حساب خود را حذف کنید. حذف حساب، داده‌های وابسته را به‌طور دائمی پاک می‌کند و قابل بازگشت نیست.</p></article>
+                        <article class="content-card"><h3>پشتیبانی</h3><p>برای پرسش، گزارش تخلف یا درخواست مرتبط با داده‌ها با «درسیار استودیو» در تلگرام <a href="https://t.me/DarsyarStu" target="_blank" rel="noopener">@DarsyarStu</a> تماس بگیرید.</p></article>
+                    </div>
+                </section>
+
+                <!-- 6. AI RESEARCH VIEW -->
+                <section id="view-schedule" class="view-section">
+                    <div class="section-heading-bar">
+                        <div>
+                            <h2 class="section-heading-title">
+                                <span class="material-symbols-outlined" style="color: var(--gold);">calendar_month</span>
+                                برنامه مطالعاتی هفتگی هوشمند
+                            </h2>
+                            <p style="font-size: 12px; color: var(--text-muted);">با مشاور یا مستقل؛ تسک‌های هر روز را با مدت پیشنهادی و وضعیت انجام مدیریت کنید</p>
+                        </div>
+                        <button type="button" class="log-launch" data-open-plan-log>ثبت گزارش</button>
+                        <button class="btn-gold schedule-print-button" onclick="Schedule.printSchedule()" aria-label="چاپ برنامه هفتگی">
+                            <span class="material-symbols-outlined" aria-hidden="true">print</span>
+                            <span>چاپ برنامه</span>
+                        </button>
+                    </div>
+
+                    <div id="schedule-admin-tools" class="schedule-admin-tools hidden">
+                        <button id="schedule-admin-toggle" class="schedule-admin-toggle" type="button" aria-expanded="false" aria-controls="schedule-admin-drawer" onclick="Schedule.toggleAdminDrawer()">
+                            <span class="material-symbols-outlined" aria-hidden="true">manage_accounts</span>
+                            <span><strong>برنامه‌ریزی برای دانش‌آموز</strong><small id="schedule-admin-current">برای انتخاب دانش‌آموز، پنل را باز کنید</small></span>
+                            <span class="material-symbols-outlined schedule-admin-chevron" aria-hidden="true">expand_more</span>
+                        </button>
+                        <div id="schedule-admin-drawer" class="schedule-admin-drawer" hidden>
+                            <div class="form-group">
+                                <label class="form-label" for="schedule-admin-student">دانش‌آموز</label>
+                                <select id="schedule-admin-student" class="form-control" onchange="Schedule.selectAdminStudent(this.value)">
+                                    <option value="">برنامه خودم</option>
+                                </select>
+                            </div>
+                            <p>دانش‌آموز را انتخاب کنید و تسک‌های هر روز را همراه با مدت پیشنهادی ثبت کنید؛ تغییرات مستقیم در دیتابیس ذخیره می‌شود.</p>
+                        </div>
+                    </div>
+
+                    <div id="schedule-context-banner" class="schedule-context-banner hidden" role="status" aria-live="polite"></div>
+
+                    <div id="schedule-printable-area" class="schedule-days-list"><div id="schedule-days-list"></div></div>
+
+                    <dialog id="plan-log" aria-labelledby="plan-log-title" dir="rtl">
+                        <header><div><small>برنامهٔ من</small><h2 id="plan-log-title">ثبت گزارش مطالعه</h2></div><button class="log-close" type="button" aria-label="بستن">×</button></header>
+                        <form id="plan-log-form">
+                            <fieldset class="log-source"><legend>انتخاب تسک</legend><label><input type="radio" name="mode" value="plan" checked>از برنامه</label><label><input type="radio" name="mode" value="manual">تسک دستی</label></fieldset>
+                            <label data-log-source="plan">تسک برنامه<select name="task"></select></label>
+                            <label data-log-source="manual" hidden>عنوان تسک جدید<input name="manualSubject" maxlength="100" placeholder="مثلاً مرور فصل دوم زیست"></label>
+                            <div class="log-period"><label>تاریخ مطالعه<input name="date" type="date" required><small id="log-persian-date" class="log-persian-date"></small></label><output id="log-duration" aria-live="polite"></output></div>
+                            <div class="log-times"><label>از ساعت<input name="start" type="time" required></label><label>تا ساعت<input name="end" type="time" required></label></div>
+                            <div class="log-presets" aria-label="مدت مطالعه"><small>مدت آماده</small><button type="button" data-min="25">۲۵ دقیقه</button><button type="button" data-min="45">۴۵ دقیقه</button><button type="button" data-min="60">۱ ساعت</button></div>
+                            <label>وضعیت مطالعه<select name="status"><option value="completed">کامل انجام شد</option><option value="partial">بخشی انجام شد</option><option value="missed">انجام نشد</option></select></label>
+                            <label>یادداشت (اختیاری)<textarea name="notes" rows="2" maxlength="500"></textarea></label>
+                            <p class="log-error" role="alert"></p><button class="log-save" type="submit">ذخیرهٔ گزارش</button>
+                        </form>
+                        <details class="log-history"><summary>گزارش‌های قبلی من</summary><div id="manual-report-list"></div></details>
+                    </dialog>
+                </section>
+
+                <!-- 8. EXAMS & ONLINE TESTING VIEW -->
+                <section id="view-exams" class="view-section" data-feature="exams">
+
+                    <!-- Catalog View -->
+                    <div id="exams-catalog-view">
+                        <div class="section-heading-bar">
+                            <div>
+                                <h2 class="section-heading-title">
+                                    <span class="material-symbols-outlined" style="color: var(--gold);">assignment</span>
+                                    سامانه آزمون‌های آنلاین و کارنامه
+                                </h2>
+                                <p style="font-size: 12px; color: var(--text-muted);">آزمون‌های تستی زمان‌دار همراه با تحلیل گزینه‌ها و پاسخ تشریحی</p>
+                            </div>
+                            <button class="btn-gold" onclick="Exams.openCreateExamModal()">
+                                + طراحی آزمون جدید
+                            </button>
+                        </div>
+
+                        <div class="kpi-grid" id="exams-catalog-grid"></div>
+                    </div>
+
+                    <!-- Live Exam Taking View -->
+                    <div id="exam-active-view" class="exam-taking-view" style="display: none;">
+                        <div class="exam-live-header">
+                            <div>
+                                <h3 id="exam-active-title" style="font-size: 16px; font-weight: 800;">آزمون تستی</h3>
+                                <div style="font-size: 12px; color: var(--text-dim);" id="exam-q-number">سوال شماره ۱ از ۴</div>
+                            </div>
+                            <div class="exam-timer-pill">
+                                <span class="material-symbols-outlined">timer</span>
+                                <span id="exam-active-timer">۱۵:۰۰</span>
+                            </div>
+                        </div>
+
+                        <!-- Question Palette -->
+                        <div style="display: flex; gap: 8px; justify-content: center; margin-bottom: 16px;" id="exam-question-palette"></div>
+
+                        <!-- Question Card -->
+                        <div class="exam-question-card">
+                            <div class="exam-question-text" id="exam-q-text">صورت سوال...</div>
+                            <div class="exam-options-list" id="exam-options-container"></div>
+                        </div>
+
+                        <!-- Navigation Controls -->
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <button class="btn-primary" onclick="Exams.prevQuestion()">
+                                قبلی ➡️
+                            </button>
+                            <button class="btn-gold" style="background: var(--danger); color: #fff;" onclick="if(confirm('آیا مطمئن هستید که می‌خواهید پاسخ‌نامه را ثبت و کارنامه را مشاهده نمایید؟')) Exams.submitExam();">
+                                🏁 ثبت نهایی و صدور کارنامه
+                            </button>
+                            <button class="btn-primary" onclick="Exams.nextQuestion()">
+                                ⬅️ بعدی
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Report Card View -->
+                    <div id="exam-report-view" class="exam-taking-view" style="display: none;">
+                        <div class="content-card" style="text-align: center; margin-bottom: 24px; padding: 34px;">
+                            <span class="material-symbols-outlined" style="font-size: 54px; color: var(--gold-light);">workspace_premium</span>
+                            <h2 style="font-size: 24px; font-weight: 800; margin: 8px 0;">کارنامه نتایج آزمون</h2>
+                            <div style="font-size: 48px; font-weight: 900; color: var(--gold-light); margin: 12px 0;" id="report-score-percent">۷۵٪</div>
+
+                            <div style="display: flex; justify-content: center; gap: 24px; margin: 20px 0;">
+                                <div><strong style="color: var(--success); font-size: 20px;" id="report-correct-count">۳</strong><div style="font-size: 12px; color: var(--text-muted);">پاسخ درست</div></div>
+                                <div><strong style="color: var(--danger); font-size: 20px;" id="report-wrong-count">۱</strong><div style="font-size: 12px; color: var(--text-muted);">پاسخ نادرست</div></div>
+                                <div><strong style="color: var(--warning); font-size: 20px;" id="report-unanswered-count">۰</strong><div style="font-size: 12px; color: var(--text-muted);">نزده</div></div>
+                            </div>
+
+                            <button class="btn-gold" onclick="Exams.returnToCatalog()">
+                                بازگشت به لیست آزمون‌ها
+                            </button>
+                        </div>
+
+                        <h3 style="font-size: 17px; font-weight: 700; margin-bottom: 14px;">تحلیل تشریحی سوال به سوال</h3>
+                        <div id="report-questions-breakdown"></div>
+                    </div>
+
+                </section>
+
+                <!-- 9. STATS VIEW -->
+                <section id="view-stats" class="view-section m-page" data-m-page="stats">
+
+                    <div class="section-heading-bar m-page-head">
+                        <div>
+                            <h2 class="section-heading-title">
+                                <span class="material-symbols-outlined" aria-hidden="true">analytics</span>
+                                آمار و گزارش‌ها
+                            </h2>
+                            <p>روند مطالعه و عملکرد تحصیلی تو</p>
+                        </div>
+                        <button class="m-head-action" type="button" onclick="Stats.exportPDFReport()" aria-label="دانلود گزارش جامع عملکرد">
+                            <span class="material-symbols-outlined" aria-hidden="true">download</span>
+                            <span>گزارش</span>
+                        </button>
+                    </div>
+
+                    <!-- Printable Stats Report Area -->
+                    <div id="stats-report-printable-area">
+
+                        <!-- Key metrics -->
+                        <div class="m-stat-grid">
+                            <div class="m-stat m-stat-lead">
+                                <span class="m-stat-icon" aria-hidden="true"><span class="material-symbols-outlined">today</span></span>
+                                <div><div class="m-stat-label">مطالعه امروز</div><div class="m-stat-value" id="stats-kpi-today">۰ س</div></div>
+                            </div>
+                            <div class="m-stat">
+                                <span class="m-stat-icon" aria-hidden="true"><span class="material-symbols-outlined">date_range</span></span>
+                                <div><div class="m-stat-label">مجموع این هفته</div><div class="m-stat-value" id="stats-kpi-week">۰ س</div></div>
+                            </div>
+                            <div class="m-stat">
+                                <span class="m-stat-icon" aria-hidden="true"><span class="material-symbols-outlined">all_inclusive</span></span>
+                                <div><div class="m-stat-label">مجموع کل دوران</div><div class="m-stat-value" id="stats-kpi-total">۰ س</div></div>
+                            </div>
+                            <div class="m-stat">
+                                <span class="m-stat-icon m-stat-icon-warm" aria-hidden="true"><span class="material-symbols-outlined">local_fire_department</span></span>
+                                <div><div class="m-stat-label">استریک مداومت</div><div class="m-stat-value" id="stats-kpi-streak">۰ روز</div></div>
+                            </div>
+                        </div>
+
+                        <!-- Trend -->
+                        <section class="m-panel" aria-labelledby="stats-line-title">
+                            <header>
+                                <h3 id="stats-line-title">روند مطالعه روزانه (ساعت)</h3>
+                                <div class="m-seg" id="stats-range" role="group" aria-label="بازه نمودار">
+                                    <button type="button" data-range="7" aria-pressed="true">۷ روز</button>
+                                    <button type="button" data-range="30" aria-pressed="false">۳۰ روز</button>
+                                    <button type="button" data-range="0" aria-pressed="false">همه</button>
+                                </div>
+                            </header>
+                            <div class="m-chart m-skel" id="stats-line-wrap"><canvas id="chart-stats-line" role="img" aria-label="نمودار ساعات مطالعه روزانه"></canvas></div>
+                            <div class="m-empty hidden" id="stats-line-empty"><span class="material-symbols-outlined" aria-hidden="true">show_chart</span><strong>هنوز زمانی ثبت نشده است.</strong><p>با تایمر تمرکز یا گزارش دستی، نمودار شکل می‌گیرد.</p></div>
+                        </section>
+
+                        <!-- Subjects -->
+                        <section class="m-panel" aria-labelledby="stats-bar-title">
+                            <header><h3 id="stats-bar-title">تفکیک دروس مطالعه‌شده</h3></header>
+                            <div class="m-chart m-skel" id="stats-bar-wrap"><canvas id="chart-stats-bar" role="img" aria-label="نمودار ساعات مطالعه هر درس"></canvas></div>
+                            <div class="m-empty hidden" id="stats-bar-empty"><span class="material-symbols-outlined" aria-hidden="true">bar_chart</span><strong>هنوز گزارشی ثبت نشده است.</strong><p>درس و مدت مطالعه را در گزارش مطالعه ثبت کن.</p></div>
+                        </section>
+
+                        <div class="m-error hidden" id="stats-error" role="alert"><span class="material-symbols-outlined" aria-hidden="true">cloud_off</span><div><strong>نمودارها بارگذاری نشدند.</strong><p>اتصال اینترنت را بررسی کن و دوباره تلاش کن.</p></div><button type="button" onclick="Stats.init()">تلاش دوباره</button></div>
+
+                    </div>
+
+                </section>
+
+                <!-- 10. GAMIFICATION VIEW -->
+                <section id="view-gamification" class="view-section" data-feature="gamification">
+
+                    <!-- Level Status Card -->
+                    <div class="dashboard-header-banner" style="background: linear-gradient(135deg, #05319e 0%, #03143f 100%);">
+                        <div class="banner-content">
+                            <div>
+                                <span class="brand-badge" style="font-size: 12px;">لیگ واقعی دانش‌آموزان</span>
+                                <h2 style="font-size: 24px; font-weight: 800; margin: 8px 0;" id="game-level-title">سطح ۱: تازه‌کار</h2>
+                                <p style="font-size: 13px; color: rgba(255,255,255,0.8);">با مطالعه واقعی امتیاز بگیر و فقط در صورت تمایل با دوستانت رقابت کن.</p>
+                            </div>
+                            <div style="min-width: 220px;">
+                                <div style="display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 6px;">
+                                    <span>پیشرفت تا سطح بعدی</span>
+                                    <span id="game-level-xp-text" style="color: var(--gold-light); font-weight: 700;">۰ از ۲۰۰ امتیاز</span>
+                                </div>
+                                <div class="goal-progress-track" style="height: 10px;">
+                                    <div class="goal-progress-fill" id="game-level-progress-fill" style="width: 0;"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="game-social-shell" class="social-layout">
+                        <div class="social-main">
+                            <section class="league-prize-card">
+                                <span class="material-symbols-outlined" aria-hidden="true">workspace_premium</span>
+                                <div><small>جایزه فصل جاری</small><h3>یک ماه اشتراک ویژه برای ۳ نفر اول</h3><p>نتیجه پس از بررسی فعالیت‌های واقعی نهایی می‌شود.</p></div>
+                            </section>
+                            <section class="content-card social-card">
+                                <header><div><span class="material-symbols-outlined" aria-hidden="true">leaderboard</span><div><h3>لیگ ماهانه مطالعه</h3><p>رتبه‌بندی بر اساس امتیاز فعالیت‌های ثبت‌شده</p></div></div><span class="privacy-pill"><span class="material-symbols-outlined" aria-hidden="true">verified_user</span>اختیاری</span></header>
+                                <div id="game-leaderboard" class="league-list" aria-live="polite"></div>
+                            </section>
+                        </div>
+                        <aside class="social-side">
+                            <section class="content-card social-card">
+                                <header><div><span class="material-symbols-outlined" aria-hidden="true">person_add</span><div><h3>دوستان من</h3><p>با نام کاربری درخواست بفرست</p></div></div></header>
+                                <form class="friend-add-form" onsubmit="event.preventDefault(); Gamification.sendRequest();"><label class="sr-only" for="friend-username">نام کاربری دوست</label><input id="friend-username" class="form-control" inputmode="text" autocomplete="off" placeholder="نام کاربری دوست"><button class="btn-primary" type="submit">افزودن</button></form>
+                                <div id="friend-requests" class="friend-requests hidden" aria-live="polite"></div>
+                                <div id="friends-list" class="friends-list"></div>
+                            </section>
+                            <section class="content-card social-card privacy-card">
+                                <header><div><span class="material-symbols-outlined" aria-hidden="true">manage_accounts</span><div><h3>پروفایل لیگ</h3><p>کنترل نمایش اطلاعات با شماست</p></div></div></header>
+                                <label class="social-switch"><span><strong>حضور در لیگ</strong><small>نام نمایشی و امتیاز دیده می‌شود</small></span><input id="league-visible" type="checkbox"><i aria-hidden="true"></i></label>
+                                <label class="social-switch"><span><strong>نمایش پایه تحصیلی</strong><small>شماره تماس و ایمیل هرگز نمایش داده نمی‌شود</small></span><input id="league-show-grade" type="checkbox" checked><i aria-hidden="true"></i></label>
+                                <label class="form-label" for="league-bio">معرفی کوتاه</label><textarea id="league-bio" class="form-control" maxlength="120" rows="2" placeholder="مثلاً: دانش‌آموز تجربی و علاقه‌مند به زیست"></textarea>
+                                <button id="league-save" class="btn-primary" type="button" onclick="Gamification.saveSettings()">ذخیره تنظیمات</button>
+                            </section>
+                        </aside>
+                    </div>
+
+                </section>
+
+                <!-- 11. SUBSCRIPTION VIEW -->
+                <section id="view-subscription" class="view-section" data-feature="subscription">
+                    <div style="text-align: center; max-width: 700px; margin: 0 auto 30px;">
+                        <span class="brand-badge" style="font-size: 12px;">پلن‌های ویژه روند</span>
+                        <h2 style="font-size: 26px; font-weight: 800; margin: 10px 0;">دسترسی نامحدود به پیشرفته‌ترین امکانات</h2>
+                        <p style="font-size: 14px; color: var(--text-muted);">پلن متناسب با نیازهای تحصیلی و کنکوری خود را انتخاب کنید.</p>
+                    </div>
+
+                    <div class="pricing-grid">
+
+                        <!-- Free Plan -->
+                        <div class="pricing-card">
+                            <div>
+                                <h3 style="font-size: 18px; font-weight: 700;">طرح رایگان</h3>
+                                <p style="font-size: 12px; color: var(--text-muted);">مناسب برای شروع و مطالعه روزمره</p>
+                                <div class="plan-price-tag">۰ <small>تومان / همیشگی</small></div>
+                                <ul class="plan-features-list">
+                                    <li><span class="material-symbols-outlined" style="color: var(--success); font-size: 18px;">check</span> تایمر پومودورو با امکانات کامل</li>
+                                    <li><span class="material-symbols-outlined" style="color: var(--success); font-size: 18px;">check</span> جعبه لایتنر ۵ مرحله‌ای</li>
+                                    <li><span class="material-symbols-outlined" style="color: var(--warning); font-size: 18px;">check</span> روزانه تا ۱۰ پیام با دستیار AI</li>
+                                    <li><span class="material-symbols-outlined" style="color: var(--success); font-size: 18px;">check</span> جدول برنامه مطالعاتی هفتگی</li>
+                                </ul>
+                            </div>
+                            <button class="btn-primary" id="btn-plan-free" style="width: 100%;" disabled>پلن فعال شما</button>
+                        </div>
+
+                        <!-- Silver Plan -->
+                        <div class="pricing-card">
+                            <div>
+                                <h3 style="font-size: 18px; font-weight: 700; color: #93c5fd;">طرح نقره‌ای 🥈</h3>
+                                <p style="font-size: 12px; color: var(--text-muted);">ویژه دانش‌آموزان کوشا و پویا</p>
+                                <div class="plan-price-tag">۵۰,۰۰۰ <small>تومان / ماهانه</small></div>
+                                <ul class="plan-features-list">
+                                    <li><span class="material-symbols-outlined" style="color: var(--success); font-size: 18px;">check</span> تمام امکانات طرح رایگان</li>
+                                    <li><span class="material-symbols-outlined" style="color: var(--success); font-size: 18px;">check</span> پیام‌های نامحدود با هوش مصنوعی</li>
+                                    <li><span class="material-symbols-outlined" style="color: var(--success); font-size: 18px;">check</span> تولید نامحدود انشا و مقالات علمی</li>
+                                    <li><span class="material-symbols-outlined" style="color: var(--success); font-size: 18px;">check</span> استخراج خودکار فلش‌کارت از جزوه</li>
+                                </ul>
+                            </div>
+                            <button class="btn-primary" id="btn-plan-silver" style="width: 100%;" onclick="Subscription.upgradePlan('silver')">ارتقا به نقره‌ای</button>
+                        </div>
+
+                        <!-- Gold VIP Plan -->
+                        <div class="pricing-card featured">
+                            <div class="pricing-badge">پیشنهاد ویژه کنکوری‌ها</div>
+                            <div>
+                                <h3 style="font-size: 20px; font-weight: 800; color: var(--gold-light);">طرح طلایی VIP 👑</h3>
+                                <p style="font-size: 12px; color: var(--text-muted);">مخصوص داوطلبان رتبه برتر و دانشجویان</p>
+                                <div class="plan-price-tag">۱۵۰,۰۰۰ <small>تومان / سه‌ماهه</small></div>
+                                <ul class="plan-features-list">
+                                    <li><span class="material-symbols-outlined" style="color: var(--success); font-size: 18px;">check</span> تمام امکانات طرح نقره‌ای</li>
+                                    <li><span class="material-symbols-outlined" style="color: var(--success); font-size: 18px;">check</span> دسترسی به مدل پیشرفته GapGPT</li>
+                                    <li><span class="material-symbols-outlined" style="color: var(--success); font-size: 18px;">check</span> بانک جامع آزمون‌های شبیه‌ساز کنکور</li>
+                                    <li><span class="material-symbols-outlined" style="color: var(--success); font-size: 18px;">check</span> نشان طلایی VIP در پروفایل و تالار افتخار</li>
+                                    <li><span class="material-symbols-outlined" style="color: var(--success); font-size: 18px;">check</span> اولویت در حل مسائل سخت فیزیک و ریاضی</li>
+                                </ul>
+                            </div>
+                            <button class="btn-gold" id="btn-plan-gold" style="width: 100%;" onclick="Subscription.upgradePlan('gold')">ارتقا به طلایی VIP 🚀</button>
+                        </div>
+
+                    </div>
+                </section>
+
+                <!-- 12. COUNSELING OPERATIONS CENTER -->
+                <section id="view-admin" class="view-section counselor-center">
+                    <header class="counselor-hero">
+                        <div class="counselor-hero-copy"><span class="counselor-kicker">مرکز عملیات آموزشی</span><h2 id="admin-role-title">پنل مشاوره روند</h2><p id="admin-role-subtitle">دانش‌آموزها، برنامه‌ها و گزارش‌های مطالعه را یک‌جا مدیریت کنید.</p></div>
+                        <button id="admin-refresh" class="counselor-refresh" type="button" onclick="Admin.refreshOverview()"><span class="material-symbols-outlined" aria-hidden="true">sync</span><span>همگام‌سازی</span></button>
+                    </header>
+
+                    <section id="advisor-link-card" class="counselor-connect hidden" aria-labelledby="advisor-link-title">
+                        <div><span class="material-symbols-outlined" aria-hidden="true">person_add</span><div><h3 id="advisor-link-title">افزودن دانش‌آموز</h3><p>نام کاربری دقیق دانش‌آموز را وارد کنید؛ اطلاعات حساب یا رمز او نمایش داده نمی‌شود.</p></div></div>
+                        <form onsubmit="event.preventDefault(); Admin.linkStudent();"><label class="sr-only" for="advisor-link-username">نام کاربری دانش‌آموز</label><input id="advisor-link-username" class="form-control" autocomplete="off" placeholder="username@ بدون علامت"><button id="advisor-link-submit" class="btn-gold" type="submit"><span class="material-symbols-outlined" aria-hidden="true">add</span> اتصال</button></form>
+                    </section>
+
+                    <div class="counselor-kpis" aria-label="خلاصه عملکرد">
+                        <article><span class="material-symbols-outlined" aria-hidden="true">groups</span><small>دانش‌آموزان من</small><strong id="admin-stat-users">۰</strong></article>
+                        <article><span class="material-symbols-outlined" aria-hidden="true">verified</span><small>فعال این هفته</small><strong id="admin-stat-cards">۰</strong></article>
+                        <article><span class="material-symbols-outlined" aria-hidden="true">task_alt</span><small>تسک‌های انجام‌شده</small><strong id="admin-stat-exams">۰</strong></article>
+                        <article class="attention"><span class="material-symbols-outlined" aria-hidden="true">notification_important</span><small>نیازمند پیگیری</small><strong id="admin-stat-researches">۰</strong></article>
+                    </div>
+
+                    <div class="counselor-layout">
+                        <aside class="counselor-roster">
+                            <div class="counselor-panel-title"><div><span class="material-symbols-outlined" aria-hidden="true">school</span><h3>دانش‌آموزان</h3></div><span id="admin-roster-count">۰ نفر</span></div>
+                            <label class="counselor-search"><span class="material-symbols-outlined" aria-hidden="true">search</span><input id="admin-student-search" type="search" placeholder="جست‌وجوی نام یا یوزرنیم" oninput="Admin.applyFilters()"></label>
+                            <div class="counselor-filter-row"><select id="admin-status-filter" aria-label="فیلتر وضعیت" onchange="Admin.applyFilters()"><option value="all">همه وضعیت‌ها</option><option value="attention">نیازمند پیگیری</option><option value="active">فعال</option></select><select id="admin-grade-filter" aria-label="فیلتر مقطع" onchange="Admin.applyFilters()"><option value="all">همه مقاطع</option></select></div>
+                            <div id="admin-attention-list" class="counselor-priority" aria-live="polite"></div>
+                            <div id="admin-student-list" class="counselor-student-list" aria-live="polite"></div>
+                        </aside>
+
+                        <main class="counselor-profile">
+                            <div id="admin-student-empty" class="counselor-empty"><span class="material-symbols-outlined" aria-hidden="true">person_search</span><h3>پرونده یک دانش‌آموز را باز کنید</h3><p>از فهرست کنار صفحه انتخاب کنید تا برنامه، گزارش‌ها و وضعیت او نمایش داده شود.</p></div>
+                            <div id="admin-student-content" class="hidden">
+                                <header class="counselor-student-header"><div class="counselor-student-identity"><span id="admin-selected-avatar" class="counselor-avatar">د</span><div><span class="counselor-kicker">پرونده تحصیلی</span><h3 id="admin-selected-name">—</h3><p id="admin-selected-meta">—</p></div></div><div class="counselor-header-actions"><span id="admin-selected-status" class="admin-status-pill">—</span><span id="admin-selected-plan" data-feature="subscription" class="admin-plan-badge">رایگان</span><select id="admin-plan-control" data-feature="subscription" class="admin-plan-control hidden" aria-label="تغییر اشتراک" onchange="Admin.changeSelectedPlan(this.value)"><option value="free">رایگان</option><option value="silver">نقره‌ای</option><option value="gold">طلایی</option></select><button type="button" class="counselor-chat-button" onclick="Admin.openStudentChat()"><span class="material-symbols-outlined" aria-hidden="true">chat</span> پیام</button></div></header>
+                                <div id="admin-student-metrics" class="counselor-metrics"></div>
+
+                                <div class="counselor-action-grid">
+                                    <section class="counselor-card counselor-program-card"><div class="counselor-card-heading"><div><span class="material-symbols-outlined" aria-hidden="true">calendar_month</span><h4>برنامه هفتگی</h4></div><button type="button" onclick="Admin.openStudentSchedule()">ویرایش کامل</button></div><div id="admin-program-list" class="admin-program-list"></div></section>
+                                    <section class="counselor-card"><div class="counselor-card-heading"><div><span class="material-symbols-outlined" aria-hidden="true">clinical_notes</span><h4>یادداشت خصوصی</h4></div></div><textarea id="admin-private-note" class="form-control" rows="6" maxlength="2000" placeholder="هدف جلسه بعد، نقطه ضعف یا نکته پیگیری..."></textarea><div class="admin-note-footer"><small id="admin-note-updated">هنوز یادداشتی ثبت نشده است.</small><button id="admin-note-save" class="btn-primary" type="button" onclick="Admin.savePrivateNote()">ذخیره</button></div></section>
+                                </div>
+
+                                <section class="counselor-card counselor-report-card"><div class="counselor-card-heading"><div><span class="material-symbols-outlined" aria-hidden="true">monitoring</span><h4>گزارش فعالیت و پیشرفت</h4></div></div><div id="admin-study-report" class="admin-study-report"></div></section>
+                                <section class="counselor-account-actions"><div><strong>مدیریت ارتباط</strong><p>مشاور می‌تواند اتصال را قطع کند؛ حذف دائمی حساب فقط برای مدیر اصلی ممکن است.</p></div><div><button id="advisor-unlink-student" class="btn-primary hidden" type="button" onclick="Admin.unlinkSelectedStudent()"><span class="material-symbols-outlined" aria-hidden="true">link_off</span> قطع اتصال</button><button id="admin-delete-student" class="admin-danger-button hidden" type="button" onclick="Admin.deleteSelectedStudent()"><span class="material-symbols-outlined" aria-hidden="true">person_remove</span> حذف کامل حساب</button></div></section>
+                            </div>
+                        </main>
+                    </div>
+
+                    <section id="admin-system-settings" class="counselor-card counselor-system hidden"><div class="counselor-card-heading"><div><span class="material-symbols-outlined" aria-hidden="true">tune</span><h4>تنظیمات هوش مصنوعی پلتفرم</h4></div></div><div><select id="admin-ai-model" class="form-control"><option value="gapgpt-qwen-3.5">gapgpt-qwen-3.5</option><option value="gapgpt-llama-3">gapgpt-llama-3</option><option value="gapgpt-deepseek">gapgpt-deepseek</option></select><button class="btn-gold" onclick="Admin.saveSystemSettings()">ذخیره مدل</button></div></section>
+                    <section id="admin-password-recovery" class="counselor-card admin-recovery hidden" aria-labelledby="admin-recovery-title">
+                        <div class="counselor-card-heading"><div><span class="material-symbols-outlined" aria-hidden="true">key</span><h4 id="admin-recovery-title">لینک تعیین رمز تازه</h4></div></div>
+                        <p>ابتدا هویت صاحب حساب را بررسی کنید. لینک فقط یک‌بار و تا ۱۵ دقیقه معتبر است؛ لینک قبلی همان کاربر با ساخت لینک تازه باطل می‌شود.</p>
+                        <form id="admin-recovery-form" onsubmit="event.preventDefault(); Admin.createPasswordResetLink()">
+                            <label for="admin-recovery-username">نام کاربری</label><input id="admin-recovery-username" class="form-control" autocomplete="off" required pattern="[a-zA-Z0-9_.-]{3,32}" placeholder="نام کاربری دانش‌آموز یا مشاور">
+                            <label for="admin-recovery-password">رمز حساب مدیر</label><input id="admin-recovery-password" class="form-control" type="password" autocomplete="current-password" required placeholder="برای تأیید عملیات">
+                            <button id="admin-recovery-submit" class="btn-primary" type="submit">ساخت لینک یک‌بارمصرف</button>
+                        </form>
+                        <div id="admin-recovery-result" class="admin-recovery-result hidden" role="status"><label for="admin-recovery-link">لینک را فقط برای صاحب تأییدشدهٔ حساب بفرستید</label><textarea id="admin-recovery-link" readonly rows="2" dir="ltr"></textarea><button type="button" class="btn-primary" onclick="Admin.copyPasswordResetLink()">کپی لینک</button><small id="admin-recovery-expiry"></small></div>
+                        <p id="admin-recovery-error" class="admin-recovery-error" role="alert"></p>
+                    </section>
+                </section>
+
+                <!-- 13. USER PROFILE VIEW -->
+                <section id="view-profile" class="view-section m-page" data-m-page="profile"></section>
+
+            </main>
+
+        </div>
+
+    </div>
+
+    <!-- MODAL 1: Edit Daily Goal -->
+    <div id="modal-pomodoro-settings" class="modal-overlay">
+        <div class="modal-box pomo-settings-modal" role="dialog" aria-modal="true" aria-labelledby="pomo-settings-title">
+            <div class="modal-header">
+                <div class="modal-title" id="pomo-settings-title"><span class="material-symbols-outlined" aria-hidden="true">timer</span> تنظیم پومودورو</div>
+                <button class="modal-close-btn" type="button" onclick="Utils.closeModal('modal-pomodoro-settings')" aria-label="بستن تنظیمات">✕</button>
+            </div>
+            <form onsubmit="event.preventDefault(); Pomodoro.saveTimerSettings();">
+                <div class="modal-body pomo-settings-fields">
+                    <label><span>زمان تمرکز</span><div><input id="pomo-setting-work" type="number" min="1" max="180" inputmode="numeric"><small>دقیقه</small></div></label>
+                    <label><span>استراحت کوتاه</span><div><input id="pomo-setting-short" type="number" min="1" max="60" inputmode="numeric"><small>دقیقه</small></div></label>
+                    <label><span>استراحت بلند</span><div><input id="pomo-setting-long" type="number" min="1" max="120" inputmode="numeric"><small>دقیقه</small></div></label>
+                    <p class="pomo-notification-note"><span class="material-symbols-outlined" aria-hidden="true">notifications_active</span> در پایان هر بازه، اعلان صوتی پخش می‌شود.</p>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn-primary" type="button" onclick="Utils.closeModal('modal-pomodoro-settings')">انصراف</button>
+                    <button class="btn-gold" type="submit">ذخیره تنظیمات</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL 1: Edit Daily Goal -->
+    <div id="modal-edit-goal" class="modal-overlay">
+        <div class="modal-box">
+            <div class="modal-header">
+                <div class="modal-title"><span class="material-symbols-outlined">tune</span> تنظیم هدف مطالعه روزانه</div>
+                <button class="modal-close-btn" onclick="Utils.closeModal('modal-edit-goal')">✕</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label class="form-label">تعداد ساعات هدف در روز</label>
+                    <input type="number" id="input-goal-hours" class="form-control" min="1" max="18" step="0.5" value="4">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-primary" onclick="Utils.closeModal('modal-edit-goal')">انصراف</button>
+                <button class="btn-gold" onclick="Dashboard.saveGoalHours()">ذخیره هدف</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL 2: Add Exam Reminder -->
+    <div id="modal-add-exam-reminder" class="modal-overlay">
+        <div class="modal-box">
+            <div class="modal-header">
+                <div class="modal-title"><span class="material-symbols-outlined">alarm_add</span> افزودن یادآور آزمون</div>
+                <button class="modal-close-btn" onclick="Utils.closeModal('modal-add-exam-reminder')">✕</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label class="form-label">عنوان آزمون یا رویداد</label>
+                    <input type="text" id="input-reminder-title" class="form-control" placeholder="مثال: آزمون قلم‌چی، کنکور نوبت تیر...">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">تاریخ برگزاری</label>
+                    <input type="date" id="input-reminder-date" class="form-control">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-primary" onclick="Utils.closeModal('modal-add-exam-reminder')">انصراف</button>
+                <button class="btn-gold" onclick="Dashboard.addExamReminderSubmit()">ثبت یادآور</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL 3: Add Flashcard -->
+    <div id="modal-add-flashcard" class="modal-overlay">
+        <div class="modal-box">
+            <div class="modal-header">
+                <div class="modal-title"><span class="material-symbols-outlined">add_card</span> ایجاد فلش‌کارت جدید</div>
+                <button class="modal-close-btn" onclick="Utils.closeModal('modal-add-flashcard')">✕</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label class="form-label">دسته‌بندی درسی</label>
+                    <select id="input-fc-category" class="form-control">
+                        <option value="زیست">زیست‌شناسی</option>
+                        <option value="شیمی">شیمی</option>
+                        <option value="فیزیک">فیزیک</option>
+                        <option value="ریاضی">ریاضیات</option>
+                        <option value="فارسی">ادبیات فارسی</option>
+                        <option value="عربی">عربی</option>
+                        <option value="انگلیسی">انگلیسی</option>
+                        <option value="سایر">عمومی و سایر</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">روی کارت (صورت سوال یا مفهوم)</label>
+                    <textarea id="input-fc-question" class="form-control" style="height: 70px; resize: none;" placeholder="پشتیبانی از فرمول‌های لاتک مانند $E=mc^2$..."></textarea>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">پشت کارت (پاسخ تشریحی)</label>
+                    <textarea id="input-fc-answer" class="form-control" style="height: 90px; resize: none;" placeholder="پاسخ کامل یا نکته کلیدی..."></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-primary" onclick="Utils.closeModal('modal-add-flashcard')">انصراف</button>
+                <button class="btn-gold" onclick="Flashcards.addFlashcardSubmit()">ذخیره فلش‌کارت</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL 4: AI Flashcard Extraction -->
+    <div id="modal-ai-flashcards" class="modal-overlay">
+        <div class="modal-box">
+            <div class="modal-header">
+                <div class="modal-title"><span class="material-symbols-outlined">auto_awesome</span> استخراج فلش‌کارت با AI</div>
+                <button class="modal-close-btn" onclick="Utils.closeModal('modal-ai-flashcards')">✕</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label class="form-label">دسته‌بندی درس</label>
+                    <select id="input-ai-fc-category" class="form-control">
+                        <option value="زیست">زیست‌شناسی</option>
+                        <option value="شیمی">شیمی</option>
+                        <option value="فیزیک">فیزیک</option>
+                        <option value="ریاضی">ریاضیات</option>
+                        <option value="فارسی">ادبیات فارسی</option>
+                        <option value="عربی">عربی</option>
+                        <option value="انگلیسی">انگلیسی</option>
+                        <option value="سایر">عمومی و سایر</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">متن جزوه یا پاراگراف درسی</label>
+                    <textarea id="input-ai-fc-text" class="form-control" style="min-height: 180px; resize: vertical;" maxlength="24000" placeholder="متن کتاب یا جزوه را وارد کنید؛ نکات مهم، جای‌خالی‌ها و سوال‌های مفهومی استخراج می‌شوند..."></textarea>
+                    <small class="field-help">برای نتیجه بهتر، حداقل یک پاراگراف کامل وارد کنید.</small>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="input-ai-fc-count">تعداد کارت پیشنهادی</label>
+                    <select id="input-ai-fc-count" class="form-control"><option value="6">۶ کارت</option><option value="8" selected>۸ کارت</option><option value="10">۱۰ کارت</option><option value="12">۱۲ کارت</option></select>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-primary" onclick="Utils.closeModal('modal-ai-flashcards')">انصراف</button>
+                <button id="btn-ai-flashcards" class="btn-gold" onclick="Flashcards.generateAIFlashcardsSubmit()"><span class="material-symbols-outlined">auto_awesome</span> استخراج حرفه‌ای کارت‌ها</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL 5: Edit Schedule Slot -->
+    <div id="modal-edit-schedule-slot" class="modal-overlay">
+        <div class="modal-box">
+            <div class="modal-header">
+                <div class="modal-title"><span class="material-symbols-outlined">edit_calendar</span> ویرایش تسک روزانه</div>
+                <button class="modal-close-btn" onclick="Utils.closeModal('modal-edit-schedule-slot')">✕</button>
+            </div>
+            <div class="modal-body">
+                <div style="font-weight: 700; color: var(--gold-light); margin-bottom: 14px;" id="edit-slot-day-name">شنبه · تسک جدید</div>
+                <div class="form-group">
+                    <label class="form-label" for="input-slot-subject">عنوان درس یا فعالیت</label>
+                    <input type="text" id="input-slot-subject" class="form-control">
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="input-slot-note">مبحث یا توضیحات تکمیلی</label>
+                    <input type="text" id="input-slot-note" class="form-control">
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="input-task-duration">مدت زمان تقریبی پیشنهادی (دقیقه)</label>
+                    <input type="number" id="input-task-duration" class="form-control" min="5" max="600" step="5" value="60" inputmode="numeric">
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="input-slot-color">رنگ نشانگر</label>
+                    <input type="color" id="input-slot-color" class="form-control" style="height: 40px; padding: 2px;">
+                </div>
+                <div id="slot-status-group" class="form-group">
+                    <label class="form-label" for="input-slot-status">وضعیت انجام</label>
+                    <select id="input-slot-status" class="form-control"><option value="pending">در انتظار انجام</option><option value="completed">کامل انجام شد</option><option value="partial">بخشی انجام شد</option><option value="missed">انجام نشد</option></select>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button id="delete-schedule-task" class="admin-danger-button" onclick="Schedule.deleteCurrentTask()"><span class="material-symbols-outlined" aria-hidden="true">delete</span> حذف تسک</button>
+                <button class="btn-primary" onclick="Utils.closeModal('modal-edit-schedule-slot')">انصراف</button>
+                <button class="btn-gold" onclick="Schedule.saveTaskSubmit()">ذخیره تسک</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL 6: Create Exam -->
+    <div id="modal-create-exam" class="modal-overlay">
+        <div class="modal-box" style="max-width: 650px;">
+            <div class="modal-header">
+                <div class="modal-title"><span class="material-symbols-outlined">post_add</span> طراحی آزمون آنلاین تستی</div>
+                <button class="modal-close-btn" onclick="Utils.closeModal('modal-create-exam')">✕</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label class="form-label">عنوان آزمون</label>
+                    <input type="text" id="input-create-exam-title" class="form-control" placeholder="مثال: آزمون فصل ۲ شیمی دوازدهم">
+                </div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px;">
+                    <div class="form-group">
+                        <label class="form-label">دسته‌بندی</label>
+                        <select id="input-create-exam-cat" class="form-control">
+                            <option value="زیست">زیست‌شناسی</option>
+                            <option value="شیمی">شیمی</option>
+                            <option value="فیزیک">فیزیک</option>
+                            <option value="ریاضی">ریاضیات</option>
+                            <option value="فارسی">ادبیات فارسی</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">مدت زمان (دقیقه)</label>
+                        <input type="number" id="input-create-exam-dur" class="form-control" value="10">
+                    </div>
+                </div>
+
+                <div style="background: var(--bg-surface); padding: 16px; border-radius: var(--radius-md); border: 1px solid var(--border-subtle); margin-top: 10px;">
+                    <h4 style="font-size: 13px; font-weight: 700; color: var(--gold-light); margin-bottom: 10px;">طراحی سوال شماره ۱:</h4>
+                    <div class="form-group">
+                        <label class="form-label">صورت سوال</label>
+                        <input type="text" id="input-create-exam-q1" class="form-control" placeholder="متن سوال را وارد کنید...">
+                    </div>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+                        <input type="text" id="input-create-exam-opt1" class="form-control" placeholder="گزینه ۱">
+                        <input type="text" id="input-create-exam-opt2" class="form-control" placeholder="گزینه ۲">
+                        <input type="text" id="input-create-exam-opt3" class="form-control" placeholder="گزینه ۳">
+                        <input type="text" id="input-create-exam-opt4" class="form-control" placeholder="گزینه ۴">
+                    </div>
+                    <div class="form-group" style="margin-top: 10px;">
+                        <label class="form-label">گزینه صحیح</label>
+                        <select id="input-create-exam-correct" class="form-control">
+                            <option value="0">گزینه ۱</option>
+                            <option value="1">گزینه ۲</option>
+                            <option value="2">گزینه ۳</option>
+                            <option value="3">گزینه ۴</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">تحلیل و پاسخ تشریحی</label>
+                        <input type="text" id="input-create-exam-expl" class="form-control" placeholder="توضیح نکته سوال...">
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-primary" onclick="Utils.closeModal('modal-create-exam')">انصراف</button>
+                <button class="btn-gold" onclick="Exams.createExamSubmit()">انتشار آزمون</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="modal-delete-account" class="modal-overlay">
+        <div class="modal-box delete-account-modal" role="dialog" aria-modal="true" aria-labelledby="delete-account-title">
+            <div class="modal-header"><div class="modal-title" id="delete-account-title"><span class="material-symbols-outlined" aria-hidden="true">warning</span> حذف دائمی حساب</div><button class="icon-btn" type="button" onclick="Utils.closeModal('modal-delete-account')" aria-label="بستن"><span class="material-symbols-outlined" aria-hidden="true">close</span></button></div>
+            <div class="modal-body"><p>همه برنامه‌ها، گزارش‌ها، پیام‌ها و اطلاعات حساب برای همیشه حذف می‌شوند. این کار قابل بازگشت نیست.</p><div class="form-group"><label class="form-label" for="delete-account-username">برای تأیید، نام کاربری خود را وارد کنید</label><input id="delete-account-username" class="form-control" autocomplete="off"></div><div class="form-group"><label class="form-label" for="delete-account-password">رمز عبور</label><input id="delete-account-password" type="password" class="form-control" autocomplete="current-password"></div></div>
+            <div class="modal-footer"><button class="btn-primary" type="button" onclick="Utils.closeModal('modal-delete-account')">انصراف</button><button id="delete-account-submit" class="admin-danger-button" type="button" onclick="Profile.confirmDeleteAccount()">حذف دائمی</button></div>
+        </div>
+    </div>
+
+    <div id="communications-overlay" class="communications-overlay" onclick="Communications.close()"></div>
+    <aside id="communications-drawer" class="communications-drawer" aria-hidden="true" aria-label="ارتباطات و یادداشت‌ها">
+        <div class="communications-header">
+            <div><strong id="communications-title">ارتباطات</strong><small id="communications-subtitle">یادداشت‌ها و گفت‌وگوی مشاوره‌ای</small></div>
+            <button class="icon-btn" type="button" onclick="Communications.close()" aria-label="بستن پنل"><span class="material-symbols-outlined" aria-hidden="true">close</span></button>
+        </div>
+        <div class="communications-tabs" role="tablist">
+            <button id="communications-tab-chat" type="button" role="tab" onclick="Communications.switchTab('chat')"><span class="material-symbols-outlined" aria-hidden="true">forum</span> گفت‌وگو</button>
+            <button id="communications-tab-notes" type="button" role="tab" onclick="Communications.switchTab('notes')"><span class="material-symbols-outlined" aria-hidden="true">sticky_note_2</span> یادداشت‌ها</button>
+        </div>
+        <section id="communications-chat-panel" class="communications-panel" role="tabpanel">
+            <div id="advisor-student-picker" class="form-group hidden"><label class="form-label" for="advisor-student-select">دانش‌آموز</label><select id="advisor-student-select" class="form-control" onchange="Communications.selectStudent(this.value)"><option value="">انتخاب دانش‌آموز</option></select></div>
+            <div id="advisor-chat-status" class="advisor-chat-status" role="status">گفت‌وگوی مستقیم و خصوصی</div>
+            <div class="chat-safety-notice"><span class="material-symbols-outlined" aria-hidden="true">shield</span><p>شماره تماس، نشانی، رمز عبور یا اطلاعات خصوصی را ارسال نکنید.</p><button id="advisor-chat-block" type="button" onclick="Communications.toggleBlock()">توقف گفت‌وگو</button></div>
+            <div id="advisor-chat-messages" class="advisor-chat-messages" aria-live="polite"></div>
+            <form class="advisor-chat-compose" onsubmit="event.preventDefault(); Communications.sendMessage();">
+                <label class="sr-only" for="advisor-chat-input">متن پیام</label>
+                <textarea id="advisor-chat-input" class="form-control" rows="2" maxlength="1000" placeholder="پیام خود را بنویسید…" required></textarea>
+                <button id="advisor-chat-send" class="btn-gold" type="submit"><span class="material-symbols-outlined" aria-hidden="true">send</span><span>ارسال</span></button>
+            </form>
+        </section>
+        <section id="communications-notes-panel" class="communications-panel hidden" role="tabpanel">
+            <form class="quick-note-form" onsubmit="event.preventDefault(); Communications.addNote();">
+                <label class="form-label" for="quick-note-input">یادداشت جدید</label>
+                <textarea id="quick-note-input" class="form-control" rows="3" maxlength="500" placeholder="کاری که نباید فراموش شود…" required></textarea>
+                <button class="btn-primary" type="submit"><span class="material-symbols-outlined" aria-hidden="true">add</span> افزودن یادداشت</button>
+            </form>
+            <div id="quick-notes-list" class="quick-notes-list" aria-live="polite"></div>
+        </section>
+    </aside>
+
+    <!-- Fullscreen Focus Overlay for Pomodoro -->
+    <div id="focus-fullscreen-overlay" class="focus-fullscreen-overlay" role="dialog" aria-modal="true" aria-label="حالت تمرکز">
+        <button class="btn-exit-focus" onclick="Pomodoro.exitFullscreenFocus()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true" width="22" height="22"><path d="M9 3v6H3m12-6v6h6M3 15h6v6m12-6h-6v6"/></svg>
+            خروج از حالت تمام‌صفحه
+        </button>
+        <div class="focus-static-card">
+            <div class="focus-static-label"><i aria-hidden="true"></i><span>تمرکز</span><button type="button" onclick="Pomodoro.openSettings()" aria-label="تنظیم زمان تمرکز"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true" width="22" height="22"><circle cx="12" cy="12" r="3"/><path d="M12 2v2m0 16v2M4.9 4.9l1.4 1.4m11.4 11.4 1.4 1.4M2 12h2m16 0h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg></button></div>
+            <span class="material-symbols-outlined focus-static-icon" aria-hidden="true">self_improvement</span>
+            <strong id="focus-task-name">مطالعه و تمرکز آزاد</strong>
+            <div class="focus-static-dial"><small>زمان باقی‌مانده</small><div id="fs-pomo-time" class="focus-static-time">۲۵:۰۰</div><span>این زمان، برای همین یک کار است</span></div>
+            <label class="focus-static-task-picker" for="fs-pomo-task-selector"><span>تسک در حال انجام</span><select id="fs-pomo-task-selector" aria-label="تغییر تسک در حالت تمام‌صفحه"></select></label>
+            <div class="focus-static-actions">
+                <button type="button" class="focus-static-reset" onclick="Pomodoro.resetTimer()" aria-label="بازنشانی تایمر"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true" width="22" height="22"><rect x="6" y="6" width="12" height="12" rx="2"/></svg></button>
+                <button class="btn-pomo-main" id="fs-btn-pomo-play" onclick="Pomodoro.toggleTimer()">
+                    <span class="material-symbols-outlined">play_arrow</span>
+                    شروع تمرکز
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Application Script Modules (In Dependency Order) -->
+    <script src="js/platform.js"></script>
+    <script src="data/storage.js"></script>
+    <script src="js/utils.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/dashboard.js"></script>
+    <script src="js/pomodoro.js"></script>
+    <script src="js/flashcards.js"></script>
+    <script src="js/ai-assistant.js"></script>
+    <script src="js/stats.js"></script>
+    <script src="js/gamification.js"></script>
+    <script src="js/schedule.js"></script>
+    <script src="js/exams.js"></script>
+    <script src="js/communications.js"></script>
+    <script src="js/admin.js"></script>
+    <script src="js/profile-studio.js"></script>
+    <script src="js/community.js"></script>
+    <script src="js/messenger.js?v=2"></script>
+    <script src="js/messenger-extras.js"></script>
+    <script src="js/study-flow.js"></script>
+    <script src="js/profile.js"></script>
+    <script src="js/subscription.js"></script>
+    <script src="js/share-card.js"></script>
+    <script src="js/dashboard-ui.js"></script>
+    <script src="js/app.js?v=2"></script>
+    <script src="js/web-studio.js"></script>
+    <script src="js/study-rooms.js"></script>
+    <script src="js/ai-workspace.js"></script>
+    <script src="js/study-workspace.js"></script>
+    <script src="js/mobile.js?v=2"></script>
+    <script src="js/side-menu.js"></script>
+    <script src="js/mobile-redesign.js"></script>
+    <script src="js/schedule-mobile.js"></script>
+    <script src="js/stats-ui.js"></script>
+    <script src="js/report-ui.js"></script>
+    <script src="js/pomodoro-ui.js"></script>
+    <script src="js/focus-fs.js"></script>
+    <script src="js/messenger-desk.js?v=2"></script>
+    <script src="js/flashcards-ui.js"></script>
+    <script src="js/league-ui.js"></script>
+    <script src="js/header-ui.js"></script>
+
+</body>
+</html>

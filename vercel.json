@@ -31,7 +31,7 @@
       "headers": { "Location": "https://ravandstudy.ir/advisors" }
     },
     {
-      "src": "^/(study-planner|advisors|pomodoro-study-room)$",
+      "src": "^/(study-planner|advisors|pomodoro-study-room|akhbar-motaleie|atamghar-motaleie|flashcard-laytnr|pomodoro|program-rez-konkur)/?$",
       "has": [{ "type": "host", "value": "^ravandstudy\\.ir$" }],
       "dest": "/landing/$1.html"
     },
