@@ -1,0 +1,108 @@
+.guide-width {
+    max-width: 1080px;
+}
+
+.study-guide {
+    display: grid;
+    gap: clamp(14px, 2.5vw, 24px);
+    padding-block: clamp(16px, 3vw, 36px);
+}
+
+.guide-intro {
+    display: grid;
+    align-items: center;
+    gap: clamp(24px, 4vw, 48px);
+    padding: clamp(20px, 4vw, 52px);
+    border: 1px solid var(--line);
+    border-radius: clamp(18px, 3vw, 30px);
+    background: linear-gradient(135deg, #fff, var(--light));
+    box-shadow: var(--shadow);
+}
+
+.guide-intro h1 {
+    margin-block-end: 12px;
+    font-size: clamp(2.1rem, 5vw, 3.8rem);
+    font-weight: 900;
+    text-wrap: balance;
+}
+
+.guide-intro p,
+.guide-panel p,
+.guide-steps {
+    color: var(--muted);
+}
+
+.guide-intro .primary {
+    margin-block-start: 20px;
+}
+
+.guide-preview img {
+    width: 100%;
+    height: auto;
+    border-radius: 12px;
+}
+
+.guide-preview figcaption {
+    margin-block-start: 8px;
+    color: var(--muted);
+    font-size: .9rem;
+}
+
+.guide-panel {
+    padding: clamp(16px, 3.5vw, 32px);
+    border: 1px solid var(--line);
+    border-radius: 18px;
+    background: #fff;
+}
+
+.guide-panel h2 {
+    margin-block-end: 12px;
+    font-size: clamp(1.35rem, 3vw, 2rem);
+}
+
+.guide-panel a {
+    color: var(--purple);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+}
+
+.guide-steps {
+    margin-block: 0;
+    padding-inline-start: 1.5em;
+}
+
+.guide-steps li + li {
+    margin-block-start: 10px;
+}
+
+.guide-steps strong {
+    color: var(--ink);
+}
+
+.guide-table {
+    width: 100%;
+    margin-block-start: 14px;
+    border-collapse: collapse;
+    text-align: start;
+}
+
+.guide-table :is(th, td) {
+    padding: 9px clamp(6px, 2vw, 14px);
+    border-block-end: 1px solid var(--line);
+    text-align: start;
+}
+
+.guide-table thead {
+    background: var(--light);
+}
+
+.guide-table :is(th, td):first-child,
+.guide-table :is(th, td):last-child {
+    white-space: nowrap;
+}
+
+@media (min-width: 740px) {
+    .guide-intro {
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr);
+    }
+}
