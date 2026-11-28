@@ -132,6 +132,17 @@ section[id], article[id] { scroll-margin-top: 20px; }
 .gallery-controls button { border: 1px solid var(--line); background: #fff; border-radius: 11px; width: 44px; height: 44px; font-size: 1.35rem; }
 .gallery-controls button:hover { background: var(--light); }
 .slide-count { color: var(--muted); font-size: .9rem; font-weight: 700; }
+.guides-hub { padding-block: clamp(42px, 6vw, 82px); border-top: 1px solid var(--line); }
+.guides-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
+.guide-card {
+    display: flex; flex-direction: column; gap: 8px; padding: clamp(18px, 2.5vw, 26px);
+    background: #fff; border: 1px solid var(--line); border-radius: 18px;
+    transition: transform .2s, border-color .2s, box-shadow .2s;
+}
+.guide-card:hover { transform: translateY(-3px); border-color: #d3c1e8; box-shadow: var(--shadow); }
+.guide-card h3 { font-size: clamp(1.2rem, 2vw, 1.5rem); font-weight: 900; color: var(--deep); }
+.guide-card p:not(.section-label) { color: var(--muted); flex: 1; }
+.guide-card .journey-link { margin-top: 4px; }
 .journey, .faq { border-top: 1px solid var(--line); }
 .journey-grid { display: grid; gap: 0; padding: 0; margin: 0; list-style: none; }
 .journey-grid li {
@@ -231,7 +242,7 @@ section[id], article[id] { scroll-margin-top: 20px; }
     .hero-quick a:active, .hero-quick a:hover { background: #e6d5f4; }
     .hero-quick svg { width: 15px; height: 15px; fill: none; stroke: var(--purple); stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; flex: 0 0 15px; }
     .button { padding-inline: 10px; gap: 6px; }
-    .features, .journey, .faq { padding-block: 29px 34px; }
+    .features, .guides-hub, .journey, .faq { padding-block: 29px 34px; }
     .section-head { align-items: start; flex-direction: column; }
     .section-head h2 { font-size: clamp(1.8rem, 7vw, 2.5rem); }
     .section-head > p { max-width: 46ch; }
@@ -263,7 +274,7 @@ section[id], article[id] { scroll-margin-top: 20px; }
     .journey-image picture { display: grid; min-height: 0; place-items: center; }
     .journey-image img { max-height: 145px; border-radius: 7px; }
     .journey-image .magnify { width: 44px; height: 44px; inset: auto auto 4px 4px; }
-    .faq-groups { grid-template-columns: minmax(0,1fr); gap: 12px; }
+    .guides-grid, .faq-groups { grid-template-columns: minmax(0,1fr); gap: 12px; }
     .faq-group { padding: 11px; }
     .end {
         min-height: 0; border-radius: 17px; background: var(--deep); color: #fff; text-align: center; padding: 24px 12px;
