@@ -19,18 +19,19 @@
       "headers": { "Location": "https://ravandstudy.ir/study-planner" }
     },
     {
+      "src": "^/(?:pomodoro-study-room(?:/|\\.html)|landing/pomodoro-study-room\\.html)$",
+      "has": [{ "type": "host", "value": "^ravandstudy\\.ir$" }],
+      "status": 308,
+      "headers": { "Location": "https://ravandstudy.ir/pomodoro-study-room" }
+    },
+    {
       "src": "^/(?:advisors(?:/|\\.html)|landing/advisors\\.html)$",
       "has": [{ "type": "host", "value": "^ravandstudy\\.ir$" }],
       "status": 308,
       "headers": { "Location": "https://ravandstudy.ir/advisors" }
     },
     {
-      "src": "^/(study-planner|advisors)$",
-      "has": [{ "type": "host", "value": "^ravandstudy\\.ir$" }],
-      "dest": "/landing/$1.html"
-    },
-    {
-      "src": "^/(program-rez-konkur|atamghar-motaleie|pomodoro|flashcard-laytnr|akhbar-motaleie)$",
+      "src": "^/(study-planner|advisors|pomodoro-study-room)$",
       "has": [{ "type": "host", "value": "^ravandstudy\\.ir$" }],
       "dest": "/landing/$1.html"
     },
@@ -40,21 +41,15 @@
       "dest": "/landing/$1"
     },
     {
-      "src": "^/(robots\\.txt|sitemap\\.xml)$",
-      "has": [{ "type": "host", "value": "^app\\.ravandstudy\\.ir$" }],
-      "dest": "/seo/app/$1"
-    },
-    {
       "src": "^/(?:index\\.html)?$",
       "has": [{ "type": "host", "value": "^darsyar-ai\\.vercel\\.app$" }],
       "headers": { "X-Robots-Tag": "noindex, follow" },
       "continue": true
     },
     {
-      "src": "^/landing/.*$",
-      "has": [{ "type": "host", "value": "^darsyar-ai\\.vercel\\.app$" }],
-      "headers": { "X-Robots-Tag": "noindex, follow" },
-      "continue": true
+      "src": "^/(robots\\.txt|sitemap\\.xml)$",
+      "has": [{ "type": "host", "value": "^app\\.ravandstudy\\.ir$" }],
+      "dest": "/seo/app/$1"
     },
     { "handle": "filesystem" }
   ]
