@@ -30,9 +30,19 @@
       "dest": "/landing/$1.html"
     },
     {
+      "src": "^/(program-rez-konkur|atamghar-motaleie|pomodoro|flashcard-laytnr|akhbar-motaleie)$",
+      "has": [{ "type": "host", "value": "^ravandstudy\\.ir$" }],
+      "dest": "/landing/$1.html"
+    },
+    {
       "src": "^/(robots\\.txt|sitemap\\.xml|googlef6a6bb91e5999d54\\.html)$",
       "has": [{ "type": "host", "value": "^ravandstudy\\.ir$" }],
       "dest": "/landing/$1"
+    },
+    {
+      "src": "^/(robots\\.txt|sitemap\\.xml)$",
+      "has": [{ "type": "host", "value": "^app\\.ravandstudy\\.ir$" }],
+      "dest": "/seo/app/$1"
     },
     {
       "src": "^/(?:index\\.html)?$",
@@ -41,9 +51,10 @@
       "continue": true
     },
     {
-      "src": "^/(robots\\.txt|sitemap\\.xml)$",
-      "has": [{ "type": "host", "value": "^app\\.ravandstudy\\.ir$" }],
-      "dest": "/seo/app/$1"
+      "src": "^/landing/.*$",
+      "has": [{ "type": "host", "value": "^darsyar-ai\\.vercel\\.app$" }],
+      "headers": { "X-Robots-Tag": "noindex, follow" },
+      "continue": true
     },
     { "handle": "filesystem" }
   ]

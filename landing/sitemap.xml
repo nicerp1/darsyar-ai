@@ -3,17 +3,55 @@
     <url>
         <loc>https://ravandstudy.ir/</loc>
         <lastmod>2026-11-28</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>1.0</priority>
     </url>
     <url>
         <loc>https://ravandstudy.ir/study-planner</loc>
         <lastmod>2026-11-28</lastmod>
+        <changefreq>monthly</changefreq>
+        <priority>0.9</priority>
+    </url>
+    <url>
+        <loc>https://ravandstudy.ir/program-rez-konkur</loc>
+        <lastmod>2026-11-28</lastmod>
+        <changefreq>monthly</changefreq>
+        <priority>0.9</priority>
+    </url>
+    <url>
+        <loc>https://ravandstudy.ir/atamghar-motaleie</loc>
+        <lastmod>2026-11-28</lastmod>
+        <changefreq>monthly</changefreq>
+        <priority>0.9</priority>
+    </url>
+    <url>
+        <loc>https://ravandstudy.ir/pomodoro</loc>
+        <lastmod>2026-11-28</lastmod>
+        <changefreq>monthly</changefreq>
+        <priority>0.9</priority>
     </url>
     <url>
         <loc>https://ravandstudy.ir/pomodoro-study-room</loc>
         <lastmod>2026-11-28</lastmod>
+        <changefreq>monthly</changefreq>
+        <priority>0.8</priority>
+    </url>
+    <url>
+        <loc>https://ravandstudy.ir/flashcard-laytnr</loc>
+        <lastmod>2026-11-28</lastmod>
+        <changefreq>monthly</changefreq>
+        <priority>0.8</priority>
+    </url>
+    <url>
+        <loc>https://ravandstudy.ir/akhbar-motaleie</loc>
+        <lastmod>2026-11-28</lastmod>
+        <changefreq>monthly</changefreq>
+        <priority>0.8</priority>
     </url>
     <url>
         <loc>https://ravandstudy.ir/advisors</loc>
         <lastmod>2026-11-28</lastmod>
+        <changefreq>monthly</changefreq>
+        <priority>0.8</priority>
     </url>
 </urlset>
